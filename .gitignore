@@ -1,0 +1,5 @@
+node_modules
+performance
+*.log
+*.out
+*.lua
