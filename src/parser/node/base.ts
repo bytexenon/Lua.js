@@ -19,7 +19,7 @@ export class Node {
 
   traverse(
     condition: (node: Node) => boolean,
-    callback: (node: Node) => void
+    callback: (node: Node) => void,
   ): void {
     if (condition(this)) {
       callback(this);
@@ -32,7 +32,7 @@ export class Node {
       const schemaFields = NODE_SCHEMA[this.type];
       if (!schemaFields) {
         throw new Error(
-          `Node type '${this.type}' is not defined in the schema.`
+          `Node type '${this.type}' is not defined in the schema.`,
         );
       }
       for (const field of schemaFields) {
@@ -51,7 +51,7 @@ export class Node {
     for (const property in this) {
       if (property !== "type" && property !== "children") {
         console.log(
-          `${indent}  ${property}: ${JSON.stringify(this[property], null, 2).replace(/\n/gu, `\n${indent}  `)},`
+          `${indent}  ${property}: ${JSON.stringify(this[property], null, 2).replace(/\n/gu, `\n${indent}  `)},`,
         );
       }
     }

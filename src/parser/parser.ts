@@ -565,7 +565,7 @@ export class Parser {
   parseCodeBlock(
     isRoot = false,
     isFunctionScope = false,
-    scopeVariables: string[] | null = null
+    scopeVariables: string[] | null = null,
   ): Node.Program | Node.Chunk {
     const chunk = isRoot ? new Node.Program() : new Node.Chunk();
     this.pushScope(isFunctionScope);

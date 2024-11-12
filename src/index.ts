@@ -25,5 +25,5 @@ ast.traverse(
   (_node) => true,
   (obj) => {
     console.log(obj);
-  }
+  },
 );

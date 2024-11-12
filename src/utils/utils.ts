@@ -31,7 +31,7 @@ export function mixin(target: Function, ...sources: Function[]): void {
           target.prototype,
           name,
           Object.getOwnPropertyDescriptor(source.prototype, name) ||
-            Object.create(null)
+            Object.create(null),
         );
       }
     });
