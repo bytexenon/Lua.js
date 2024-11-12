@@ -2,17 +2,41 @@
   "name": "lua-js",
   "version": "1.0.0",
   "description": "A modular and fast Lua interpreter written in JavaScript",
-  "main": "./src/index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "start": "node .",
+    "start": "tsc && node dist/index.js",
+    "build": "tsc",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "author": "bytexenon",
   "license": "MIT",
-  "dependencies": {
-    "eslint": "^9.14.0",
-    "prettier": "^3.3.3"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytexenon/lua-js.git"
   },
+  "keywords": [
+    "lua",
+    "interpreter",
+    "javascript",
+    "typescript"
+  ],
+  "bugs": {
+    "url": "https://github.com/bytexenon/lua-js/issues"
+  },
+  "homepage": "https://github.com/bytexenon/lua-js#readme",
+  "devDependencies": {
+    "eslint": "^9.14.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module"
 }

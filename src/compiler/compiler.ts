@@ -1,12 +1,18 @@
 /* IRInstruction */
 class IRInstruction {
-  constructor(opcode, operands) {
+  opcode: string;
+  operands: IROperand[];
+
+  constructor(opcode: string, operands: IROperand[]) {
     this.opcode = opcode;
     this.operands = operands;
   }
 }
 class IROperand {
-  constructor(type, value) {
+  type: string;
+  value: number;
+
+  constructor(type: string, value: number) {
     this.type = type;
     this.value = value;
   }

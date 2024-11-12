@@ -1,5 +1,6 @@
-node_modules
-performance
+node_modules/
+performance/
+dist/
 *.log
 *.out
 *.lua

@@ -6,10 +6,9 @@ import { Parser } from "./parser/parser.js";
 
 /* Code */
 const code = `
-if 1 == 2 then
-elseif 2 then
-else
-  local a = 10
+local a = 10 + 20 * 10 ^ 5;
+while a do
+  local b = a
 end
 `.repeat(1);
 
@@ -23,7 +22,7 @@ const ast = parser.parse();
 
 ast.print();
 ast.traverse(
-  () => true,
+  (_node) => true,
   (obj) => {
     console.log(obj);
   }

@@ -1,5 +1,6 @@
 /* Imports */
 import { Node, NodeList } from "./base.js";
+export { Node, NodeList };
 
 /* List nodes */
 export class Program extends NodeList {
@@ -25,39 +26,39 @@ export class IfBranchList extends NodeList {
 
 /* Variable nodes */
 class VariableNode extends Node {
-  constructor(name, variableType) {
+  constructor(name: string, variableType: string) {
     super("Variable", { variableType, name });
   }
 }
 export class LocalVariable extends VariableNode {
-  constructor(name) {
+  constructor(name: string) {
     super(name, "Local");
   }
 }
 export class GlobalVariable extends VariableNode {
-  constructor(name) {
+  constructor(name: string) {
     super(name, "Global");
   }
 }
 export class UpvalueVariable extends VariableNode {
-  constructor(name) {
+  constructor(name: string) {
     super(name, "Upvalue");
   }
 }
 
 /* Primitive nodes */
 export class NumberLiteral extends Node {
-  constructor(value) {
+  constructor(value: string) {
     super("NumberLiteral", { value });
   }
 }
 export class StringLiteral extends Node {
-  constructor(value) {
+  constructor(value: string) {
     super("StringLiteral", { value });
   }
 }
 export class BooleanLiteral extends Node {
-  constructor(value) {
+  constructor(value: string) {
     super("BooleanLiteral", { value });
   }
 }
@@ -69,44 +70,44 @@ export class VarargLiteral extends Node {
 
 /* Expression nodes */
 export class BinaryOperator extends Node {
-  constructor(operator, left, right) {
+  constructor(operator: string, left: Node, right: Node) {
     super("BinaryOperator", { operator, left, right });
   }
 }
 export class UnaryOperator extends Node {
-  constructor(operator, operand) {
+  constructor(operator: string, operand: Node) {
     super("UnaryOperator", { operator, operand });
   }
 }
 export class FunctionCall extends Node {
-  constructor(expression, argumentsList) {
+  constructor(expression: Node, argumentsList: NodeList) {
     super("FunctionCall", { expression, arguments: argumentsList });
   }
 }
 
 /* Statement nodes */
 export class LocalStatement extends Node {
-  constructor(locals, expressions) {
+  constructor(locals: string[], expressions: ExpressionList | undefined) {
     super("LocalStatement", { locals, expressions });
   }
 }
 export class WhileStatement extends Node {
-  constructor(condition, chunk) {
+  constructor(condition: Node, chunk: Chunk) {
     super("WhileStatement", { condition, chunk });
   }
 }
 export class IfBranch extends Node {
-  constructor(condition, chunk) {
+  constructor(condition: Node | null, chunk: Chunk) {
     super("IfBranch", { condition, chunk });
   }
 }
 export class IfStatement extends Node {
-  constructor(branches) {
+  constructor(branches: IfBranchList) {
     super("IfStatement", { branches });
   }
 }
 export class VariableAssignment extends Node {
-  constructor(variable, expression) {
+  constructor(variable: Node, expression: Node) {
     super("VariableAssignment", { variable, expression });
   }
 }
