@@ -14,7 +14,7 @@ const KEYWORDS = new Set([
   "true",     "false"
 ]);
 // prettier-ignore
-const OPERATORS = [
+const OPERATORS: readonly string[] = [
   "^", "*", "/", "%",
   "+", "-", "<", ">",
   "#",
@@ -37,9 +37,9 @@ const OPERATOR_TRIE = makeTrie(OPERATORS);
 const OPERATOR_KEYWORDS = new Set(["and", "or", "not"]);
 const CONSTANT_KEYWORDS = new Set(["nil", "true", "false"]);
 
-interface TrieNode {
+type TrieNode = {
   [key: string]: TrieNode | { word?: string };
-}
+};
 
 /* Lexer */
 export class Lexer {
@@ -80,6 +80,7 @@ export class Lexer {
   expectCharacter(char: string): void {
     if (!this.checkCharacter(char)) {
       this.throwError(`Expected '${char}', got '${this.curChar}'`);
+      return;
     }
   }
 
@@ -170,7 +171,7 @@ export class Lexer {
     const curCharPos = this.curPos;
     let index = 0;
     while (true) {
-      const char: string = this.getCharacterFromPosition(curCharPos + index);
+      const char = this.getCharacterFromPosition(curCharPos + index);
       node = node[char] as TrieNode;
       if (!node) {
         break;
@@ -289,8 +290,8 @@ export class Lexer {
     this.advance(1); // Skip the ending quote
     return string;
   }
-  consumeLongString(): string {
-    return this.consumeDelimiter() as string;
+  consumeLongString(): string | false {
+    return this.consumeDelimiter();
   }
 
   consumeSimpleComment(): void {
@@ -329,6 +330,10 @@ export class Lexer {
       this.tokens.push(new Token("STRING", string));
     } else if (this.isLongString()) {
       const string = this.consumeLongString();
+      if (!string) {
+        this.throwError("Invalid long string");
+        return;
+      }
       this.tokens.push(new Token("STRING", string));
     } else if (this.isComment()) {
       this.advance(2); // Skip the first two "-"

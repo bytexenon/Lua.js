@@ -4,7 +4,7 @@ import * as Node from "./node/node.js";
 /* Constants */
 
 // prettier-ignore
-const OPERATOR_PRECEDENCE: { [key: string]: [number, number] } = {
+const OPERATOR_PRECEDENCE: { readonly [key: string]: readonly [number, number] } = {
   "+":   [6, 6],  "-":  [6, 6],
   "*":   [7, 7],  "/":  [7, 7], "%": [7, 7],
   "^":   [10, 9], "..": [5, 4],
@@ -13,30 +13,29 @@ const OPERATOR_PRECEDENCE: { [key: string]: [number, number] } = {
   "and": [2, 2],  "or": [1, 1],
 };
 // prettier-ignore
-const BINARY_OPERATORS: string[] = [
+const BINARY_OPERATORS: readonly string[] = [
   "+",  "-",   "*",  "/",
   "%",  "^",   "..", "==",
   "~=", "<",   ">",  "<=",
   ">=", "and", "or"
 ];
 // prettier-ignore
-const RECOVERY_KEYWORDS: string[] = [
+const RECOVERY_KEYWORDS: readonly string[] = [
   // Basically, all statement starting keywords
   "while",  "do",     "for",
   "local",  "repeat", "until",
   "return", "if",     "break",
 ];
 
-const UNARY_OPERATORS: string[] = ["-", "not", "#"];
+const UNARY_OPERATORS: readonly string[] = ["-", "not", "#"];
 const UNARY_PRECEDENCE = 8;
-const STOP_KEYWORDS: string[] = ["end", "else", "elseif"];
+const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif"];
 
-/* Token interface */
-interface Token {
+/* Token type */
+type Token = {
   type: string;
   value: string;
-  position?: number;
-}
+};
 
 /* Scope */
 class Scope {
@@ -130,11 +129,15 @@ export class Parser {
   getVariableType(variableName: string): string {
     let isUpvalue = false;
     for (let i = this.scopeStack.length - 1; i >= 0; i--) {
-      const scope = this.scopeStack[i];
-      if (scope!.hasVariable(variableName)) {
+      const scope: Scope | undefined = this.scopeStack[i];
+      if (!scope) {
+        throw new Error("Invalid scope");
+      }
+
+      if (scope.hasVariable(variableName)) {
         return isUpvalue ? "Upvalue" : "Local";
       }
-      if (scope!.isFunctionScope) {
+      if (scope.isFunctionScope) {
         isUpvalue = true;
       }
     }
@@ -211,16 +214,20 @@ export class Parser {
   }
 
   /* Expression parsing */
-  static isUnaryOperator(token: Token | null): boolean {
-    return (token &&
+  static isUnaryOperator(token: Token | null): boolean | null {
+    return (
+      token &&
       token.type === "OPERATOR" &&
-      UNARY_OPERATORS.includes(token.value)) as boolean;
+      UNARY_OPERATORS.includes(token.value)
+    );
   }
 
-  static isBinaryOperator(token: Token | null): boolean {
-    return (token &&
+  static isBinaryOperator(token: Token | null): boolean | null {
+    return (
+      token &&
       token.type === "OPERATOR" &&
-      BINARY_OPERATORS.includes(token.value)) as boolean;
+      BINARY_OPERATORS.includes(token.value)
+    );
   }
 
   parseExpression(): Node.Node | null {
@@ -346,12 +353,12 @@ export class Parser {
       if (!Parser.isBinaryOperator(nextToken)) {
         break;
       }
-      const operator: string = nextToken!.value;
+      // @ts-expect-error - Parser.isBinaryOperator checks whether nextToken is null
+      const operator: string = nextToken.value;
       const precedence = OPERATOR_PRECEDENCE[operator];
       if (precedence![0] < minPrecedence) {
         break;
       }
-
       this.advance(2); // Consume last token of unary and the operator
       const right = this.parseBinary(precedence![1]);
       if (!right) {
