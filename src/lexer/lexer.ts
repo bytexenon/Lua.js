@@ -6,11 +6,11 @@ import { Token } from "./token.js";
 
 // prettier-ignore
 const KEYWORDS = new Set([
-  "while",    "do",      "end",     "for",
-  "local",    "repeat",  "until",   "return",
-  "in",       "if",      "else",    "elseif",
-  "function", "then",    "break",
-  "and",      "or",      "not",     "nil",
+  "while",    "do",     "end",   "for",
+  "local",    "repeat", "until", "return",
+  "in",       "if",     "else",  "elseif",
+  "function", "then",   "break",
+  "and",      "or",     "not",   "nil",
   "true",     "false"
 ]);
 // prettier-ignore
