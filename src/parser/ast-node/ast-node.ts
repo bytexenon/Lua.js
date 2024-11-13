@@ -25,7 +25,7 @@ export class IfBranchList extends ASTNodeList {
 }
 
 /* Variable nodes */
-class VariableNode extends ASTNode {
+export class VariableNode extends ASTNode {
   constructor(name: string, variableType: string) {
     super("Variable", { variableType, name });
   }
