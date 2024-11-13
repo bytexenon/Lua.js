@@ -1,5 +1,5 @@
 /* Dependencies */
-import * as Node from "./node/node.js";
+import * as ASTNode from "./ast-node/ast-node.js";
 
 /* Constants */
 
@@ -61,7 +61,7 @@ export class Parser {
   tokens: Token[];
   position: number;
   curToken: Token | undefined;
-  ast: Node.Program;
+  ast: ASTNode.Program;
   errors: { token: Token; message: string; position: number }[];
   scopeStack: Scope[];
   currentScope: Scope | undefined;
@@ -72,7 +72,7 @@ export class Parser {
     this.tokens = tokens;
     this.position = 0;
     this.curToken = this.tokens[this.position];
-    this.ast = new Node.Program();
+    this.ast = new ASTNode.Program();
     this.errors = [];
 
     /* Scope management */
@@ -230,7 +230,7 @@ export class Parser {
     );
   }
 
-  parseExpression(): Node.Node | null {
+  parseExpression(): ASTNode.ASTNode | null {
     const expression = this.parseBinary();
     if (!expression) {
       this.advance(-1);
@@ -239,7 +239,7 @@ export class Parser {
     return expression;
   }
 
-  parseBase(): Node.Node | null {
+  parseBase(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       return null;
@@ -248,20 +248,20 @@ export class Parser {
     const tokenType = curToken.type;
     switch (tokenType) {
       case "NUMBER":
-        return new Node.NumberLiteral(curToken.value);
+        return new ASTNode.NumberLiteral(curToken.value);
       case "STRING":
-        return new Node.StringLiteral(curToken.value);
+        return new ASTNode.StringLiteral(curToken.value);
       case "VARARG":
-        return new Node.VarargLiteral();
+        return new ASTNode.VarargLiteral();
       case "IDENTIFIER": {
         const variableName = curToken.value;
         const variableType = this.getVariableType(variableName);
         if (variableType === "Local") {
-          return new Node.LocalVariable(variableName);
+          return new ASTNode.LocalVariable(variableName);
         } else if (variableType === "Global") {
-          return new Node.GlobalVariable(variableName);
+          return new ASTNode.GlobalVariable(variableName);
         }
-        return new Node.UpvalueVariable(variableName);
+        return new ASTNode.UpvalueVariable(variableName);
       }
     }
 
@@ -269,7 +269,7 @@ export class Parser {
     return null;
   }
 
-  parseSuffix(): Node.Node | null {
+  parseSuffix(): ASTNode.ASTNode | null {
     const nextToken = this.peek(1);
     if (!nextToken) {
       // TODO: Should error?
@@ -278,7 +278,7 @@ export class Parser {
     return null;
   }
 
-  parsePrefix(): Node.Node | null {
+  parsePrefix(): ASTNode.ASTNode | null {
     let primaryExpression = this.parseBase();
     if (!primaryExpression) {
       // TODO: Should error?
@@ -295,7 +295,7 @@ export class Parser {
     return primaryExpression;
   }
 
-  parseUnary(): Node.Node | null {
+  parseUnary(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       // TODO: Should error?
@@ -307,15 +307,15 @@ export class Parser {
     const operator = curToken.value;
 
     this.advance(1);
-    const expression: Node.Node | null = this.parseBinary(UNARY_PRECEDENCE);
+    const expression: ASTNode.ASTNode | null = this.parseBinary(UNARY_PRECEDENCE);
     if (!expression) {
       this.error("Expected expression");
       return null;
     }
-    return new Node.UnaryOperator(operator, expression);
+    return new ASTNode.UnaryOperator(operator, expression);
   }
 
-  parseBinary(minPrecedence = 0): Node.Node | null {
+  parseBinary(minPrecedence = 0): ASTNode.ASTNode | null {
     let expression = this.parseUnary();
     if (!expression) {
       // TODO: Should error?
@@ -348,7 +348,7 @@ export class Parser {
         return null; // It doesn't break from all parsers
       }
 
-      expression = new Node.BinaryOperator(operator, expression, right);
+      expression = new ASTNode.BinaryOperator(operator, expression, right);
     }
 
     return expression;
@@ -372,8 +372,8 @@ export class Parser {
     return identifiers;
   }
 
-  parseExpressionList(atLeastOne = false): Node.ExpressionList {
-    const expressionList = new Node.ExpressionList();
+  parseExpressionList(atLeastOne = false): ASTNode.ExpressionList {
+    const expressionList = new ASTNode.ExpressionList();
     while (this.curToken) {
       const expression = this.parseExpression();
       if (!expression) {
@@ -439,22 +439,22 @@ export class Parser {
   }*/
 
   /* Keyword parsers */
-  parseLocal(): Node.LocalStatement {
+  parseLocal(): ASTNode.LocalStatement {
     this.advance(1); // Skip 'local'
     const locals: string[] = this.consumeIdentifierList();
-    let expressions: Node.ExpressionList | undefined;
+    let expressions: ASTNode.ExpressionList | undefined;
     // local <varlist> = <explist>
     if (this.checkCurrentToken("CHARACTER", "=")) {
       this.advance(1); // Skip '='
       expressions = this.parseExpressionList();
     }
     this.registerVariables(locals);
-    return new Node.LocalStatement(locals, expressions);
+    return new ASTNode.LocalStatement(locals, expressions);
   }
 
-  parseWhile(): Node.WhileStatement | null {
+  parseWhile(): ASTNode.WhileStatement | null {
     this.advance(1); // Skip `while`
-    const condition: Node.Node | null = this.parseExpression();
+    const condition: ASTNode.ASTNode | null = this.parseExpression();
     if (!condition) {
       this.error("Expected expression");
       return null;
@@ -464,18 +464,18 @@ export class Parser {
     this.advance(1); // Skip `do`
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken("KEYWORD", "end");
-    return new Node.WhileStatement(condition, chunk);
+    return new ASTNode.WhileStatement(condition, chunk);
   }
 
-  parseIf(): Node.IfStatement {
+  parseIf(): ASTNode.IfStatement {
     this.advance(1); // Skip `if`
     const mainCondition = this.parseExpression();
     this.advance(1); // Skip last token of condition
     this.expectCurrentToken("KEYWORD", "then");
     this.advance(1); // Skip `then`
     const mainChunk = this.parseCodeBlock();
-    const ifBranches = new Node.IfBranchList();
-    const firstBranch = new Node.IfBranch(mainCondition, mainChunk);
+    const ifBranches = new ASTNode.IfBranchList();
+    const firstBranch = new ASTNode.IfBranch(mainCondition, mainChunk);
     ifBranches.addChild(firstBranch);
     while (this.checkCurrentTokenType("KEYWORD")) {
       if (this.checkCurrentTokenValue("elseif")) {
@@ -485,21 +485,21 @@ export class Parser {
         this.expectCurrentToken("KEYWORD", "then");
         this.advance(1); // Skip `then`
         const chunk = this.parseCodeBlock();
-        ifBranches.addChild(new Node.IfBranch(condition, chunk));
+        ifBranches.addChild(new ASTNode.IfBranch(condition, chunk));
       } else if (this.checkCurrentTokenValue("else")) {
         this.advance(1); // Skip `else`
         const elseChunk = this.parseCodeBlock();
-        ifBranches.addChild(new Node.IfBranch(null, elseChunk));
+        ifBranches.addChild(new ASTNode.IfBranch(null, elseChunk));
         break;
       } else {
         break; // ???
       }
     }
     this.expectCurrentToken("KEYWORD", "end");
-    return new Node.IfStatement(ifBranches);
+    return new ASTNode.IfStatement(ifBranches);
   }
 
-  parseDo(): Node.Chunk {
+  parseDo(): ASTNode.Chunk {
     this.advance(1); // Skip 'do'
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken("KEYWORD", "end");
@@ -507,7 +507,7 @@ export class Parser {
   }
 
   /* Parser Handler */
-  parseStatement(): Node.Node | null {
+  parseStatement(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       return null;
@@ -515,7 +515,7 @@ export class Parser {
     const tokenType = curToken.type;
     const tokenValue = curToken.value;
 
-    let node: Node.Node | null = null;
+    let node: ASTNode.ASTNode | null = null;
     if (tokenType === "KEYWORD") {
       if (STOP_KEYWORDS.includes(tokenValue)) {
         return null;
@@ -552,9 +552,9 @@ export class Parser {
   parseCodeBlock(
     isRoot = false,
     isFunctionScope = false,
-    scopeVariables: string[] | null = null,
-  ): Node.Program | Node.Chunk {
-    const chunk = isRoot ? new Node.Program() : new Node.Chunk();
+    scopeVariables: string[] | null = null
+  ): ASTNode.Program | ASTNode.Chunk {
+    const chunk = isRoot ? new ASTNode.Program() : new ASTNode.Chunk();
     this.pushScope(isFunctionScope);
     if (scopeVariables) {
       this.registerVariables(scopeVariables);
@@ -573,7 +573,7 @@ export class Parser {
   }
 
   /* Main */
-  parse(): Node.Program {
+  parse(): ASTNode.Program {
     const chunk = this.parseCodeBlock(true);
     return chunk;
   }
