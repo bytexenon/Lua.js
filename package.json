@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "build": "tsc",
-    "lint": "rm -rf dist && eslint .",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
