@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-
+import { NodeType } from "./ast-node.js";
 import { NODE_SCHEMA } from "./node-schema.js";
 
 type NodeProperty =
@@ -14,11 +14,11 @@ type NodeProperty =
 
 /* Base Node class */
 export class ASTNode {
-  type: string;
+  type: NodeType;
   properties: Record<string, NodeProperty>;
   children?: ASTNode[];
 
-  constructor(type: string, properties?: Record<string, NodeProperty>) {
+  constructor(type: NodeType, properties?: Record<string, NodeProperty>) {
     this.type = type;
     this.properties = properties ?? {};
   }
@@ -38,7 +38,7 @@ export class ASTNode {
       const schemaFields: string[] | undefined = NODE_SCHEMA[this.type];
       if (!schemaFields) {
         throw new Error(
-          `Node type '${this.type}' is not defined in the schema.`,
+          `Node type '${this.type.toString()}' is not defined in the schema.`,
         );
       }
       for (const field of schemaFields) {
@@ -54,7 +54,7 @@ export class ASTNode {
   print(level = 0): void {
     const indent = "  ".repeat(level);
     console.log(`${indent}Node {`);
-    console.log(`${indent}  type: '${this.type}',`);
+    console.log(`${indent}  type: '${this.type.toString()}',`);
     for (const property in this) {
       if (property !== "type" && property !== "children") {
         console.log(
@@ -78,7 +78,7 @@ export class ASTNode {
 export class ASTNodeList extends ASTNode {
   override children: ASTNode[];
 
-  constructor(type: string, properties?: Record<string, NodeProperty>) {
+  constructor(type: NodeType, properties?: Record<string, NodeProperty>) {
     super(type, properties);
     this.children = [];
   }

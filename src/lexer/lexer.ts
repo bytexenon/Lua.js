@@ -46,7 +46,7 @@ export class Lexer {
 
   /* Constructor */
   constructor(code: string) {
-    this.code = code; // Null character at the end
+    this.code = code;
     this.curPos = 0;
     this.curChar = this.getCharacterFromPosition(this.curPos);
     this.tokens = [];
