@@ -4,7 +4,7 @@ import * as Node from "./node/node.js";
 /* Constants */
 
 // prettier-ignore
-const OPERATOR_PRECEDENCE: { readonly [key: string]: readonly [number, number] } = {
+const OPERATOR_PRECEDENCE: Readonly<Record<string, readonly [number, number]>> = {
   "+":   [6, 6],  "-":  [6, 6],
   "*":   [7, 7],  "/":  [7, 7], "%": [7, 7],
   "^":   [10, 9], "..": [5, 4],
@@ -32,15 +32,15 @@ const UNARY_PRECEDENCE = 8;
 const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif"];
 
 /* Token type */
-type Token = {
+interface Token {
   type: string;
   value: string;
-};
+}
 
 /* Scope */
 class Scope {
   isFunctionScope: boolean;
-  variables: { [key: string]: boolean };
+  variables: Record<string, boolean>;
 
   constructor(isFunctionScope = false) {
     this.isFunctionScope = isFunctionScope;
@@ -60,24 +60,24 @@ class Scope {
 export class Parser {
   tokens: Token[];
   position: number;
-  curToken: Token | null;
+  curToken: Token | undefined;
   ast: Node.Program;
   errors: { token: Token; message: string; position: number }[];
   scopeStack: Scope[];
-  currentScope: Scope | null;
+  currentScope: Scope | undefined;
   isInLoop: boolean;
 
   /* Constructor */
   constructor(tokens: Token[]) {
     this.tokens = tokens;
     this.position = 0;
-    this.curToken = this.tokens[this.position] || null;
+    this.curToken = this.tokens[this.position];
     this.ast = new Node.Program();
     this.errors = [];
 
     /* Scope management */
     this.scopeStack = [];
-    this.currentScope = null;
+    this.currentScope = undefined;
 
     /* Flow control */
     // Keep track of whether we are in a loop,
@@ -86,13 +86,13 @@ export class Parser {
   }
 
   /* Utils */
-  peek(n: number): Token | null {
-    return this.tokens[this.position + n] || null;
+  peek(n: number): Token | undefined {
+    return this.tokens[this.position + n];
   }
 
   advance(n: number): void {
     const newPos = this.position + n;
-    const newToken = this.tokens[newPos] || null;
+    const newToken = this.tokens[newPos];
     this.position = newPos;
     this.curToken = newToken;
   }
@@ -109,7 +109,7 @@ export class Parser {
       throw new Error("No scope to pop");
     }
     this.scopeStack.pop();
-    this.currentScope = this.scopeStack[this.scopeStack.length - 1] || null;
+    this.currentScope = this.scopeStack[this.scopeStack.length - 1];
   }
 
   /* Variable management */
@@ -159,7 +159,7 @@ export class Parser {
   }
 
   error(message: string): void {
-    throw new Error(`${message}`);
+    throw new Error(message);
   }
 
   /* Token checks */
@@ -187,15 +187,15 @@ export class Parser {
     }
   }
 
-  checkTokenType(token: Token | null, type: string): boolean {
+  checkTokenType(token: Token | undefined, type: string): boolean {
     return token?.type === type;
   }
 
-  checkTokenValue(token: Token | null, value: string): boolean {
+  checkTokenValue(token: Token | undefined, value: string): boolean {
     return token?.value === value;
   }
 
-  checkToken(token: Token | null, type: string, value: string): boolean {
+  checkToken(token: Token | undefined, type: string, value: string): boolean {
     return (
       this.checkTokenType(token, type) && this.checkTokenValue(token, value)
     );
@@ -214,7 +214,7 @@ export class Parser {
   }
 
   /* Expression parsing */
-  static isUnaryOperator(token: Token | null): boolean | null {
+  static isUnaryOperator(token: Token | undefined): boolean | undefined {
     return (
       token &&
       token.type === "OPERATOR" &&
@@ -222,7 +222,7 @@ export class Parser {
     );
   }
 
-  static isBinaryOperator(token: Token | null): boolean | null {
+  static isBinaryOperator(token: Token | undefined): boolean | undefined {
     return (
       token &&
       token.type === "OPERATOR" &&
@@ -269,38 +269,12 @@ export class Parser {
     return null;
   }
 
-  parseSuffix(_primaryExpression: Node.Node): Node.Node | null {
+  parseSuffix(): Node.Node | null {
     const nextToken = this.peek(1);
     if (!nextToken) {
       // TODO: Should error?
       return null;
     }
-    const nextTokenValue = nextToken.value;
-    const nextTokenType = nextToken.type;
-    if (nextTokenType === "CHARACTER") {
-      switch (
-        nextTokenValue
-        /*// <functionCall> ::= <expression> \( <args> \)
-        case "(":
-          this.advance(1);
-          return this.parseFunctionCall(primaryExpression, false);
-        // <functionCall> ::= <expression> : <identifier> \( <args> \)
-        case ":":
-          this.advance(1);
-          return this.parseFunctionCall(primaryExpression, true);
-        /* // <tableAccess> ::= <expression> \[ <expression> \]
-        case "[":
-          this.advance(1);
-          return this.parseTableAccess(primaryExpression, false);
-        // <tableAccess> ::= <expression> \. <identifier>
-        case ".":
-          this.advance(1);
-          return this.parseTableAccess(primaryExpression, true);
-        */
-      ) {
-      }
-    }
-
     return null;
   }
 
@@ -311,7 +285,7 @@ export class Parser {
       return null;
     }
     while (true) {
-      const suffix = this.parseSuffix(primaryExpression);
+      const suffix = this.parseSuffix();
       if (!suffix) {
         break;
       }
@@ -341,7 +315,7 @@ export class Parser {
     return new Node.UnaryOperator(operator, expression);
   }
 
-  parseBinary(minPrecedence: number = 0): Node.Node | null {
+  parseBinary(minPrecedence = 0): Node.Node | null {
     let expression = this.parseUnary();
     if (!expression) {
       // TODO: Should error?
@@ -349,18 +323,24 @@ export class Parser {
     }
 
     while (true) {
-      const nextToken: Token | null = this.peek(1);
+      const nextToken: Token | undefined = this.peek(1);
       if (!Parser.isBinaryOperator(nextToken)) {
         break;
       }
       // @ts-expect-error - Parser.isBinaryOperator checks whether nextToken is null
       const operator: string = nextToken.value;
       const precedence = OPERATOR_PRECEDENCE[operator];
-      if (precedence![0] < minPrecedence) {
+      if (!precedence) {
+        this.error(`Unknown operator '${operator}'`);
+        return null;
+      }
+      const leftPrecedence = precedence[0];
+      const rightPrecedence = precedence[1];
+      if (leftPrecedence < minPrecedence) {
         break;
       }
       this.advance(2); // Consume last token of unary and the operator
-      const right = this.parseBinary(precedence![1]);
+      const right = this.parseBinary(rightPrecedence);
       if (!right) {
         this.error("Expected expression");
         // How can we recover from this?
@@ -378,14 +358,14 @@ export class Parser {
   consumeIdentifierList(): string[] {
     // Ensure the first token is always an identifier
     this.expectCurrentTokenType("IDENTIFIER");
-    const identifiers = [this.curToken?.value || ""];
+    const identifiers = [this.curToken!.value];
     this.advance(1); // Skip the first identifier
 
     // Continue consuming identifiers separated by commas
     while (this.checkCurrentToken("CHARACTER", ",")) {
       this.advance(1); // Skip the comma
       this.expectCurrentTokenType("IDENTIFIER");
-      identifiers.push(this.curToken?.value || "");
+      identifiers.push(this.curToken!.value);
       this.advance(1); // Skip the identifier
     }
 
@@ -582,7 +562,8 @@ export class Parser {
     while (this.curToken) {
       const statement = this.parseStatement();
       if (!statement) {
-        break; // Break if end of block
+        // Break if end of chunk
+        break;
       }
       chunk.addChild(statement);
       this.advance(1);
@@ -592,7 +573,7 @@ export class Parser {
   }
 
   /* Main */
-  parse(): Node.Program | Node.Chunk {
+  parse(): Node.Program {
     const chunk = this.parseCodeBlock(true);
     return chunk;
   }

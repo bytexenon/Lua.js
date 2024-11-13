@@ -1,5 +1,5 @@
 /* Dependencies */
-import { makeTrie } from "../utils/utils.js";
+import { makeTrie, TrieNode } from "../utils/utils.js";
 import { Token } from "./token.js";
 
 /* Constants */
@@ -37,10 +37,6 @@ const OPERATOR_TRIE = makeTrie(OPERATORS);
 const OPERATOR_KEYWORDS = new Set(["and", "or", "not"]);
 const CONSTANT_KEYWORDS = new Set(["nil", "true", "false"]);
 
-type TrieNode = {
-  [key: string]: TrieNode | { word?: string };
-};
-
 /* Lexer */
 export class Lexer {
   private code: string;
@@ -58,7 +54,7 @@ export class Lexer {
 
   /* Utils */
   getCharacterFromPosition(n: number): string {
-    return this.code[n] || "\0";
+    return this.code[n] ?? "\0";
   }
   peek(n: number): string {
     return this.getCharacterFromPosition(this.curPos + n);
@@ -80,7 +76,6 @@ export class Lexer {
   expectCharacter(char: string): void {
     if (!this.checkCharacter(char)) {
       this.throwError(`Expected '${char}', got '${this.curChar}'`);
-      return;
     }
   }
 
@@ -366,7 +361,7 @@ export class Lexer {
   /* Main Method */
   lex(): Token[] {
     const tokens = this.tokens;
-    while (this.curChar != "\0") {
+    while (this.curChar !== "\0") {
       this.getNextToken();
     }
     return tokens;

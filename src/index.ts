@@ -12,7 +12,7 @@ while a do
 end
 `.repeat(1);
 
-console.log(`Processing ${code.length / 1024 / 1024} MB of data`);
+console.log(`Processing ${(code.length / 1024 / 1024).toString()} MB of data`);
 
 const lexer = new Lexer(code);
 const tokens = lexer.lex();
@@ -22,7 +22,7 @@ const ast = parser.parse();
 
 ast.print();
 ast.traverse(
-  (_node) => true,
+  () => true,
   (obj) => {
     console.log(obj);
   },

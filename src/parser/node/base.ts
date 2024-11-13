@@ -1,20 +1,26 @@
 /* eslint-disable no-console */
+
 import { NODE_SCHEMA } from "./node-schema.js";
+
+type NodeProperty =
+  | Node
+  | NodeList
+  | string
+  | string[]
+  | number
+  | boolean
+  | null
+  | undefined;
 
 /* Base Node class */
 export class Node {
   type: string;
-  [key: string]: any;
+  properties: Record<string, NodeProperty>;
+  children?: Node[];
 
-  constructor(type: string, properties?: { [key: string]: any }) {
+  constructor(type: string, properties?: Record<string, NodeProperty>) {
     this.type = type;
-    if (properties) {
-      for (const property in properties) {
-        if (Object.prototype.hasOwnProperty.call(properties, property)) {
-          this[property] = properties[property];
-        }
-      }
-    }
+    this.properties = properties ?? {};
   }
 
   traverse(
@@ -29,22 +35,23 @@ export class Node {
         child.traverse(condition, callback);
       }
     } else {
-      const schemaFields = NODE_SCHEMA[this.type];
+      const schemaFields: string[] | undefined = NODE_SCHEMA[this.type];
       if (!schemaFields) {
         throw new Error(
           `Node type '${this.type}' is not defined in the schema.`,
         );
       }
       for (const field of schemaFields) {
-        if (this[field]) {
-          this[field].traverse(condition, callback);
+        const value: NodeProperty | undefined = this.properties[field];
+        if (value instanceof Node) {
+          value.traverse(condition, callback);
         }
       }
     }
   }
 
   // Recursively prints all the nodes in the tree
-  print(level: number = 0): void {
+  print(level = 0): void {
     const indent = "  ".repeat(level);
     console.log(`${indent}Node {`);
     console.log(`${indent}  type: '${this.type}',`);
@@ -55,9 +62,12 @@ export class Node {
         );
       }
     }
-    if (this["children"]?.length > 0) {
+    const children = this.children;
+    if (children && children.length > 0) {
       console.log(`${indent}  children: [`);
-      this["children"].forEach((child: Node) => child.print(level + 2));
+      children.forEach((child: Node) => {
+        child.print(level + 2);
+      });
       console.log(`${indent}  ]`);
     }
     console.log(`${indent}}`);
@@ -66,14 +76,14 @@ export class Node {
 
 /* Base NodeList class */
 export class NodeList extends Node {
-  children: Node[];
+  override children: Node[];
 
-  constructor(type: string, properties?: { [key: string]: any }) {
+  constructor(type: string, properties?: Record<string, NodeProperty>) {
     super(type, properties);
     this.children = [];
   }
 
   addChild(node: Node): void {
-    this.children.push(node);
+    this.children?.push(node);
   }
 }
