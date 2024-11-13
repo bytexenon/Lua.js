@@ -19,6 +19,7 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
+    "preserveConstEnums": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
@@ -31,7 +32,7 @@
     "noStrictGenericChecks": false,
     "noEmitOnError": true,
     "noEmitHelpers": false,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "checkJs": true
   },
   "include": ["src/**/*"],
