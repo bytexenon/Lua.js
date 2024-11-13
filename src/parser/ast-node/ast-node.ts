@@ -111,3 +111,8 @@ export class VariableAssignment extends ASTNode {
     super("VariableAssignment", { variable, expression });
   }
 }
+export class DoStatement extends ASTNode {
+  constructor(chunk: Chunk) {
+    super("DoStatement", { chunk });
+  }
+}

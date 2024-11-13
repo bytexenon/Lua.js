@@ -500,11 +500,11 @@ export class Parser {
     return new ASTNode.IfStatement(ifBranches);
   }
 
-  parseDo(): ASTNode.Chunk {
+  parseDo(): ASTNode.DoStatement {
     this.advance(1); // Skip 'do'
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken("KEYWORD", "end");
-    return chunk;
+    return new ASTNode.DoStatement(chunk);
   }
 
   /* Parser Handler */

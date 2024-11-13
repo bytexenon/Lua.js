@@ -23,4 +23,5 @@ export const NODE_SCHEMA: Record<string, string[]> = {
   WhileStatement: ["condition", "chunk"],
   IfStatement: ["branches"],
   IfBranch: ["condition", "chunk"],
+  DoStatement: ["chunk"],
 };
