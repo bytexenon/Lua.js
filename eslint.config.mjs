@@ -2,6 +2,7 @@ import globals from "globals";
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
+import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -26,7 +27,28 @@ export default tseslint.config(
         ...globals.node,
       },
     },
+    plugins: {
+      import: importPlugin,
+    },
     rules: {
+      "import/named": "error",
+      "import/namespace": "error",
+      "import/default": "error",
+      "import/export": "error",
+      "import/no-named-as-default": "error",
+      "import/no-unused-modules": "error",
+      "import/no-named-as-default-member": "error",
+      "import/no-mutable-exports": "error",
+      "import/no-extraneous-dependencies": "error",
+      "import/no-empty-named-blocks": "error",
+      "import/no-deprecated": "error",
+
+      // Import style
+      "import/first": "error",
+      "import/exports-last": "error",
+      "import/no-duplicates": "error",
+      "import/order": "error",
+
       "@typescript-eslint/no-unnecessary-condition": "off",
       // 🕸
       "array-callback-return": "error",
@@ -35,6 +57,9 @@ export default tseslint.config(
       "no-duplicate-case": "error",
       "for-direction": "error",
       "no-useless-backreference": "error",
+
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
 
       // 👀
       "default-case-last": "error",
