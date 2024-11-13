@@ -1,4 +1,5 @@
 /* Dependencies */
+import { TokenInterface, TokenEnum } from "../lexer/token.js";
 import * as ASTNode from "./ast-node/ast-node.js";
 
 /* Constants */
@@ -31,12 +32,6 @@ const UNARY_OPERATORS: readonly string[] = ["-", "not", "#"];
 const UNARY_PRECEDENCE = 8;
 const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif"];
 
-/* Token type */
-interface Token {
-  type: string;
-  value: string;
-}
-
 /* Scope */
 class Scope {
   isFunctionScope: boolean;
@@ -58,17 +53,17 @@ class Scope {
 
 /* Parser */
 export class Parser {
-  tokens: Token[];
+  tokens: TokenInterface[];
   position: number;
-  curToken: Token | undefined;
+  curToken: TokenInterface | undefined;
   ast: ASTNode.Program;
-  errors: { token: Token; message: string; position: number }[];
+  errors: { token: TokenInterface; message: string; position: number }[];
   scopeStack: Scope[];
   currentScope: Scope | undefined;
   isInLoop: boolean;
 
   /* Constructor */
-  constructor(tokens: Token[]) {
+  constructor(tokens: TokenInterface[]) {
     this.tokens = tokens;
     this.position = 0;
     this.curToken = this.tokens[this.position];
@@ -86,7 +81,7 @@ export class Parser {
   }
 
   /* Utils */
-  peek(n: number): Token | undefined {
+  peek(n: number): TokenInterface | undefined {
     return this.tokens[this.position + n];
   }
 
@@ -149,7 +144,7 @@ export class Parser {
     // Tries to recover from a syntax error by skipping
     // tokens until a "safe" token is found
     while (this.curToken) {
-      if (this.checkCurrentTokenType("KEYWORD")) {
+      if (this.checkCurrentTokenType(TokenEnum.KEYWORD)) {
         if (RECOVERY_KEYWORDS.includes(this.curToken.value)) {
           return;
         }
@@ -163,9 +158,9 @@ export class Parser {
   }
 
   /* Token checks */
-  expectCurrentTokenType(type: string): boolean {
+  expectCurrentTokenType(type: TokenEnum): boolean {
     if (this.curToken?.type !== type) {
-      this.error(`Expected token type '${type}'`);
+      this.error(`Expected token type '${type.toString()}'`);
       this.recover();
       return false;
     }
@@ -181,27 +176,31 @@ export class Parser {
     return true;
   }
 
-  expectCurrentToken(type: string, value: string): void {
+  expectCurrentToken(type: TokenEnum, value: string): void {
     if (this.expectCurrentTokenType(type)) {
       this.expectCurrentTokenValue(value);
     }
   }
 
-  checkTokenType(token: Token | undefined, type: string): boolean {
+  checkTokenType(token: TokenInterface | undefined, type: TokenEnum): boolean {
     return token?.type === type;
   }
 
-  checkTokenValue(token: Token | undefined, value: string): boolean {
+  checkTokenValue(token: TokenInterface | undefined, value: string): boolean {
     return token?.value === value;
   }
 
-  checkToken(token: Token | undefined, type: string, value: string): boolean {
+  checkToken(
+    token: TokenInterface | undefined,
+    type: TokenEnum,
+    value: string,
+  ): boolean {
     return (
       this.checkTokenType(token, type) && this.checkTokenValue(token, value)
     );
   }
 
-  checkCurrentTokenType(type: string): boolean {
+  checkCurrentTokenType(type: TokenEnum): boolean {
     return this.checkTokenType(this.curToken, type);
   }
 
@@ -209,23 +208,27 @@ export class Parser {
     return this.checkTokenValue(this.curToken, value);
   }
 
-  checkCurrentToken(type: string, value: string): boolean {
+  checkCurrentToken(type: TokenEnum, value: string): boolean {
     return this.checkToken(this.curToken, type, value);
   }
 
   /* Expression parsing */
-  static isUnaryOperator(token: Token | undefined): boolean | undefined {
+  static isUnaryOperator(
+    token: TokenInterface | undefined,
+  ): boolean | undefined {
     return (
       token &&
-      token.type === "OPERATOR" &&
+      token.type === TokenEnum.OPERATOR &&
       UNARY_OPERATORS.includes(token.value)
     );
   }
 
-  static isBinaryOperator(token: Token | undefined): boolean | undefined {
+  static isBinaryOperator(
+    token: TokenInterface | undefined,
+  ): boolean | undefined {
     return (
       token &&
-      token.type === "OPERATOR" &&
+      token.type === TokenEnum.OPERATOR &&
       BINARY_OPERATORS.includes(token.value)
     );
   }
@@ -247,13 +250,13 @@ export class Parser {
 
     const tokenType = curToken.type;
     switch (tokenType) {
-      case "NUMBER":
+      case TokenEnum.NUMBER:
         return new ASTNode.NumberLiteral(curToken.value);
-      case "STRING":
+      case TokenEnum.STRING:
         return new ASTNode.StringLiteral(curToken.value);
-      case "VARARG":
+      case TokenEnum.VARARG:
         return new ASTNode.VarargLiteral();
-      case "IDENTIFIER": {
+      case TokenEnum.IDENTIFIER: {
         const variableName = curToken.value;
         const variableType = this.getVariableType(variableName);
         if (variableType === "Local") {
@@ -324,7 +327,7 @@ export class Parser {
     }
 
     while (true) {
-      const nextToken: Token | undefined = this.peek(1);
+      const nextToken: TokenInterface | undefined = this.peek(1);
       if (!Parser.isBinaryOperator(nextToken)) {
         break;
       }
@@ -358,14 +361,14 @@ export class Parser {
   /* Parser helpers */
   consumeIdentifierList(): string[] {
     // Ensure the first token is always an identifier
-    this.expectCurrentTokenType("IDENTIFIER");
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
     const identifiers = [this.curToken!.value];
     this.advance(1); // Skip the first identifier
 
     // Continue consuming identifiers separated by commas
-    while (this.checkCurrentToken("CHARACTER", ",")) {
+    while (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
       this.advance(1); // Skip the comma
-      this.expectCurrentTokenType("IDENTIFIER");
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
       identifiers.push(this.curToken!.value);
       this.advance(1); // Skip the identifier
     }
@@ -384,7 +387,7 @@ export class Parser {
         break;
       }
       expressionList.addChild(expression);
-      if (this.checkToken(this.peek(1), "CHARACTER", ",")) {
+      if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
         this.advance(2); // Skip the last token of the expression and the comma
       } else {
         break;
@@ -394,7 +397,7 @@ export class Parser {
   }
 
   consumeOptionalSemicolon(): void {
-    if (this.checkToken(this.peek(1), "CHARACTER", ";")) {
+    if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ";")) {
       this.advance(1);
     }
   }
@@ -445,7 +448,7 @@ export class Parser {
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
     // local <varlist> = <explist>
-    if (this.checkCurrentToken("CHARACTER", "=")) {
+    if (this.checkCurrentToken(TokenEnum.CHARACTER, "=")) {
       this.advance(1); // Skip '='
       expressions = this.parseExpressionList();
     }
@@ -461,10 +464,10 @@ export class Parser {
       return null;
     }
     this.advance(1); // Skip last token of condition
-    this.expectCurrentToken("KEYWORD", "do");
+    this.expectCurrentToken(TokenEnum.KEYWORD, "do");
     this.advance(1); // Skip `do`
     const chunk = this.parseCodeBlock();
-    this.expectCurrentToken("KEYWORD", "end");
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
     return new ASTNode.WhileStatement(condition, chunk);
   }
 
@@ -472,18 +475,18 @@ export class Parser {
     this.advance(1); // Skip `if`
     const mainCondition = this.parseExpression();
     this.advance(1); // Skip last token of condition
-    this.expectCurrentToken("KEYWORD", "then");
+    this.expectCurrentToken(TokenEnum.KEYWORD, "then");
     this.advance(1); // Skip `then`
     const mainChunk = this.parseCodeBlock();
     const ifBranches = new ASTNode.IfBranchList();
     const firstBranch = new ASTNode.IfBranch(mainCondition, mainChunk);
     ifBranches.addChild(firstBranch);
-    while (this.checkCurrentTokenType("KEYWORD")) {
+    while (this.checkCurrentTokenType(TokenEnum.KEYWORD)) {
       if (this.checkCurrentTokenValue("elseif")) {
         this.advance(1); // Skip `elseif`
         const condition = this.parseExpression();
         this.advance(1); // Skip last token of condition
-        this.expectCurrentToken("KEYWORD", "then");
+        this.expectCurrentToken(TokenEnum.KEYWORD, "then");
         this.advance(1); // Skip `then`
         const chunk = this.parseCodeBlock();
         ifBranches.addChild(new ASTNode.IfBranch(condition, chunk));
@@ -496,14 +499,14 @@ export class Parser {
         break; // ???
       }
     }
-    this.expectCurrentToken("KEYWORD", "end");
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
     return new ASTNode.IfStatement(ifBranches);
   }
 
   parseDo(): ASTNode.DoStatement {
     this.advance(1); // Skip 'do'
     const chunk = this.parseCodeBlock();
-    this.expectCurrentToken("KEYWORD", "end");
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
     return new ASTNode.DoStatement(chunk);
   }
 
@@ -517,7 +520,7 @@ export class Parser {
     const tokenValue = curToken.value;
 
     let node: ASTNode.ASTNode | null = null;
-    if (tokenType === "KEYWORD") {
+    if (tokenType === TokenEnum.KEYWORD) {
       if (STOP_KEYWORDS.includes(tokenValue)) {
         return null;
       }

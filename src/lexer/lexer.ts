@@ -1,6 +1,6 @@
 /* Dependencies */
 import { makeTrie, TrieNode } from "../utils/utils.js";
-import { Token } from "./token.js";
+import { Token, TokenEnum } from "./token.js";
 
 /* Constants */
 
@@ -309,27 +309,27 @@ export class Lexer {
     } else if (Lexer.isIdentifierStart(curChar)) {
       const identifier = this.consumeIdentifier();
       if (OPERATOR_KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token("OPERATOR", identifier));
+        this.tokens.push(new Token(TokenEnum.OPERATOR, identifier));
       } else if (CONSTANT_KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token("CONSTANT", identifier));
+        this.tokens.push(new Token(TokenEnum.CONSTANT, identifier));
       } else if (KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token("KEYWORD", identifier));
+        this.tokens.push(new Token(TokenEnum.KEYWORD, identifier));
       } else {
-        this.tokens.push(new Token("IDENTIFIER", identifier));
+        this.tokens.push(new Token(TokenEnum.IDENTIFIER, identifier));
       }
     } else if (this.isNumberStart()) {
       const number = this.consumeNumber();
-      this.tokens.push(new Token("NUMBER", number.toString()));
+      this.tokens.push(new Token(TokenEnum.NUMBER, number.toString()));
     } else if (Lexer.isQuoteString(curChar)) {
       const string = this.consumeSimpleString();
-      this.tokens.push(new Token("STRING", string));
+      this.tokens.push(new Token(TokenEnum.STRING, string));
     } else if (this.isLongString()) {
       const string = this.consumeLongString();
       if (!string) {
         this.throwError("Invalid long string");
         return;
       }
-      this.tokens.push(new Token("STRING", string));
+      this.tokens.push(new Token(TokenEnum.STRING, string));
     } else if (this.isComment()) {
       this.advance(2); // Skip the first two "-"
       if (this.isDelimiter()) {
@@ -339,11 +339,11 @@ export class Lexer {
       }
     } else if (this.isVararg()) {
       this.advance(3); // Skip the "..."
-      this.tokens.push(new Token("VARARG", "..."));
+      this.tokens.push(new Token(TokenEnum.VARARG, "..."));
     } else {
       const operator = this.consumeOperatorIfPossible();
       if (operator) {
-        this.tokens.push(new Token("OPERATOR", operator));
+        this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
       } else {
         if (curChar === "\0") {
           this.advance(1);
@@ -352,7 +352,7 @@ export class Lexer {
           throw new Error(`Invalid character: ${curChar}`);
         }
         // Process it as character
-        this.tokens.push(new Token("CHARACTER", curChar));
+        this.tokens.push(new Token(TokenEnum.CHARACTER, curChar));
         this.advance(1); // Skip the character
       }
     }
