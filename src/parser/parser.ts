@@ -307,7 +307,8 @@ export class Parser {
     const operator = curToken.value;
 
     this.advance(1);
-    const expression: ASTNode.ASTNode | null = this.parseBinary(UNARY_PRECEDENCE);
+    const expression: ASTNode.ASTNode | null =
+      this.parseBinary(UNARY_PRECEDENCE);
     if (!expression) {
       this.error("Expected expression");
       return null;
@@ -552,7 +553,7 @@ export class Parser {
   parseCodeBlock(
     isRoot = false,
     isFunctionScope = false,
-    scopeVariables: string[] | null = null
+    scopeVariables: string[] | null = null,
   ): ASTNode.Program | ASTNode.Chunk {
     const chunk = isRoot ? new ASTNode.Program() : new ASTNode.Chunk();
     this.pushScope(isFunctionScope);
