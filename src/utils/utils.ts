@@ -1,9 +1,6 @@
-export interface TrieNode {
-  [key: string]: TrieNode | TrieLeaf;
-}
-export interface TrieLeaf {
-  word?: string;
-}
+/* Imports */
+import { TrieLeaf, TrieNode } from "./types.js";
+export type { TrieLeaf, TrieNode };
 
 /**
  * Creates a trie (prefix tree) from an array of words.
