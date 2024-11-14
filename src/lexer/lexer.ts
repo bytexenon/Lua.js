@@ -188,7 +188,8 @@ export class Lexer {
     this.advance(1); // Skip the second "["
 
     const start = this.curPos;
-    while (this.curChar) {
+    let endedSuccessfully = false;
+    while (this.curChar !== "\0") {
       if (this.curChar === "]") {
         this.advance(1);
         let newDelimeterDepth = 0;
@@ -197,14 +198,16 @@ export class Lexer {
           this.advance(1);
         }
         if (this.curChar === "]" && newDelimeterDepth === delimeterDepth) {
+          endedSuccessfully = true;
           break;
         }
       }
       this.advance(1);
     }
-    if (!noExpect) {
-      this.expectCharacter("]");
-    } else if (!this.checkCharacter("]")) {
+    if (!endedSuccessfully) {
+      if (!noExpect) {
+        this.throwError("Unterminated long string");
+      }
       return false;
     }
     this.advance(1); // Skip the ending "]"
@@ -315,11 +318,7 @@ export class Lexer {
       const string = this.consumeSimpleString();
       this.tokens.push(new Token(TokenEnum.STRING, string));
     } else if (this.isLongString()) {
-      const string = this.consumeLongString();
-      if (!string) {
-        this.throwError("Invalid long string");
-        return;
-      }
+      const string = this.consumeLongString() as string;
       this.tokens.push(new Token(TokenEnum.STRING, string));
     } else if (this.isComment()) {
       this.advance(2); // Skip the first two "-"
