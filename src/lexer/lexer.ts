@@ -204,11 +204,10 @@ export class Lexer {
       }
       this.advance(1);
     }
+    // Check if the string/comment ended abruptly
     if (!endedSuccessfully) {
-      if (!noExpect) {
-        this.throwError("Unterminated long string");
-      }
-      return false;
+      const endingDelimeter = "]" + "=".repeat(delimeterDepth) + "]";
+      this.throwError(`Expected '${endingDelimeter}', got <EOF>`);
     }
     this.advance(1); // Skip the ending "]"
 
@@ -284,7 +283,7 @@ export class Lexer {
   }
 
   consumeSimpleComment(): void {
-    while (this.curChar !== "\n") {
+    while (this.curChar !== "\n" && this.curChar !== "\0") {
       this.advance(1);
     }
   }
