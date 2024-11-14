@@ -36,6 +36,13 @@ const VALID_CHARACTERS = new Set([
 const OPERATOR_TRIE = makeTrie(OPERATORS);
 const OPERATOR_KEYWORDS = new Set(["and", "or", "not"]);
 const CONSTANT_KEYWORDS = new Set(["nil", "true", "false"]);
+const SPECIAL_CHARS_MAP: Record<string, string> = {
+  "\0": "<EOF>",
+  "\n": "<newline>",
+  "\t": "<tab>",
+  " ": "<space>",
+  "\r": "<CR>",
+};
 
 /* Lexer */
 export class Lexer {
@@ -67,15 +74,21 @@ export class Lexer {
   }
 
   /* Error Handling */
-  throwError(message: string): void {
-    throw new Error(message);
-  }
   checkCharacter(char: string): boolean {
     return this.curChar === char;
   }
+  throwError(message: string): void {
+    throw new Error(message);
+  }
+  throwUnexpectedCharacterError(expected: string): void {
+    const convertedCurChar = SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
+    this.throwError(
+      `Unexpected character '${convertedCurChar}', expected '${expected}'`,
+    );
+  }
   expectCharacter(char: string): void {
     if (!this.checkCharacter(char)) {
-      this.throwError(`Expected '${char}', got '${this.curChar}'`);
+      this.throwUnexpectedCharacterError(char);
     }
   }
 
@@ -183,13 +196,10 @@ export class Lexer {
     } else if (!this.checkCharacter("[")) {
       return false;
     }
-
     this.expectCharacter("[");
     this.advance(1); // Skip the second "["
-
     const start = this.curPos;
-    let endedSuccessfully = false;
-    while (this.curChar !== "\0") {
+    while (true) {
       if (this.curChar === "]") {
         this.advance(1);
         let newDelimeterDepth = 0;
@@ -198,19 +208,17 @@ export class Lexer {
           this.advance(1);
         }
         if (this.curChar === "]" && newDelimeterDepth === delimeterDepth) {
-          endedSuccessfully = true;
-          break;
+          break; // Successfully consumed the delimiter
         }
+      } else if (this.curChar === "\0") {
+        // Error if ended abruptly
+        const endingDelimeter = "]" + "=".repeat(delimeterDepth) + "]";
+        this.throwUnexpectedCharacterError(endingDelimeter);
       }
       this.advance(1);
     }
-    // Check if the string/comment ended abruptly
-    if (!endedSuccessfully) {
-      const endingDelimeter = "]" + "=".repeat(delimeterDepth) + "]";
-      this.throwError(`Expected '${endingDelimeter}', got <EOF>`);
-    }
+    this.expectCharacter("]");
     this.advance(1); // Skip the ending "]"
-
     return this.code.slice(start, this.curPos - 2 - delimeterDepth);
   }
   consumeWhitespace(): void {
