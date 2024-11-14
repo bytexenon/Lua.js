@@ -347,10 +347,9 @@ export class Lexer {
 
   /* Main Method */
   lex(): Token[] {
-    const tokens = this.tokens;
     while (this.curChar !== "\0") {
       this.getNextToken();
     }
-    return tokens;
+    return this.tokens;
   }
 }
