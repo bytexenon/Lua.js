@@ -96,20 +96,8 @@ export class Lexer {
     const nextChar = this.peek(1);
     return curChar === "0" && (nextChar === "x" || nextChar === "X");
   }
-  isScientificNotationStart(): boolean {
-    const curChar = this.curChar;
-    const nextChar = this.peek(1);
-    return (
-      curChar === "e" ||
-      curChar === "E" ||
-      ((curChar === "-" || curChar === "+") &&
-        (nextChar === "e" || nextChar === "E"))
-    );
-  }
   isVararg(): boolean {
-    return (
-      this.curChar === "." && this.peek(1) === "." && this.peek(2) === "..."
-    );
+    return this.curChar === "." && this.peek(1) === "." && this.peek(2) === ".";
   }
   isNumberStart(): boolean {
     return (
@@ -150,6 +138,9 @@ export class Lexer {
       (code >= 97 && code <= 102) || // a-f
       (code >= 65 && code <= 70) // A-F
     );
+  }
+  static isScientificNotationStart(curChar: string): boolean {
+    return curChar === "e" || curChar === "E";
   }
   static isWhitespace(char: string): boolean {
     return char === " " || char === "\t" || char === "\n";
@@ -255,7 +246,7 @@ export class Lexer {
     }
 
     // Scientific notation
-    if (this.isScientificNotationStart()) {
+    if (Lexer.isScientificNotationStart(this.curChar)) {
       this.advance(1); // Skip the "e" or "E"
       if (this.curChar === "-" || this.curChar === "+") {
         this.advance(1); // Skip the "-" or "+"
@@ -345,10 +336,7 @@ export class Lexer {
       if (operator) {
         this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
       } else {
-        if (curChar === "\0") {
-          this.advance(1);
-          return;
-        } else if (!VALID_CHARACTERS.has(curChar)) {
+        if (!VALID_CHARACTERS.has(curChar)) {
           throw new Error(`Invalid character: ${curChar}`);
         }
         // Process it as character
