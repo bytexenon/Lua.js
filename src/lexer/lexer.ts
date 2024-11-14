@@ -10,8 +10,6 @@ const KEYWORDS = new Set([
   "local",    "repeat", "until", "return",
   "in",       "if",     "else",  "elseif",
   "function", "then",   "break",
-  "and",      "or",     "not",   "nil",
-  "true",     "false"
 ]);
 // prettier-ignore
 const OPERATORS: readonly string[] = [
