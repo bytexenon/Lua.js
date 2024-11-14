@@ -35,6 +35,6 @@
     "isolatedModules": false,
     "checkJs": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests/**/*", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
