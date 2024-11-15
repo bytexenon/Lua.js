@@ -88,4 +88,7 @@ export class ASTNodeList extends ASTNode {
   addChild(node: ASTNode): void {
     this.children?.push(node);
   }
+  addChildren(nodes: ASTNode[]): void {
+    this.children?.push(...nodes);
+  }
 }
