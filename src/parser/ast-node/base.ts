@@ -97,4 +97,17 @@ export class ASTNodeList extends ASTNode {
     this.children.push(...nodes);
     return this;
   }
+  removeChild(node: ASTNode): this {
+    const index = this.children.indexOf(node);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+    }
+    return this;
+  }
+  removeChildren(nodes: ASTNode[]): this {
+    for (const node of nodes) {
+      this.removeChild(node);
+    }
+    return this;
+  }
 }
