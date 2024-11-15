@@ -101,6 +101,8 @@ export class ASTNodeList extends ASTNode {
     const index = this.children.indexOf(node);
     if (index !== -1) {
       this.children.splice(index, 1);
+    } else {
+      throw new Error("Node not found");
     }
     return this;
   }
