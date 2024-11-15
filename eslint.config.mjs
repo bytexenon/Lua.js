@@ -3,7 +3,6 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
-import jestPlugin from "eslint-plugin-jest";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -11,7 +10,13 @@ export default tseslint.config(
   ...tseslint.configs.stylisticTypeCheckedOnly,
   {
     // Ignore patterns
-    ignores: ["dist/**/*.ts", "dist/**", "**/*.mjs", "eslint.config.mjs"],
+    ignores: [
+      "dist/**/*.ts",
+      "dist/**",
+      "**/*.mjs",
+      "eslint.config.mjs",
+      "coverage/**",
+    ],
   },
   {
     languageOptions: {
@@ -26,11 +31,11 @@ export default tseslint.config(
       globals: {
         ...globals.builtin,
         ...globals.node,
+        ...globals.jest,
       },
     },
     plugins: {
       import: importPlugin,
-      jest: jestPlugin,
     },
     rules: {
       "import/named": "error",
