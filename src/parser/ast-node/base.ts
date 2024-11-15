@@ -1,7 +1,11 @@
-/* eslint-disable no-console */
+/* Imports */
 import { NodeType } from "./ast-node.js";
 import { NODE_SCHEMA } from "./node-schema.js";
 
+/* Constants */
+const RESERVED_PROPERTIES = ["type", "children"];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NodeMethod = (...args: any[]) => any;
 type NodeProperty =
   | ASTNode
   | ASTNodeList
@@ -10,17 +14,32 @@ type NodeProperty =
   | number
   | boolean
   | null
-  | undefined;
+  | undefined
+  | ASTNode[]
+  | NodeMethod;
+
+interface NodeProperties {
+  [key: string]: NodeProperty;
+}
 
 /* Base Node class */
 export class ASTNode {
   type: NodeType;
-  properties: Record<string, NodeProperty>;
   children?: ASTNode[];
+  [key: string]: NodeProperty;
 
-  constructor(type: NodeType, properties?: Record<string, NodeProperty>) {
+  constructor(type: NodeType, properties?: NodeProperties) {
     this.type = type;
-    this.properties = properties ?? {};
+    if (properties) {
+      for (const key in properties) {
+        if (RESERVED_PROPERTIES.includes(key)) {
+          throw new Error(
+            `Property '${key}' is reserved and cannot be set on ASTNode.`,
+          );
+        }
+        this[key] = properties[key];
+      }
+    }
   }
 
   traverse(
@@ -42,7 +61,7 @@ export class ASTNode {
         );
       }
       for (const field of schemaFields) {
-        const value: NodeProperty | undefined = this.properties[field];
+        const value = this[field];
         if (value instanceof ASTNode) {
           value.traverse(condition, callback);
         }
