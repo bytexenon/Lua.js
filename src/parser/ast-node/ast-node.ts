@@ -40,6 +40,7 @@ export const enum NodeType {
   BINARY_OPERATOR,
   UNARY_OPERATOR,
   FUNCTION_CALL,
+  TABLE_INDEX,
 
   // Statement nodes //
   LOCAL_STATEMENT,
@@ -133,8 +134,21 @@ export class UnaryOperator extends ASTNode {
   }
 }
 export class FunctionCall extends ASTNode {
-  constructor(expression: ASTNode, argumentsList: ASTNodeList) {
-    super(NodeType.FUNCTION_CALL, { expression, arguments: argumentsList });
+  constructor(
+    expression: ASTNode,
+    argumentsList: ASTNodeList,
+    isMethodCall = false,
+  ) {
+    super(NodeType.FUNCTION_CALL, {
+      expression,
+      arguments: argumentsList,
+      isMethodCall,
+    });
+  }
+}
+export class TableIndex extends ASTNode {
+  constructor(expression: ASTNode, index: ASTNode) {
+    super(NodeType.TABLE_INDEX, { expression, index });
   }
 }
 

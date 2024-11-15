@@ -18,6 +18,7 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   [NodeType.BINARY_OPERATOR]: ["left", "right"],
   [NodeType.UNARY_OPERATOR]: ["operand"],
   [NodeType.FUNCTION_CALL]: ["expression", "arguments"],
+  [NodeType.TABLE_INDEX]: ["expression", "index"],
   [NodeType.NUMBER_LITERAL]: [],
   [NodeType.STRING_LITERAL]: [],
   [NodeType.VARARG_LITERAL]: [],
