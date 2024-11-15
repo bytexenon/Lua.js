@@ -51,26 +51,9 @@ export class ASTNode {
   }
 
   // Recursively prints all the nodes in the tree
-  print(level = 0): void {
-    const indent = "  ".repeat(level);
-    console.log(`${indent}Node {`);
-    console.log(`${indent}  type: '${this.type.toString()}',`);
-    for (const property in this) {
-      if (property !== "type" && property !== "children") {
-        console.log(
-          `${indent}  ${property}: ${JSON.stringify(this[property], null, 2).replace(/\n/gu, `\n${indent}  `)},`,
-        );
-      }
-    }
-    const children = this.children;
-    if (children && children.length > 0) {
-      console.log(`${indent}  children: [`);
-      children.forEach((child: ASTNode) => {
-        child.print(level + 2);
-      });
-      console.log(`${indent}  ]`);
-    }
-    console.log(`${indent}}`);
+  print(): void {
+    // eslint-disable-next-line no-console
+    console.dir(this, { depth: null });
   }
 }
 
