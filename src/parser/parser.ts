@@ -272,11 +272,19 @@ export class Parser {
     return null;
   }
 
-  parseSuffix(): ASTNode.ASTNode | null {
+  parseSuffix(primaryExpression: ASTNode.ASTNode): ASTNode.ASTNode | null {
     const nextToken = this.peek(1);
-    if (!nextToken) {
-      // TODO: Should error?
-      return null;
+    if (nextToken && nextToken.type === TokenEnum.CHARACTER) {
+      switch (nextToken.value) {
+        case "(":
+          this.advance(1);
+          // expression \( <explist> \)
+          return this.parseFunctionCall(primaryExpression);
+        case ":":
+          this.advance(1);
+          // expression : <name> \( <explist> \)
+          return this.consumeMethodCall(primaryExpression);
+      }
     }
     return null;
   }
@@ -284,11 +292,10 @@ export class Parser {
   parsePrefix(): ASTNode.ASTNode | null {
     let primaryExpression = this.parseBase();
     if (!primaryExpression) {
-      // TODO: Should error?
       return null;
     }
     while (true) {
-      const suffix = this.parseSuffix();
+      const suffix = this.parseSuffix(primaryExpression);
       if (!suffix) {
         break;
       }
@@ -402,16 +409,27 @@ export class Parser {
     }
   }
 
-  /*parseFunctionCall(
-    primaryExpression: Node.Node
-  ): Node.FunctionCall {
-    this.expectCurrentToken("CHARACTER", "(");
+  parseFunctionCall(primaryExpression: ASTNode.ASTNode): ASTNode.FunctionCall {
+    this.expectCurrentToken(TokenEnum.CHARACTER, "(");
     this.advance(1); // Skip '('
     const args = this.parseExpressionList();
     this.advance(1); // Skip last token of arguments
-    this.expectCurrentToken("CHARACTER", ")");
-    return new Node.FunctionCall(primaryExpression, args);
-  }*/
+    this.expectCurrentToken(TokenEnum.CHARACTER, ")");
+    return new ASTNode.FunctionCall(primaryExpression, args);
+  }
+  consumeMethodCall(primaryExpression: ASTNode.ASTNode): ASTNode.FunctionCall {
+    this.advance(1); // Skip ':'
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER); // Method name
+    const methodName = this.curToken!.value;
+    this.advance(1); // Skip method name
+    const methodExpression = new ASTNode.TableIndex(
+      primaryExpression,
+      new ASTNode.StringLiteral(methodName),
+    );
+    const methodCall = this.parseFunctionCall(methodExpression);
+    methodCall["isMethodCall"] = true;
+    return methodCall;
+  }
 
   // <exprstat> ::= <functioncall> | <assignment>
   /* parseExprstat(): Node.Node | null {
