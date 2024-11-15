@@ -146,10 +146,17 @@ describe("Lexer", () => {
       );
     });
 
-    it("should throw error on malformed long string", () => {
+    it("should throw error on malformed long string with spaces", () => {
       const lexer = new Lexer("[===== this string lacks a bracket]=====]");
       expect(() => lexer.lex()).toThrow(
         "Unexpected character '<space>', expected '['",
+      );
+    });
+
+    it("should throw error on malformed long string with exclamation mark", () => {
+      const lexer = new Lexer("[=====!this string lacks a bracket]=====]");
+      expect(() => lexer.lex()).toThrow(
+        "Unexpected character '!', expected '['",
       );
     });
   });
