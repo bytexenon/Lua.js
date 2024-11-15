@@ -80,9 +80,13 @@ export class ASTNode {
 export class ASTNodeList extends ASTNode {
   override children: ASTNode[];
 
-  constructor(type: NodeType, properties?: Record<string, NodeProperty>) {
+  constructor(
+    type: NodeType,
+    properties?: Record<string, NodeProperty>,
+    children?: ASTNode[],
+  ) {
     super(type, properties);
-    this.children = [];
+    this.children = children ?? [];
   }
 
   addChild(node: ASTNode): this {

@@ -58,23 +58,23 @@ export const enum VariableType {
 
 /* List nodes */
 export class Program extends ASTNodeList {
-  constructor() {
-    super(NodeType.PROGRAM);
+  constructor(children?: ASTNode[]) {
+    super(NodeType.PROGRAM, undefined, children);
   }
 }
 export class Chunk extends ASTNodeList {
-  constructor() {
-    super(NodeType.CHUNK);
+  constructor(children?: ASTNode[]) {
+    super(NodeType.CHUNK, undefined, children);
   }
 }
 export class ExpressionList extends ASTNodeList {
-  constructor() {
-    super(NodeType.EXPRESSION_LIST);
+  constructor(children?: ASTNode[]) {
+    super(NodeType.EXPRESSION_LIST, undefined, children);
   }
 }
 export class IfBranchList extends ASTNodeList {
-  constructor() {
-    super(NodeType.IF_BRANCH_LIST);
+  constructor(children?: ASTNode[]) {
+    super(NodeType.IF_BRANCH_LIST, undefined, children);
   }
 }
 
