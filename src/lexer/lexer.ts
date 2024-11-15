@@ -210,7 +210,7 @@ export class Lexer {
         }
       } else if (this.curChar === "\0") {
         // Error if ended abruptly
-        const endingDelimeter = "]" + "=".repeat(delimeterDepth) + "]";
+        const endingDelimeter = `]${"=".repeat(delimeterDepth)}]`;
         this.throwUnexpectedCharacterError(endingDelimeter);
       }
       this.advance(1);
