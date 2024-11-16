@@ -298,7 +298,7 @@ describe("Parser", () => {
       const ast = parse(tokens);
 
       const expectedNode = new ASTNode.Program([
-        new ASTNode.LocalStatement(
+        new ASTNode.LocalAssignment(
           ["a"],
           new ASTNode.ExpressionList([
             new ASTNode.BinaryOperator(
@@ -318,7 +318,7 @@ describe("Parser", () => {
       const ast = parse(tokens);
 
       const expectedNode = new ASTNode.Program([
-        new ASTNode.LocalStatement(
+        new ASTNode.LocalAssignment(
           ["a"],
           new ASTNode.ExpressionList([
             new ASTNode.BinaryOperator(
@@ -338,7 +338,7 @@ describe("Parser", () => {
       const ast = parse(tokens);
 
       const expectedNode = new ASTNode.Program([
-        new ASTNode.LocalStatement(
+        new ASTNode.LocalAssignment(
           ["a", "b"],
           new ASTNode.ExpressionList([
             new ASTNode.BinaryOperator(
