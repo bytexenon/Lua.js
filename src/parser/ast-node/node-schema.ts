@@ -14,32 +14,36 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   [NodeType.EXPRESSION_LIST]: [],
   [NodeType.IF_BRANCH_LIST]: [],
 
+  // Variable node //
+  [NodeType.VARIABLE]: [],
+
+  // Primitive nodes //
+  [NodeType.NUMBER_LITERAL]: [],
+  [NodeType.STRING_LITERAL]: [],
+  [NodeType.BOOLEAN_LITERAL]: [],
+  [NodeType.VARARG_LITERAL]: [],
+
   // Expression nodes //
   [NodeType.BINARY_OPERATOR]: ["left", "right"],
   [NodeType.UNARY_OPERATOR]: ["operand"],
   [NodeType.FUNCTION_CALL]: ["expression", "arguments"],
   [NodeType.TABLE_INDEX]: ["expression", "index"],
-  [NodeType.NUMBER_LITERAL]: [],
-  [NodeType.STRING_LITERAL]: [],
-  [NodeType.VARARG_LITERAL]: [],
-  [NodeType.BOOLEAN_LITERAL]: [],
-  [NodeType.VARIABLE]: [],
   [NodeType.ANONYMOUS_FUNCTION]: ["chunk"],
   [NodeType.TABLE_ELEMENT]: ["key", "value"],
   [NodeType.TABLE_CONSTRUCTOR]: ["elements"],
 
   // Statement nodes //
-  [NodeType.LOCAL_STATEMENT]: ["expressions"],
-  [NodeType.WHILE_STATEMENT]: ["condition", "chunk"],
-  [NodeType.IF_STATEMENT]: ["branches"],
-  [NodeType.IF_BRANCH]: ["condition", "chunk"],
-  [NodeType.DO_STATEMENT]: ["chunk"],
+  [NodeType.LOCAL_ASSIGNMENT]: ["expressions"],
   [NodeType.VARIABLE_ASSIGNMENT]: ["expressions"],
-  [NodeType.RETURN_STATEMENT]: ["expressions"],
-  [NodeType.BREAK_STATEMENT]: [],
-  [NodeType.NUMERIC_FOR_STATEMENT]: ["start", "end", "step", "chunk"],
-  [NodeType.GENERIC_FOR_STATEMENT]: ["generator", "state", "control", "chunk"],
   [NodeType.FUNCTION_DECLARATION]: ["chunk"],
   [NodeType.LOCAL_FUNCTION_DECLARATION]: ["chunk"],
+  [NodeType.RETURN_STATEMENT]: ["expressions"],
+  [NodeType.BREAK_STATEMENT]: [],
+  [NodeType.DO_STATEMENT]: ["chunk"],
+  [NodeType.WHILE_STATEMENT]: ["condition", "chunk"],
   [NodeType.REPEAT_UNTIL_STATEMENT]: ["condition", "chunk"],
+  [NodeType.NUMERIC_FOR_STATEMENT]: ["start", "end", "step", "chunk"],
+  [NodeType.GENERIC_FOR_STATEMENT]: ["generator", "state", "control", "chunk"],
+  [NodeType.IF_BRANCH]: ["condition", "chunk"],
+  [NodeType.IF_STATEMENT]: ["branches"],
 };

@@ -46,19 +46,19 @@ export const enum NodeType {
   TABLE_CONSTRUCTOR,
 
   // Statement nodes //
-  LOCAL_STATEMENT,
-  WHILE_STATEMENT,
-  IF_STATEMENT,
-  IF_BRANCH,
+  LOCAL_ASSIGNMENT,
   VARIABLE_ASSIGNMENT,
-  DO_STATEMENT,
-  RETURN_STATEMENT,
-  BREAK_STATEMENT,
-  NUMERIC_FOR_STATEMENT,
-  GENERIC_FOR_STATEMENT,
   FUNCTION_DECLARATION,
   LOCAL_FUNCTION_DECLARATION,
+  RETURN_STATEMENT,
+  BREAK_STATEMENT,
+  DO_STATEMENT,
+  WHILE_STATEMENT,
   REPEAT_UNTIL_STATEMENT,
+  NUMERIC_FOR_STATEMENT,
+  GENERIC_FOR_STATEMENT,
+  IF_BRANCH,
+  IF_STATEMENT,
 }
 export const enum VariableType {
   LOCAL,
@@ -178,24 +178,9 @@ export class TableConstructor extends ASTNode {
 }
 
 /* Statement nodes */
-export class LocalStatement extends ASTNode {
+export class LocalAssignment extends ASTNode {
   constructor(locals: string[], expressions: ExpressionList | undefined) {
-    super(NodeType.LOCAL_STATEMENT, { locals, expressions });
-  }
-}
-export class WhileStatement extends ASTNode {
-  constructor(condition: ASTNode, chunk: Chunk) {
-    super(NodeType.WHILE_STATEMENT, { condition, chunk });
-  }
-}
-export class IfBranch extends ASTNode {
-  constructor(condition: ASTNode | null, chunk: Chunk) {
-    super(NodeType.IF_BRANCH, { condition, chunk });
-  }
-}
-export class IfStatement extends ASTNode {
-  constructor(branches: IfBranchList) {
-    super(NodeType.IF_STATEMENT, { branches });
+    super(NodeType.LOCAL_ASSIGNMENT, { locals, expressions });
   }
 }
 export class VariableAssignment extends ASTNode {
@@ -203,9 +188,19 @@ export class VariableAssignment extends ASTNode {
     super(NodeType.VARIABLE_ASSIGNMENT, { variable, expression: expressions });
   }
 }
-export class DoStatement extends ASTNode {
-  constructor(chunk: Chunk) {
-    super(NodeType.DO_STATEMENT, { chunk });
+export class FunctionDeclaration extends ASTNode {
+  constructor(
+    name: string,
+    fields: string[],
+    parameters: string[],
+    chunk: Chunk,
+  ) {
+    super(NodeType.FUNCTION_DECLARATION, { name, fields, parameters, chunk });
+  }
+}
+export class LocalFunctionDeclaration extends ASTNode {
+  constructor(name: string, parameters: string[], chunk: Chunk) {
+    super(NodeType.LOCAL_FUNCTION_DECLARATION, { name, parameters, chunk });
   }
 }
 export class ReturnStatement extends ASTNode {
@@ -216,6 +211,21 @@ export class ReturnStatement extends ASTNode {
 export class BreakStatement extends ASTNode {
   constructor() {
     super(NodeType.BREAK_STATEMENT);
+  }
+}
+export class DoStatement extends ASTNode {
+  constructor(chunk: Chunk) {
+    super(NodeType.DO_STATEMENT, { chunk });
+  }
+}
+export class WhileStatement extends ASTNode {
+  constructor(condition: ASTNode, chunk: Chunk) {
+    super(NodeType.WHILE_STATEMENT, { condition, chunk });
+  }
+}
+export class RepeatUntilStatement extends ASTNode {
+  constructor(chunk: Chunk, condition: ASTNode) {
+    super(NodeType.REPEAT_UNTIL_STATEMENT, { chunk, condition });
   }
 }
 export class NumericForStatement extends ASTNode {
@@ -252,23 +262,13 @@ export class GenericForStatement extends ASTNode {
     });
   }
 }
-export class FunctionDeclaration extends ASTNode {
-  constructor(
-    name: string,
-    fields: string[],
-    parameters: string[],
-    chunk: Chunk,
-  ) {
-    super(NodeType.FUNCTION_DECLARATION, { name, fields, parameters, chunk });
+export class IfBranch extends ASTNode {
+  constructor(condition: ASTNode | null, chunk: Chunk) {
+    super(NodeType.IF_BRANCH, { condition, chunk });
   }
 }
-export class LocalFunctionDeclaration extends ASTNode {
-  constructor(name: string, parameters: string[], chunk: Chunk) {
-    super(NodeType.LOCAL_FUNCTION_DECLARATION, { name, parameters, chunk });
-  }
-}
-export class RepeatUntilStatement extends ASTNode {
-  constructor(chunk: Chunk, condition: ASTNode) {
-    super(NodeType.REPEAT_UNTIL_STATEMENT, { chunk, condition });
+export class IfStatement extends ASTNode {
+  constructor(branches: IfBranchList) {
+    super(NodeType.IF_STATEMENT, { branches });
   }
 }
