@@ -24,6 +24,9 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   [NodeType.VARARG_LITERAL]: [],
   [NodeType.BOOLEAN_LITERAL]: [],
   [NodeType.VARIABLE]: [],
+  [NodeType.ANONYMOUS_FUNCTION]: ["chunk"],
+  [NodeType.TABLE_ELEMENT]: ["key", "value"],
+  [NodeType.TABLE_CONSTRUCTOR]: ["elements"],
 
   // Statement nodes //
   [NodeType.LOCAL_STATEMENT]: ["expressions"],
@@ -32,4 +35,11 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   [NodeType.IF_BRANCH]: ["condition", "chunk"],
   [NodeType.DO_STATEMENT]: ["chunk"],
   [NodeType.VARIABLE_ASSIGNMENT]: ["expressions"],
+  [NodeType.RETURN_STATEMENT]: ["expressions"],
+  [NodeType.BREAK_STATEMENT]: [],
+  [NodeType.NUMERIC_FOR_STATEMENT]: ["start", "end", "step", "chunk"],
+  [NodeType.GENERIC_FOR_STATEMENT]: ["generator", "state", "control", "chunk"],
+  [NodeType.FUNCTION_DECLARATION]: ["chunk"],
+  [NodeType.LOCAL_FUNCTION_DECLARATION]: ["chunk"],
+  [NodeType.REPEAT_UNTIL_STATEMENT]: ["condition", "chunk"],
 };
