@@ -461,7 +461,7 @@ export class Parser {
   }*/
 
   /* Keyword parsers */
-  parseLocal(): ASTNode.LocalStatement {
+  parseLocal(): ASTNode.LocalAssignment {
     this.advance(1); // Skip 'local'
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
@@ -471,7 +471,7 @@ export class Parser {
       expressions = this.parseExpressionList();
     }
     this.registerVariables(locals);
-    return new ASTNode.LocalStatement(locals, expressions);
+    return new ASTNode.LocalAssignment(locals, expressions);
   }
 
   parseWhile(): ASTNode.WhileStatement | null {
