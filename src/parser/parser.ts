@@ -266,6 +266,17 @@ export class Parser {
         }
         return new ASTNode.UpvalueVariable(variableName);
       }
+      case TokenEnum.CHARACTER: {
+        const tokenValue = curToken.value;
+        if (tokenValue === "(") {
+          // \( <expr> \)
+          this.advance(1); // Skip `(`
+          const expression = this.parseExpression();
+          this.advance(1); // Skip last token of expression
+          this.expectCurrentToken(TokenEnum.CHARACTER, ")");
+          return expression;
+        }
+      }
     }
 
     // It's fine, base doesn't always have to be here
