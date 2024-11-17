@@ -23,7 +23,7 @@ const BINARY_OPERATORS: readonly string[] = [
 
 const UNARY_OPERATORS: readonly string[] = ["-", "not", "#"];
 const UNARY_PRECEDENCE = 8;
-const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif"];
+const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif", "until"];
 
 /* Scope */
 class Scope {
