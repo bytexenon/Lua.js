@@ -739,10 +739,7 @@ export class Parser {
 
   /* Parser Handler */
   private parseStatement(): ASTNode.ASTNode | null {
-    const curToken = this.curToken;
-    if (!curToken) {
-      return null;
-    }
+    const curToken = this.curToken!;
     const tokenType = curToken.type;
     const tokenValue = curToken.value;
 
