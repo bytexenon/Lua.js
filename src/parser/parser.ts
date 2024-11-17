@@ -249,6 +249,13 @@ export class Parser {
           this.expectCurrentToken(TokenEnum.CHARACTER, ")");
           return expression;
         }
+        break;
+      }
+      case TokenEnum.KEYWORD: {
+        const tokenValue = curToken.value;
+        if (tokenValue === "function") {
+          return this.parseAnonymousFunction();
+        }
       }
     }
 
@@ -375,6 +382,36 @@ export class Parser {
 
     return identifiers;
   }
+  private consumeParameterList(): string[] {
+    // <paramlist> ::= \(
+    //                    [<identifier>]? [, <identifier>]* [, <vararg>]?
+    //                 \)
+    this.expectCurrentToken(TokenEnum.CHARACTER, "(");
+    this.advance(1); // Skip `(`
+
+    // Check for empty parameter list
+    if (this.checkCurrentToken(TokenEnum.CHARACTER, ")")) {
+      return [];
+    }
+
+    const parameters = [];
+    while (this.curToken) {
+      if (this.checkCurrentToken(TokenEnum.CHARACTER, "...")) {
+        parameters.push("...");
+        this.advance(1); // Skip `...`
+        break;
+      }
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+      parameters.push(this.curToken.value);
+      this.advance(1); // Skip the identifier
+      if (!this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
+        break;
+      }
+      this.advance(1); // Skip `,`
+    }
+    this.expectCurrentToken(TokenEnum.CHARACTER, ")");
+    return parameters;
+  }
 
   private parseExpressionList(atLeastOne = false): ASTNode.ExpressionList {
     const expressionList = new ASTNode.ExpressionList();
@@ -458,6 +495,17 @@ export class Parser {
     this.advance(1); // Skip last token of index expression
     this.expectCurrentToken(TokenEnum.CHARACTER, "]");
     return new ASTNode.TableIndex(primaryExpression, indexExpression);
+  }
+
+  // function \( <parlist>? \) <chunk> end
+  private parseAnonymousFunction(): ASTNode.AnonymousFunction {
+    this.advance(1); // Skip `function`
+    this.expectCurrentToken(TokenEnum.CHARACTER, "(");
+    const parameters = this.consumeParameterList();
+    this.advance(1); // Skip ')'
+    const chunk = this.parseCodeBlock(false, true, parameters);
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
+    return new ASTNode.AnonymousFunction(parameters, chunk);
   }
 
   // <exprstat> ::= <functioncall> | <assignment>
@@ -676,9 +724,7 @@ export class Parser {
       this.advance(1); // Skip the new field
     }
     this.expectCurrentToken(TokenEnum.CHARACTER, "(");
-    this.advance(1); // Skip '('
-    const parameters = this.consumeIdentifierList();
-    this.expectCurrentToken(TokenEnum.CHARACTER, ")");
+    const parameters = this.consumeParameterList();
     this.advance(1); // Skip ')'
     const chunk = this.parseCodeBlock(false, true, parameters);
     this.expectCurrentToken(TokenEnum.KEYWORD, "end");
