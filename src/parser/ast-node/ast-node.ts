@@ -191,11 +191,18 @@ export class VariableAssignment extends ASTNode {
 export class FunctionDeclaration extends ASTNode {
   constructor(
     name: string,
+    variable: VariableNode,
     fields: string[],
     parameters: string[],
     chunk: Chunk,
   ) {
-    super(NodeType.FUNCTION_DECLARATION, { name, fields, parameters, chunk });
+    super(NodeType.FUNCTION_DECLARATION, {
+      name,
+      variable,
+      fields,
+      parameters,
+      chunk,
+    });
   }
 }
 export class LocalFunctionDeclaration extends ASTNode {
@@ -233,7 +240,7 @@ export class NumericForStatement extends ASTNode {
     variable: string,
     start: ASTNode,
     end: ASTNode,
-    step: ASTNode | undefined,
+    step: ASTNode | null,
     chunk: Chunk,
   ) {
     super(NodeType.NUMERIC_FOR_STATEMENT, {
