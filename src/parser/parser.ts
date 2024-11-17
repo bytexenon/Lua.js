@@ -735,9 +735,8 @@ export class Parser {
           node = this.parseFunction();
           break;
         default:
+          // Raise an unrecovarable error as it's a problem with the lexer/parser
           this.error(`Unexpected keyword '${tokenValue}'`);
-          this.recover();
-          break; // TODO: Should we check for optional semicolon?
       }
     } /* else {
       // <exprstat>
