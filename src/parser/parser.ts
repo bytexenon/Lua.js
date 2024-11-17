@@ -20,13 +20,6 @@ const BINARY_OPERATORS: readonly string[] = [
   "~=", "<",   ">",  "<=",
   ">=", "and", "or"
 ];
-// prettier-ignore
-const RECOVERY_KEYWORDS: readonly string[] = [
-  // Basically, all statement starting keywords
-  "while",  "do",     "for",
-  "local",  "repeat", "until",
-  "return", "if",     "break",
-];
 
 const UNARY_OPERATORS: readonly string[] = ["-", "not", "#"];
 const UNARY_PRECEDENCE = 8;
@@ -57,7 +50,6 @@ export class Parser {
   position: number;
   curToken: TokenInterface | undefined;
   ast: ASTNode.Program;
-  errors: { token: TokenInterface; message: string; position: number }[];
   scopeStack: Scope[];
   currentScope: Scope | undefined;
   isInLoop: boolean;
@@ -68,7 +60,6 @@ export class Parser {
     this.position = 0;
     this.curToken = this.tokens[this.position];
     this.ast = new ASTNode.Program();
-    this.errors = [];
 
     /* Scope management */
     this.scopeStack = [];
@@ -101,7 +92,7 @@ export class Parser {
 
   popScope(): void {
     if (this.scopeStack.length === 0) {
-      throw new Error("No scope to pop");
+      this.fatalError("No scope to pop");
     }
     this.scopeStack.pop();
     this.currentScope = this.scopeStack[this.scopeStack.length - 1];
@@ -110,9 +101,9 @@ export class Parser {
   /* Variable management */
   registerVariable(variableName: string): void {
     if (!this.currentScope) {
-      throw new Error("No scope to register variable");
+      this.fatalError("No scope to register variable");
     }
-    this.currentScope.registerVariable(variableName);
+    this.currentScope!.registerVariable(variableName);
   }
 
   registerVariables(variableNames: string[]): void {
@@ -126,42 +117,28 @@ export class Parser {
     for (let i = this.scopeStack.length - 1; i >= 0; i--) {
       const scope: Scope | undefined = this.scopeStack[i];
       if (!scope) {
-        throw new Error("Invalid scope");
+        this.fatalError("No scope to check variable type");
       }
 
-      if (scope.hasVariable(variableName)) {
+      if (scope!.hasVariable(variableName)) {
         return isUpvalue ? "Upvalue" : "Local";
       }
-      if (scope.isFunctionScope) {
+      if (scope!.isFunctionScope) {
         isUpvalue = true;
       }
     }
     return "Global";
   }
 
-  /* Error handing and recovery */
-  recover(): void {
-    // Tries to recover from a syntax error by skipping
-    // tokens until a "safe" token is found
-    while (this.curToken) {
-      if (this.checkCurrentTokenType(TokenEnum.KEYWORD)) {
-        if (RECOVERY_KEYWORDS.includes(this.curToken.value)) {
-          return;
-        }
-      }
-      this.advance(1);
-    }
-  }
-
-  error(message: string): void {
+  /* Error handing */
+  fatalError(message: string): void {
     throw new Error(message);
   }
 
   /* Token checks */
   expectCurrentTokenType(type: TokenEnum): boolean {
     if (this.curToken?.type !== type) {
-      this.error(`Expected token type '${type.toString()}'`);
-      this.recover();
+      this.fatalError(`Expected token type '${type.toString()}'`);
       return false;
     }
     return true;
@@ -169,8 +146,7 @@ export class Parser {
 
   expectCurrentTokenValue(value: string): boolean {
     if (this.curToken?.value !== value) {
-      this.error(`Expected token value '${value}'`);
-      this.recover();
+      this.fatalError(`Expected token value '${value}'`);
       return false;
     }
     return true;
@@ -241,6 +217,15 @@ export class Parser {
     }
     return expression;
   }
+  parseExpressionWithError(
+    errorMessage = "Expected expression",
+  ): ASTNode.ASTNode {
+    const expression = this.parseExpression();
+    if (!expression) {
+      this.fatalError(errorMessage);
+    }
+    return expression!;
+  }
 
   parseBase(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
@@ -256,22 +241,14 @@ export class Parser {
         return new ASTNode.StringLiteral(curToken.value);
       case TokenEnum.VARARG:
         return new ASTNode.VarargLiteral();
-      case TokenEnum.IDENTIFIER: {
-        const variableName = curToken.value;
-        const variableType = this.getVariableType(variableName);
-        if (variableType === "Local") {
-          return new ASTNode.LocalVariable(variableName);
-        } else if (variableType === "Global") {
-          return new ASTNode.GlobalVariable(variableName);
-        }
-        return new ASTNode.UpvalueVariable(variableName);
-      }
+      case TokenEnum.IDENTIFIER:
+        return this.parseVariable();
       case TokenEnum.CHARACTER: {
         const tokenValue = curToken.value;
         if (tokenValue === "(") {
           // \( <expr> \)
           this.advance(1); // Skip `(`
-          const expression = this.parseExpression();
+          const expression = this.parseExpressionWithError();
           this.advance(1); // Skip last token of expression
           this.expectCurrentToken(TokenEnum.CHARACTER, ")");
           return expression;
@@ -331,7 +308,7 @@ export class Parser {
     const expression: ASTNode.ASTNode | null =
       this.parseBinary(UNARY_PRECEDENCE);
     if (!expression) {
-      this.error("Expected expression");
+      this.fatalError("Expected expression");
       return null;
     }
     return new ASTNode.UnaryOperator(operator, expression);
@@ -353,7 +330,7 @@ export class Parser {
       const operator: string = nextToken.value;
       const precedence = OPERATOR_PRECEDENCE[operator];
       if (!precedence) {
-        this.error(`Unknown operator '${operator}'`);
+        this.fatalError(`Unknown operator '${operator}'`);
         return null;
       }
       const leftPrecedence = precedence[0];
@@ -364,9 +341,7 @@ export class Parser {
       this.advance(2); // Consume last token of unary and the operator
       const right = this.parseBinary(rightPrecedence);
       if (!right) {
-        this.error("Expected expression");
-        // How can we recover from this?
-        this.recover();
+        this.fatalError("Expected expression");
         return null; // It doesn't break from all parsers
       }
 
@@ -396,22 +371,31 @@ export class Parser {
 
   parseExpressionList(atLeastOne = false): ASTNode.ExpressionList {
     const expressionList = new ASTNode.ExpressionList();
-    while (this.curToken) {
-      const expression = this.parseExpression();
-      if (!expression) {
-        if (atLeastOne && expressionList.children.length === 0) {
-          this.error("Expected at least one expression");
-        }
-        break;
+    const firstExpression = this.parseExpression();
+    if (!firstExpression) {
+      if (atLeastOne) {
+        this.fatalError("Expected at least one expression");
       }
+      return expressionList;
+    }
+    expressionList.addChild(firstExpression);
+    while (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
+      this.advance(2); // Skip last token of the expression and `,`
+      const expression = this.parseExpressionWithError();
       expressionList.addChild(expression);
-      if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
-        this.advance(2); // Skip the last token of the expression and the comma
-      } else {
-        break;
-      }
     }
     return expressionList;
+  }
+
+  parseVariable(): ASTNode.VariableNode {
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+    const variableName = this.curToken!.value;
+    const variableType = this.getVariableType(variableName);
+    const variableNode =
+      (variableType === "Local" && new ASTNode.LocalVariable(variableName)) ||
+      (variableType === "Global" && new ASTNode.GlobalVariable(variableName)) ||
+      new ASTNode.UpvalueVariable(variableName);
+    return variableNode;
   }
 
   consumeOptionalSemicolon(): void {
@@ -428,6 +412,7 @@ export class Parser {
     this.expectCurrentToken(TokenEnum.CHARACTER, ")");
     return new ASTNode.FunctionCall(primaryExpression, args);
   }
+
   consumeMethodCall(primaryExpression: ASTNode.ASTNode): ASTNode.FunctionCall {
     this.advance(1); // Skip ':'
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER); // Method name
@@ -479,7 +464,7 @@ export class Parser {
     // local <varlist> = <explist>
     if (this.checkCurrentToken(TokenEnum.CHARACTER, "=")) {
       this.advance(1); // Skip '='
-      expressions = this.parseExpressionList();
+      expressions = this.parseExpressionList(true);
     }
     this.registerVariables(locals);
     return new ASTNode.LocalAssignment(locals, expressions);
@@ -487,11 +472,7 @@ export class Parser {
 
   parseWhile(): ASTNode.WhileStatement | null {
     this.advance(1); // Skip `while`
-    const condition: ASTNode.ASTNode | null = this.parseExpression();
-    if (!condition) {
-      this.error("Expected expression");
-      return null;
-    }
+    const condition = this.parseExpressionWithError();
     this.advance(1); // Skip last token of condition
     this.expectCurrentToken(TokenEnum.KEYWORD, "do");
     this.advance(1); // Skip `do`
@@ -502,7 +483,7 @@ export class Parser {
 
   parseIf(): ASTNode.IfStatement {
     this.advance(1); // Skip `if`
-    const mainCondition = this.parseExpression();
+    const mainCondition = this.parseExpressionWithError();
     this.advance(1); // Skip last token of condition
     this.expectCurrentToken(TokenEnum.KEYWORD, "then");
     this.advance(1); // Skip `then`
@@ -513,7 +494,7 @@ export class Parser {
     while (this.checkCurrentTokenType(TokenEnum.KEYWORD)) {
       if (this.checkCurrentTokenValue("elseif")) {
         this.advance(1); // Skip `elseif`
-        const condition = this.parseExpression();
+        const condition = this.parseExpressionWithError();
         this.advance(1); // Skip last token of condition
         this.expectCurrentToken(TokenEnum.KEYWORD, "then");
         this.advance(1); // Skip `then`
@@ -556,25 +537,16 @@ export class Parser {
       //                      <chunk>
       //                    end
       this.advance(1); // Skip `=`
-      const startExpression = this.parseExpression();
-      if (!startExpression) {
-        this.error("Unexpected symbol");
-      }
+      const startExpression = this.parseExpressionWithError();
       this.advance(1); // Skip last token of the start expression
       this.expectCurrentToken(TokenEnum.CHARACTER, ",");
       this.advance(1); // Skip `,`
-      const endExpression = this.parseExpression();
-      if (!endExpression) {
-        this.error("Unexpected symbol");
-      }
+      const endExpression = this.parseExpressionWithError();
       this.advance(1); // Skip last token of the end expression
       let stepExpression: ASTNode.ASTNode | null = null;
       if (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
         this.advance(1); // Skip `,`
-        stepExpression = this.parseExpression();
-        if (!stepExpression) {
-          this.error("Unexpected symbol");
-        }
+        stepExpression = this.parseExpressionWithError();
         this.advance(1); // Skip last token of the step expression
       }
       this.expectCurrentToken(TokenEnum.KEYWORD, "do");
@@ -583,8 +555,8 @@ export class Parser {
       this.expectCurrentToken(TokenEnum.KEYWORD, "end");
       return new ASTNode.NumericForStatement(
         firstIteratorVariable,
-        startExpression!,
-        endExpression!,
+        startExpression,
+        endExpression,
         stepExpression,
         chunk,
       );
@@ -634,11 +606,8 @@ export class Parser {
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken(TokenEnum.KEYWORD, "until");
     this.advance(1); // Skip `until`
-    const condition = this.parseExpression();
-    if (!condition) {
-      this.error("Expected expression");
-    }
-    return new ASTNode.RepeatUntilStatement(chunk, condition!);
+    const condition = this.parseExpressionWithError();
+    return new ASTNode.RepeatUntilStatement(chunk, condition);
   }
 
   parseFunction(): ASTNode.FunctionDeclaration {
@@ -649,14 +618,8 @@ export class Parser {
     //                           <chunk>
     //                         end
     this.advance(1); // Skip `function`
-    // Mandatory variable name
-    this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
-    const variableName = this.curToken!.value;
-    const variableType = this.getVariableType(variableName);
-    const variableNode =
-      (variableType === "Local" && new ASTNode.LocalVariable(variableName)) ||
-      (variableType === "Global" && new ASTNode.GlobalVariable(variableName)) ||
-      new ASTNode.UpvalueVariable(variableName);
+    // Mandatory variable
+    const variableNode = this.parseVariable();
     this.advance(1); // Skip the variable
     const fields = [];
     while (this.checkCurrentToken(TokenEnum.CHARACTER, ".")) {
@@ -736,7 +699,7 @@ export class Parser {
           break;
         default:
           // Raise an unrecovarable error as it's a problem with the lexer/parser
-          this.error(`Unexpected keyword '${tokenValue}'`);
+          this.fatalError(`Unexpected keyword '${tokenValue}'`);
       }
     } /* else {
       // <exprstat>
