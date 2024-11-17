@@ -466,33 +466,35 @@ export class Parser {
   }
 
   // <exprstat> ::= <functioncall> | <assignment>
-  /* parseExprstat(): Node.Node | null {
-    const expression: Node.Node | null = this.parsePrefix();
+  parseExprstat(): ASTNode.ASTNode {
+    const expression: ASTNode.ASTNode | null = this.parsePrefix();
     if (!expression) {
-      this.error("Expected expression");
-      return null;
+      this.fatalError("Expected expression");
     }
-    if (expression.type === "FunctionCall") {
+    if (expression!.type === ASTNode.NodeType.FUNCTION_CALL) {
       // <functioncall>
-      return expression;
+      return expression!;
     }
-
     // <assignment>
-    return this.parseAssignment(expression);
-  } */
-
-  // <assignment> ::= <lvaluelist> = <explist>
-  /*parseAssignment(firstLvalue: Node.Node): Node.VariableAssignment | null {
-    const lvalues = this.parseLValueList();
-    if (!lvalues) {
-      return null;
+    this.advance(1); // Skip last token of lvalue
+    return this.parseAssignment(expression!);
+  }
+  parseAssignment(firstLvalue: ASTNode.ASTNode): ASTNode.ASTNode {
+    const lvalues = [firstLvalue];
+    while (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
+      this.advance(1); // Skip `,`
+      const nextLvalue = this.parsePrefix();
+      if (!nextLvalue) {
+        this.fatalError("Expected lvalue");
+      }
+      lvalues.push(nextLvalue!);
+      this.advance(1); // Skip last token of lvalue
     }
-    this.advance(1); // Skip last token of lvalues
-    this.expectCurrentToken("CHARACTER", "=");
-    this.advance(1); // Skip '='
-    const expressions = this.parseExpressionList();
-    return new VariableAssignment(lvalues, expressions);
-  }*/
+    this.expectCurrentToken(TokenEnum.CHARACTER, "=");
+    this.advance(1); // Skip `=`
+    const rvalues = this.parseExpressionList(true);
+    return new ASTNode.VariableAssignment(lvalues, rvalues);
+  }
 
   /* Keyword parsers */
   private parseLocal(): ASTNode.LocalAssignment {
@@ -741,10 +743,10 @@ export class Parser {
           // Raise an unrecovarable error as it's a problem with the lexer/parser
           this.fatalError(`Unexpected keyword '${tokenValue}'`);
       }
-    } /* else {
+    } else {
       // <exprstat>
       node = this.parseExprstat();
-    } */
+    }
     this.consumeOptionalSemicolon();
 
     return node;
