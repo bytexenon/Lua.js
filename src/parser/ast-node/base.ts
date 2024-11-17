@@ -22,14 +22,22 @@ interface NodeProperties {
   [key: string]: NodeProperty;
 }
 
-/* Base Node class */
+/**
+ * Base class for AST nodes.
+ */
 export class ASTNode {
-  type: NodeType;
-  children?: ASTNode[];
+  public readonly type: NodeType;
+  public readonly children?: ASTNode[];
   [key: string]: NodeProperty;
 
+  /**
+   * Creates an instance of ASTNode.
+   * @param type - The type of the node.
+   * @param properties - Additional properties to set on the node.
+   */
   constructor(type: NodeType, properties?: NodeProperties) {
     this.type = type;
+
     if (properties) {
       for (const key in properties) {
         if (RESERVED_PROPERTIES.includes(key)) {
@@ -42,7 +50,12 @@ export class ASTNode {
     }
   }
 
-  traverse(
+  /**
+   * Traverses the AST and applies a callback to nodes that match the condition.
+   * @param condition - A function that returns true for nodes to be processed.
+   * @param callback - A function to apply to matching nodes.
+   */
+  public traverse(
     condition: (node: ASTNode) => boolean,
     callback: (node: ASTNode) => void,
   ): void {
@@ -54,12 +67,7 @@ export class ASTNode {
         child.traverse(condition, callback);
       }
     } else {
-      const schemaFields: string[] | undefined = NODE_SCHEMA[this.type];
-      if (!schemaFields) {
-        throw new Error(
-          `Node type '${this.type.toString()}' is not defined in the schema.`,
-        );
-      }
+      const schemaFields = NODE_SCHEMA[this.type];
       for (const field of schemaFields) {
         const value = this[field];
         if (value instanceof ASTNode) {
@@ -69,44 +77,76 @@ export class ASTNode {
     }
   }
 
-  // Recursively prints all the nodes in the tree
-  print(): void {
+  /**
+   * Recursively prints all the nodes in the tree.
+   */
+  public print(): void {
     // eslint-disable-next-line no-console
     console.dir(this, { depth: null });
   }
 }
 
-/* Base NodeList class */
+/**
+ * Base class for AST node lists.
+ */
 export class ASTNodeList extends ASTNode {
-  override children: ASTNode[];
+  public override readonly children: ASTNode[];
 
+  /**
+   * Creates an instance of ASTNodeList.
+   * @param type - The type of the node list.
+   * @param properties - Additional properties to set on the node list.
+   * @param children - Child nodes to add to the node list.
+   */
   constructor(
     type: NodeType,
-    properties?: Record<string, NodeProperty>,
+    properties?: NodeProperties,
     children?: ASTNode[],
   ) {
     super(type, properties);
     this.children = children ?? [];
   }
 
-  addChild(node: ASTNode): this {
+  /**
+   * Adds a child node to the node list.
+   * @param node - The child node to add.
+   * @returns The current instance for chaining.
+   */
+  public addChild(node: ASTNode): this {
     this.children.push(node);
     return this;
   }
-  addChildren(nodes: ASTNode[]): this {
+
+  /**
+   * Adds multiple child nodes to the node list.
+   * @param nodes - The child nodes to add.
+   * @returns The current instance for chaining.
+   */
+  public addChildren(nodes: ASTNode[]): this {
     this.children.push(...nodes);
     return this;
   }
-  removeChild(node: ASTNode): this {
+
+  /**
+   * Removes a child node from the node list.
+   * @param node - The child node to remove.
+   * @returns The current instance for chaining.
+   */
+  public removeChild(node: ASTNode): this {
     const index = this.children.indexOf(node);
-    if (index !== -1) {
-      this.children.splice(index, 1);
-    } else {
+    if (index === -1) {
       throw new Error("Node not found");
     }
+    this.children.splice(index, 1);
     return this;
   }
-  removeChildren(nodes: ASTNode[]): this {
+
+  /**
+   * Removes multiple child nodes from the node list.
+   * @param nodes - The child nodes to remove.
+   * @returns The current instance for chaining.
+   */
+  public removeChildren(nodes: ASTNode[]): this {
     for (const node of nodes) {
       this.removeChild(node);
     }

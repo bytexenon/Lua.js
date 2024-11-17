@@ -1,7 +1,7 @@
 /* Token */
 export class Token {
-  type: TokenEnum;
-  value: string;
+  public type: TokenEnum;
+  public value: string;
 
   constructor(type: TokenEnum, value: string) {
     this.type = type;
@@ -11,8 +11,8 @@ export class Token {
 
 /* TokenInterface */
 export interface TokenInterface {
-  type: TokenEnum;
-  value: string;
+  readonly type: TokenEnum;
+  readonly value: string;
 }
 
 /* TokenEnum */

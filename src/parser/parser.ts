@@ -27,8 +27,8 @@ const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif"];
 
 /* Scope */
 class Scope {
-  isFunctionScope: boolean;
-  variables: Record<string, boolean>;
+  public readonly isFunctionScope: boolean;
+  public variables: Record<string, boolean>;
 
   constructor(isFunctionScope = false) {
     this.isFunctionScope = isFunctionScope;
@@ -46,37 +46,27 @@ class Scope {
 
 /* Parser */
 export class Parser {
-  tokens: TokenInterface[];
-  position: number;
-  curToken: TokenInterface | undefined;
-  ast: ASTNode.Program;
-  scopeStack: Scope[];
-  currentScope: Scope | undefined;
-  isInLoop: boolean;
+  private readonly tokens: TokenInterface[];
+  private readonly scopeStack: Scope[];
+  private position: number;
+  private curToken: TokenInterface | undefined;
+  private currentScope: Scope | undefined;
 
   /* Constructor */
   constructor(tokens: TokenInterface[]) {
     this.tokens = tokens;
+    this.scopeStack = [];
     this.position = 0;
     this.curToken = this.tokens[this.position];
-    this.ast = new ASTNode.Program();
-
-    /* Scope management */
-    this.scopeStack = [];
     this.currentScope = undefined;
-
-    /* Flow control */
-    // Keep track of whether we are in a loop,
-    // so we can throw errors if we encounter a break outside of a loop
-    this.isInLoop = false;
   }
 
   /* Utils */
-  peek(n: number): TokenInterface | undefined {
+  private peek(n: number): TokenInterface | undefined {
     return this.tokens[this.position + n];
   }
 
-  advance(n: number): void {
+  private advance(n: number): void {
     const newPos = this.position + n;
     const newToken = this.tokens[newPos];
     this.position = newPos;
@@ -84,13 +74,13 @@ export class Parser {
   }
 
   /* Stack operations */
-  pushScope(isFunctionScope = false): void {
+  private pushScope(isFunctionScope = false): void {
     const newScope = new Scope(isFunctionScope);
     this.scopeStack.push(newScope);
     this.currentScope = newScope;
   }
 
-  popScope(): void {
+  private popScope(): void {
     if (this.scopeStack.length === 0) {
       this.fatalError("No scope to pop");
     }
@@ -99,20 +89,20 @@ export class Parser {
   }
 
   /* Variable management */
-  registerVariable(variableName: string): void {
+  private registerVariable(variableName: string): void {
     if (!this.currentScope) {
       this.fatalError("No scope to register variable");
     }
     this.currentScope!.registerVariable(variableName);
   }
 
-  registerVariables(variableNames: string[]): void {
+  private registerVariables(variableNames: string[]): void {
     for (const variableName of variableNames) {
       this.registerVariable(variableName);
     }
   }
 
-  getVariableType(variableName: string): string {
+  private getVariableType(variableName: string): string {
     let isUpvalue = false;
     for (let i = this.scopeStack.length - 1; i >= 0; i--) {
       const scope: Scope | undefined = this.scopeStack[i];
@@ -131,12 +121,12 @@ export class Parser {
   }
 
   /* Error handing */
-  fatalError(message: string): void {
+  private fatalError(message: string): void {
     throw new Error(message);
   }
 
   /* Token checks */
-  expectCurrentTokenType(type: TokenEnum): boolean {
+  private expectCurrentTokenType(type: TokenEnum): boolean {
     if (this.curToken?.type !== type) {
       this.fatalError(`Expected token type '${type.toString()}'`);
       return false;
@@ -144,7 +134,7 @@ export class Parser {
     return true;
   }
 
-  expectCurrentTokenValue(value: string): boolean {
+  private expectCurrentTokenValue(value: string): boolean {
     if (this.curToken?.value !== value) {
       this.fatalError(`Expected token value '${value}'`);
       return false;
@@ -152,21 +142,27 @@ export class Parser {
     return true;
   }
 
-  expectCurrentToken(type: TokenEnum, value: string): void {
+  private expectCurrentToken(type: TokenEnum, value: string): void {
     if (this.expectCurrentTokenType(type)) {
       this.expectCurrentTokenValue(value);
     }
   }
 
-  checkTokenType(token: TokenInterface | undefined, type: TokenEnum): boolean {
+  private checkTokenType(
+    token: TokenInterface | undefined,
+    type: TokenEnum,
+  ): boolean {
     return token?.type === type;
   }
 
-  checkTokenValue(token: TokenInterface | undefined, value: string): boolean {
+  private checkTokenValue(
+    token: TokenInterface | undefined,
+    value: string,
+  ): boolean {
     return token?.value === value;
   }
 
-  checkToken(
+  private checkToken(
     token: TokenInterface | undefined,
     type: TokenEnum,
     value: string,
@@ -176,20 +172,20 @@ export class Parser {
     );
   }
 
-  checkCurrentTokenType(type: TokenEnum): boolean {
+  private checkCurrentTokenType(type: TokenEnum): boolean {
     return this.checkTokenType(this.curToken, type);
   }
 
-  checkCurrentTokenValue(value: string): boolean {
+  private checkCurrentTokenValue(value: string): boolean {
     return this.checkTokenValue(this.curToken, value);
   }
 
-  checkCurrentToken(type: TokenEnum, value: string): boolean {
+  private checkCurrentToken(type: TokenEnum, value: string): boolean {
     return this.checkToken(this.curToken, type, value);
   }
 
   /* Expression parsing */
-  static isUnaryOperator(
+  private static isUnaryOperator(
     token: TokenInterface | undefined,
   ): boolean | undefined {
     return (
@@ -199,7 +195,7 @@ export class Parser {
     );
   }
 
-  static isBinaryOperator(
+  private static isBinaryOperator(
     token: TokenInterface | undefined,
   ): boolean | undefined {
     return (
@@ -209,7 +205,8 @@ export class Parser {
     );
   }
 
-  parseExpression(): ASTNode.ASTNode | null {
+  // It's public because it's used in the tests
+  public parseExpression(): ASTNode.ASTNode | null {
     const expression = this.parseBinary();
     if (!expression) {
       this.advance(-1);
@@ -217,7 +214,8 @@ export class Parser {
     }
     return expression;
   }
-  parseExpressionWithError(
+
+  private parseExpressionWithError(
     errorMessage = "Expected expression",
   ): ASTNode.ASTNode {
     const expression = this.parseExpression();
@@ -227,7 +225,7 @@ export class Parser {
     return expression!;
   }
 
-  parseBase(): ASTNode.ASTNode | null {
+  private parseBase(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       return null;
@@ -260,7 +258,9 @@ export class Parser {
     return null;
   }
 
-  parseSuffix(primaryExpression: ASTNode.ASTNode): ASTNode.ASTNode | null {
+  private parseSuffix(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.ASTNode | null {
     const nextToken = this.peek(1);
     if (nextToken && nextToken.type === TokenEnum.CHARACTER) {
       switch (nextToken.value) {
@@ -277,7 +277,7 @@ export class Parser {
     return null;
   }
 
-  parsePrefix(): ASTNode.ASTNode | null {
+  private parsePrefix(): ASTNode.ASTNode | null {
     let primaryExpression = this.parseBase();
     if (!primaryExpression) {
       return null;
@@ -293,7 +293,7 @@ export class Parser {
     return primaryExpression;
   }
 
-  parseUnary(): ASTNode.ASTNode | null {
+  private parseUnary(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       // TODO: Should error?
@@ -314,7 +314,7 @@ export class Parser {
     return new ASTNode.UnaryOperator(operator, expression);
   }
 
-  parseBinary(minPrecedence = 0): ASTNode.ASTNode | null {
+  private parseBinary(minPrecedence = 0): ASTNode.ASTNode | null {
     let expression = this.parseUnary();
     if (!expression) {
       // TODO: Should error?
@@ -352,7 +352,7 @@ export class Parser {
   }
 
   /* Parser helpers */
-  consumeIdentifierList(): string[] {
+  private consumeIdentifierList(): string[] {
     // Ensure the first token is always an identifier
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
     const identifiers = [this.curToken!.value];
@@ -369,7 +369,7 @@ export class Parser {
     return identifiers;
   }
 
-  parseExpressionList(atLeastOne = false): ASTNode.ExpressionList {
+  private parseExpressionList(atLeastOne = false): ASTNode.ExpressionList {
     const expressionList = new ASTNode.ExpressionList();
     const firstExpression = this.parseExpression();
     if (!firstExpression) {
@@ -387,7 +387,7 @@ export class Parser {
     return expressionList;
   }
 
-  parseVariable(): ASTNode.VariableNode {
+  private parseVariable(): ASTNode.VariableNode {
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
     const variableName = this.curToken!.value;
     const variableType = this.getVariableType(variableName);
@@ -398,13 +398,15 @@ export class Parser {
     return variableNode;
   }
 
-  consumeOptionalSemicolon(): void {
+  private consumeOptionalSemicolon(): void {
     if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ";")) {
       this.advance(1);
     }
   }
 
-  parseFunctionCall(primaryExpression: ASTNode.ASTNode): ASTNode.FunctionCall {
+  private parseFunctionCall(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.FunctionCall {
     this.expectCurrentToken(TokenEnum.CHARACTER, "(");
     this.advance(1); // Skip '('
     const args = this.parseExpressionList();
@@ -413,7 +415,9 @@ export class Parser {
     return new ASTNode.FunctionCall(primaryExpression, args);
   }
 
-  consumeMethodCall(primaryExpression: ASTNode.ASTNode): ASTNode.FunctionCall {
+  private consumeMethodCall(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.FunctionCall {
     this.advance(1); // Skip ':'
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER); // Method name
     const methodName = this.curToken!.value;
@@ -457,7 +461,7 @@ export class Parser {
   }*/
 
   /* Keyword parsers */
-  parseLocal(): ASTNode.LocalAssignment {
+  private parseLocal(): ASTNode.LocalAssignment {
     this.advance(1); // Skip 'local'
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
@@ -470,7 +474,7 @@ export class Parser {
     return new ASTNode.LocalAssignment(locals, expressions);
   }
 
-  parseWhile(): ASTNode.WhileStatement | null {
+  private parseWhile(): ASTNode.WhileStatement | null {
     this.advance(1); // Skip `while`
     const condition = this.parseExpressionWithError();
     this.advance(1); // Skip last token of condition
@@ -481,7 +485,7 @@ export class Parser {
     return new ASTNode.WhileStatement(condition, chunk);
   }
 
-  parseIf(): ASTNode.IfStatement {
+  private parseIf(): ASTNode.IfStatement {
     this.advance(1); // Skip `if`
     const mainCondition = this.parseExpressionWithError();
     this.advance(1); // Skip last token of condition
@@ -513,20 +517,22 @@ export class Parser {
     return new ASTNode.IfStatement(ifBranches);
   }
 
-  parseDo(): ASTNode.DoStatement {
+  private parseDo(): ASTNode.DoStatement {
     this.advance(1); // Skip 'do'
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken(TokenEnum.KEYWORD, "end");
     return new ASTNode.DoStatement(chunk);
   }
 
-  parseReturn(): ASTNode.ReturnStatement {
+  private parseReturn(): ASTNode.ReturnStatement {
     this.advance(1); // Skip `return`
     const expressions = this.parseExpressionList();
     return new ASTNode.ReturnStatement(expressions);
   }
 
-  parseFor(): ASTNode.GenericForStatement | ASTNode.NumericForStatement {
+  private parseFor():
+    | ASTNode.GenericForStatement
+    | ASTNode.NumericForStatement {
     this.advance(1); // Skip `for`
     // <iterVariable>
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
@@ -597,11 +603,11 @@ export class Parser {
     );
   }
 
-  parseBreak(): ASTNode.BreakStatement {
+  private parseBreak(): ASTNode.BreakStatement {
     return new ASTNode.BreakStatement();
   }
 
-  parseRepeat(): ASTNode.RepeatUntilStatement {
+  private parseRepeat(): ASTNode.RepeatUntilStatement {
     this.advance(1); // Skip `repeat`
     const chunk = this.parseCodeBlock();
     this.expectCurrentToken(TokenEnum.KEYWORD, "until");
@@ -610,7 +616,7 @@ export class Parser {
     return new ASTNode.RepeatUntilStatement(chunk, condition);
   }
 
-  parseFunction(): ASTNode.FunctionDeclaration {
+  private parseFunction(): ASTNode.FunctionDeclaration {
     // <FunctionDeclaration> ::= function <variable>[. <funcField>]* \( <parlist>? \)
     //                             <chunk>
     //                           end
@@ -655,7 +661,7 @@ export class Parser {
   }
 
   /* Parser Handler */
-  parseStatement(): ASTNode.ASTNode | null {
+  private parseStatement(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
     if (!curToken) {
       return null;
@@ -711,7 +717,7 @@ export class Parser {
   }
 
   /* Code Block Parser */
-  parseCodeBlock(
+  private parseCodeBlock(
     isRoot = false,
     isFunctionScope = false,
     scopeVariables: string[] | null = null,
@@ -735,7 +741,7 @@ export class Parser {
   }
 
   /* Main */
-  parse(): ASTNode.Program {
+  public parse(): ASTNode.Program {
     const chunk = this.parseCodeBlock(true);
     return chunk;
   }
