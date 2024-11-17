@@ -75,16 +75,16 @@ export class Lexer {
   private checkCharacter(char: string): boolean {
     return this.curChar === char;
   }
-  private throwError(message: string): void {
+  private throwError(message: string): never {
     throw new Error(message);
   }
-  private throwUnexpectedCharacterError(expected: string): void {
+  private throwUnexpectedCharacterError(expected: string): never {
     const convertedCurChar = SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
     this.throwError(
       `Unexpected character '${convertedCurChar}', expected '${expected}'`,
     );
   }
-  private expectCharacter(char: string): void {
+  private expectCharacter(char: string): never | void {
     if (!this.checkCharacter(char)) {
       this.throwUnexpectedCharacterError(char);
     }
