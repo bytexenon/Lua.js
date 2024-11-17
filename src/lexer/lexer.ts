@@ -90,33 +90,6 @@ export class Lexer {
     }
   }
 
-  /* Multi-character checkers */
-  private isDelimiter(): boolean {
-    const curChar = this.curChar;
-    const nextChar = this.peek(1);
-    return curChar === "[" && (nextChar === "[" || nextChar === "=");
-  }
-  private isLongString(): boolean {
-    return this.isDelimiter();
-  }
-  private isComment(): boolean {
-    return this.curChar === "-" && this.peek(1) === "-";
-  }
-  private isHexadecimalStart(): boolean {
-    const curChar = this.curChar;
-    const nextChar = this.peek(1);
-    return curChar === "0" && (nextChar === "x" || nextChar === "X");
-  }
-  private isVararg(): boolean {
-    return this.curChar === "." && this.peek(1) === "." && this.peek(2) === ".";
-  }
-  private isNumberStart(): boolean {
-    return (
-      Lexer.isNumber(this.curChar) ||
-      (this.curChar === "." && Lexer.isNumber(this.peek(1)))
-    );
-  }
-
   /* Single-character checkers */
   private static isQuoteString(char: string): boolean {
     return char === "'" || char === '"';
@@ -155,6 +128,33 @@ export class Lexer {
   }
   private static isWhitespace(char: string): boolean {
     return char === " " || char === "\t" || char === "\n";
+  }
+
+  /* Multi-character checkers */
+  private isDelimiter(): boolean {
+    const curChar = this.curChar;
+    const nextChar = this.peek(1);
+    return curChar === "[" && (nextChar === "[" || nextChar === "=");
+  }
+  private isLongString(): boolean {
+    return this.isDelimiter();
+  }
+  private isComment(): boolean {
+    return this.curChar === "-" && this.peek(1) === "-";
+  }
+  private isHexadecimalStart(): boolean {
+    const curChar = this.curChar;
+    const nextChar = this.peek(1);
+    return curChar === "0" && (nextChar === "x" || nextChar === "X");
+  }
+  private isVararg(): boolean {
+    return this.curChar === "." && this.peek(1) === "." && this.peek(2) === ".";
+  }
+  private isNumberStart(): boolean {
+    return (
+      Lexer.isNumber(this.curChar) ||
+      (this.curChar === "." && Lexer.isNumber(this.peek(1)))
+    );
   }
 
   /* Consumers */
