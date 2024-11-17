@@ -539,6 +539,158 @@ export class Parser {
     return new ASTNode.DoStatement(chunk);
   }
 
+  parseReturn(): ASTNode.ReturnStatement {
+    this.advance(1); // Skip `return`
+    const expressions = this.parseExpressionList();
+    return new ASTNode.ReturnStatement(expressions);
+  }
+
+  parseFor(): ASTNode.GenericForStatement | ASTNode.NumericForStatement {
+    this.advance(1); // Skip `for`
+    // <iterVariable>
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+    const firstIteratorVariable = this.curToken!.value;
+    this.advance(1); // Skip first iterator variable
+    if (this.checkCurrentToken(TokenEnum.CHARACTER, "=")) {
+      // NumericForLoop ::= for <iterVar> = <startExpr>, <endExpr>[, <stepExpr>]? do
+      //                      <chunk>
+      //                    end
+      this.advance(1); // Skip `=`
+      const startExpression = this.parseExpression();
+      if (!startExpression) {
+        this.error("Unexpected symbol");
+      }
+      this.advance(1); // Skip last token of the start expression
+      this.expectCurrentToken(TokenEnum.CHARACTER, ",");
+      this.advance(1); // Skip `,`
+      const endExpression = this.parseExpression();
+      if (!endExpression) {
+        this.error("Unexpected symbol");
+      }
+      this.advance(1); // Skip last token of the end expression
+      let stepExpression: ASTNode.ASTNode | null = null;
+      if (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
+        this.advance(1); // Skip `,`
+        stepExpression = this.parseExpression();
+        if (!stepExpression) {
+          this.error("Unexpected symbol");
+        }
+        this.advance(1); // Skip last token of the step expression
+      }
+      this.expectCurrentToken(TokenEnum.KEYWORD, "do");
+      this.advance(1); // Skip `do`
+      const chunk = this.parseCodeBlock();
+      this.expectCurrentToken(TokenEnum.KEYWORD, "end");
+      return new ASTNode.NumericForStatement(
+        firstIteratorVariable,
+        startExpression!,
+        endExpression!,
+        stepExpression,
+        chunk,
+      );
+    }
+
+    // <GenericForLoop> ::= for <iterVarList> in <generator> [, <state> [, <control>]? ]? do
+    //                        <chunk>
+    //                      end
+
+    // <iterVariableList>*
+    const iteratorVariables = [firstIteratorVariable];
+    while (!this.checkCurrentToken(TokenEnum.KEYWORD, "in")) {
+      this.expectCurrentToken(TokenEnum.CHARACTER, ",");
+      this.advance(1); // Skip `,`
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+      const iteratorVariable = this.curToken!.value;
+      iteratorVariables.push(iteratorVariable);
+      this.advance(1); // Skip the iterator variable
+    }
+    this.advance(1); // Skip `in`
+    const expressionList = this.parseExpressionList(true);
+    // Always assumes that `generator` is a valid expression
+    const generator = expressionList.children[0]!;
+    const state: ASTNode.ASTNode | undefined = expressionList.children[1];
+    const control: ASTNode.ASTNode | undefined = expressionList.children[2];
+    this.advance(1); // Skip the last token of the last expression
+
+    this.expectCurrentToken(TokenEnum.KEYWORD, "do");
+    this.advance(1);
+    const chunk = this.parseCodeBlock();
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
+    return new ASTNode.GenericForStatement(
+      iteratorVariables,
+      generator,
+      state,
+      control,
+      chunk,
+    );
+  }
+
+  parseBreak(): ASTNode.BreakStatement {
+    return new ASTNode.BreakStatement();
+  }
+
+  parseRepeat(): ASTNode.RepeatUntilStatement {
+    this.advance(1); // Skip `repeat`
+    const chunk = this.parseCodeBlock();
+    this.expectCurrentToken(TokenEnum.KEYWORD, "until");
+    this.advance(1); // Skip `until`
+    const condition = this.parseExpression();
+    if (!condition) {
+      this.error("Expected expression");
+    }
+    return new ASTNode.RepeatUntilStatement(chunk, condition!);
+  }
+
+  parseFunction(): ASTNode.FunctionDeclaration {
+    // <FunctionDeclaration> ::= function <variable>[. <funcField>]* \( <parlist>? \)
+    //                             <chunk>
+    //                           end
+    // <MethodDeclaration> ::= function <variable>[. <funcField>]* : <funcField> \( <parlist>? \)
+    //                           <chunk>
+    //                         end
+    this.advance(1); // Skip `function`
+    // Mandatory variable name
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+    const variableName = this.curToken!.value;
+    const variableType = this.getVariableType(variableName);
+    const variableNode =
+      (variableType === "Local" && new ASTNode.LocalVariable(variableName)) ||
+      (variableType === "Global" && new ASTNode.GlobalVariable(variableName)) ||
+      new ASTNode.UpvalueVariable(variableName);
+    this.advance(1); // Skip the variable
+    const fields = [];
+    while (this.checkCurrentToken(TokenEnum.CHARACTER, ".")) {
+      this.advance(1); // Skip `.`
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+      const newField = this.curToken!.value;
+      fields.push(newField);
+      this.advance(1); // Skip the new field
+    }
+    let isMethod = false;
+    if (this.checkCurrentToken(TokenEnum.CHARACTER, ":")) {
+      this.advance(1); // Skip `:`
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+      const newField = this.curToken!.value;
+      fields.push(newField);
+      isMethod = true;
+      this.advance(1); // Skip the new field
+    }
+    this.expectCurrentToken(TokenEnum.CHARACTER, "(");
+    this.advance(1); // Skip '('
+    const parameters = this.consumeIdentifierList();
+    this.expectCurrentToken(TokenEnum.CHARACTER, ")");
+    this.advance(1); // Skip ')'
+    const chunk = this.parseCodeBlock(false, true, parameters);
+    this.expectCurrentToken(TokenEnum.KEYWORD, "end");
+    return new ASTNode.FunctionDeclaration(
+      variableNode,
+      fields,
+      parameters,
+      chunk,
+      isMethod,
+    );
+  }
+
   /* Parser Handler */
   parseStatement(): ASTNode.ASTNode | null {
     const curToken = this.curToken;
@@ -566,6 +718,21 @@ export class Parser {
           break;
         case "do":
           node = this.parseDo();
+          break;
+        case "return":
+          node = this.parseReturn();
+          break;
+        case "for":
+          node = this.parseFor();
+          break;
+        case "break":
+          node = this.parseBreak();
+          break;
+        case "repeat":
+          node = this.parseRepeat();
+          break;
+        case "function":
+          node = this.parseFunction();
           break;
         default:
           this.error(`Unexpected keyword '${tokenValue}'`);
