@@ -93,7 +93,7 @@ export class Parser {
     if (!this.currentScope) {
       this.fatalError("No scope to register variable");
     }
-    this.currentScope!.registerVariable(variableName);
+    this.currentScope.registerVariable(variableName);
   }
 
   private registerVariables(variableNames: string[]): void {
@@ -110,10 +110,10 @@ export class Parser {
         this.fatalError("No scope to check variable type");
       }
 
-      if (scope!.hasVariable(variableName)) {
+      if (scope.hasVariable(variableName)) {
         return isUpvalue ? "Upvalue" : "Local";
       }
-      if (scope!.isFunctionScope) {
+      if (scope.isFunctionScope) {
         isUpvalue = true;
       }
     }
@@ -121,7 +121,7 @@ export class Parser {
   }
 
   /* Error handing */
-  private fatalError(message: string): void {
+  private fatalError(message: string): never {
     throw new Error(message);
   }
 
@@ -129,7 +129,6 @@ export class Parser {
   private expectCurrentTokenType(type: TokenEnum): boolean {
     if (this.curToken?.type !== type) {
       this.fatalError(`Expected token type '${type.toString()}'`);
-      return false;
     }
     return true;
   }
@@ -137,7 +136,6 @@ export class Parser {
   private expectCurrentTokenValue(value: string): boolean {
     if (this.curToken?.value !== value) {
       this.fatalError(`Expected token value '${value}'`);
-      return false;
     }
     return true;
   }
@@ -222,7 +220,7 @@ export class Parser {
     if (!expression) {
       this.fatalError(errorMessage);
     }
-    return expression!;
+    return expression;
   }
 
   private parseBase(): ASTNode.ASTNode | null {
@@ -321,7 +319,6 @@ export class Parser {
       this.parseBinary(UNARY_PRECEDENCE);
     if (!expression) {
       this.fatalError("Expected expression");
-      return null;
     }
     return new ASTNode.UnaryOperator(operator, expression);
   }
@@ -343,7 +340,6 @@ export class Parser {
       const precedence = OPERATOR_PRECEDENCE[operator];
       if (!precedence) {
         this.fatalError(`Unknown operator '${operator}'`);
-        return null;
       }
       const leftPrecedence = precedence[0];
       const rightPrecedence = precedence[1];
@@ -354,7 +350,6 @@ export class Parser {
       const right = this.parseBinary(rightPrecedence);
       if (!right) {
         this.fatalError("Expected expression");
-        return null; // It doesn't break from all parsers
       }
 
       expression = new ASTNode.BinaryOperator(operator, expression, right);
@@ -471,13 +466,13 @@ export class Parser {
     if (!expression) {
       this.fatalError("Expected expression");
     }
-    if (expression!.type === ASTNode.NodeType.FUNCTION_CALL) {
+    if (expression.type === ASTNode.NodeType.FUNCTION_CALL) {
       // <functioncall>
-      return expression!;
+      return expression;
     }
     // <assignment>
     this.advance(1); // Skip last token of lvalue
-    return this.parseAssignment(expression!);
+    return this.parseAssignment(expression);
   }
   parseAssignment(firstLvalue: ASTNode.ASTNode): ASTNode.ASTNode {
     const lvalues = [firstLvalue];
@@ -487,7 +482,7 @@ export class Parser {
       if (!nextLvalue) {
         this.fatalError("Expected lvalue");
       }
-      lvalues.push(nextLvalue!);
+      lvalues.push(nextLvalue);
       this.advance(1); // Skip last token of lvalue
     }
     this.expectCurrentToken(TokenEnum.CHARACTER, "=");
