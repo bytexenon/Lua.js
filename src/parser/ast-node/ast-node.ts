@@ -195,6 +195,7 @@ export class FunctionDeclaration extends ASTNode {
     fields: string[],
     parameters: string[],
     chunk: Chunk,
+    isMethod = false,
   ) {
     super(NodeType.FUNCTION_DECLARATION, {
       name,
@@ -202,6 +203,7 @@ export class FunctionDeclaration extends ASTNode {
       fields,
       parameters,
       chunk,
+      isMethod,
     });
   }
 }
