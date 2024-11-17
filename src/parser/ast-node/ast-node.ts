@@ -190,7 +190,6 @@ export class VariableAssignment extends ASTNode {
 }
 export class FunctionDeclaration extends ASTNode {
   constructor(
-    name: string,
     variable: VariableNode,
     fields: string[],
     parameters: string[],
@@ -198,7 +197,6 @@ export class FunctionDeclaration extends ASTNode {
     isMethod = false,
   ) {
     super(NodeType.FUNCTION_DECLARATION, {
-      name,
       variable,
       fields,
       parameters,
