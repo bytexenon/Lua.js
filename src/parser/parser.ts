@@ -264,14 +264,26 @@ export class Parser {
     const nextToken = this.peek(1);
     if (nextToken && nextToken.type === TokenEnum.CHARACTER) {
       switch (nextToken.value) {
-        case "(":
+        case "(": {
           this.advance(1);
           // expression \( <explist> \)
           return this.parseFunctionCall(primaryExpression);
-        case ":":
+        }
+        case ":": {
           this.advance(1);
           // expression : <name> \( <explist> \)
           return this.consumeMethodCall(primaryExpression);
+        }
+        case ".": {
+          this.advance(1);
+          // expression \. <name>
+          return this.consumeTableIndex(primaryExpression);
+        }
+        case "[": {
+          this.advance(1);
+          // expression \[ <expr> \]
+          return this.consumeBracketIndex(primaryExpression);
+        }
       }
     }
     return null;
@@ -429,6 +441,28 @@ export class Parser {
     const methodCall = this.parseFunctionCall(methodExpression);
     methodCall["isMethodCall"] = true;
     return methodCall;
+  }
+
+  private consumeTableIndex(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.TableIndex {
+    this.advance(1); // Skip '.'
+    this.expectCurrentTokenType(TokenEnum.IDENTIFIER); // Index name
+    const indexName = this.curToken!.value;
+    return new ASTNode.TableIndex(
+      primaryExpression,
+      new ASTNode.StringLiteral(indexName),
+    );
+  }
+
+  private consumeBracketIndex(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.ASTNode {
+    this.advance(1); // Skip `[`
+    const indexExpression = this.parseExpressionWithError();
+    this.advance(1); // Skip last token of index expression
+    this.expectCurrentToken(TokenEnum.CHARACTER, "]");
+    return new ASTNode.TableIndex(primaryExpression, indexExpression);
   }
 
   // <exprstat> ::= <functioncall> | <assignment>
