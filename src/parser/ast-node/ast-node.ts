@@ -184,8 +184,8 @@ export class LocalAssignment extends ASTNode {
   }
 }
 export class VariableAssignment extends ASTNode {
-  constructor(variable: ASTNode, expressions: ASTNodeList) {
-    super(NodeType.VARIABLE_ASSIGNMENT, { variable, expression: expressions });
+  constructor(lvalues: ASTNode[], expressions: ASTNodeList) {
+    super(NodeType.VARIABLE_ASSIGNMENT, { lvalues, expressions });
   }
 }
 export class FunctionDeclaration extends ASTNode {
