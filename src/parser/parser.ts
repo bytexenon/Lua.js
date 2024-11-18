@@ -533,11 +533,13 @@ export class Parser {
         fields.addChild(new ASTNode.TableElement(key, value));
       }
       // <key: identifier> = <value: expression>
-      else if (this.checkCurrentTokenType(TokenEnum.IDENTIFIER)) {
+      else if (
+        this.checkCurrentTokenType(TokenEnum.IDENTIFIER) &&
+        // To avoid false positives with variables
+        this.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")
+      ) {
         const key = new ASTNode.StringLiteral(this.curToken!.value);
-        this.advance(1); // Skip the key
-        this.expectCurrentToken(TokenEnum.CHARACTER, "=");
-        this.advance(1); // Skip `=`
+        this.advance(2); // Skip the key and `=`
         const value = this.parseExpressionWithError();
         fields.addChild(new ASTNode.TableElement(key, value));
       }
