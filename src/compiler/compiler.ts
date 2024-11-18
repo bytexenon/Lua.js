@@ -1,8 +1,8 @@
 /* IRInstruction */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class IRInstruction {
-  opcode: string;
-  operands: IROperand[];
+  public opcode: string;
+  public operands: IROperand[];
 
   constructor(opcode: string, operands: IROperand[]) {
     this.opcode = opcode;
@@ -10,8 +10,8 @@ class IRInstruction {
   }
 }
 class IROperand {
-  type: string;
-  value: number;
+  public type: string;
+  public value: number;
 
   constructor(type: string, value: number) {
     this.type = type;
