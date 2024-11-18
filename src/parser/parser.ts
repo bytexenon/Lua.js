@@ -544,6 +544,20 @@ export class Parser {
   /* Keyword parsers */
   private parseLocal(): ASTNode.LocalAssignment {
     this.advance(1); // Skip 'local'
+    if (this.checkCurrentToken(TokenEnum.KEYWORD, "function")) {
+      // local function <name> \( <parlist> \)
+      //   <chunk>
+      // end
+      this.advance(1); // Skip 'function'
+      this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
+      const name = this.curToken!.value;
+      this.advance(1); // Skip the function name
+      const parameters = this.consumeParameterList();
+      this.advance(1); // Skip ')'
+      const chunk = this.parseCodeBlock(false, true, parameters);
+      this.expectCurrentToken(TokenEnum.KEYWORD, "end");
+      return new ASTNode.LocalFunctionDeclaration(name, parameters, chunk);
+    }
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
     // local <varlist> = <explist>
