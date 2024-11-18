@@ -859,6 +859,10 @@ export class Parser {
   /* Main */
   public parse(): ASTNode.Program {
     const chunk = this.parseCodeBlock(true);
+    if (this.curToken) {
+      this.fatalError("Expected end of file");
+    }
+
     return chunk;
   }
 }
