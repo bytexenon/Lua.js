@@ -118,7 +118,7 @@ describe("Lexer", () => {
 
   describe("String Tokenization", () => {
     it("should tokenize strings", () => {
-      testLexer(`'simple string' "another string"`, [
+      testLexer("'simple string' \"another string\"", [
         new Token(TokenEnum.STRING, "simple string"),
         new Token(TokenEnum.STRING, "another string"),
       ]);
