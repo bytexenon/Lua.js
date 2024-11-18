@@ -17,12 +17,12 @@ export interface TokenInterface {
 
 /* TokenEnum */
 export const enum TokenEnum {
-  OPERATOR,
-  CONSTANT,
-  KEYWORD,
-  IDENTIFIER,
-  NUMBER,
-  STRING,
-  VARARG,
-  CHARACTER,
+  OPERATOR = "OPERATOR",
+  CONSTANT = "CONSTANT",
+  KEYWORD = "KEYWORD",
+  IDENTIFIER = "IDENTIFIER",
+  NUMBER = "NUMBER",
+  STRING = "STRING",
+  VARARG = "VARARG",
+  CHARACTER = "CHARACTER",
 }
