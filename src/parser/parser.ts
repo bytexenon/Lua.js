@@ -537,7 +537,7 @@ export class Parser {
   }
 
   // <exprstat> ::= <functioncall> | <assignment>
-  parseExprstat(): ASTNode.ASTNode {
+  private parseExprstat(): ASTNode.ASTNode {
     const expression: ASTNode.ASTNode | null = this.parsePrefix();
     if (!expression) {
       this.fatalError("Expected expression");
@@ -550,7 +550,7 @@ export class Parser {
     this.advance(1); // Skip last token of lvalue
     return this.parseAssignment(expression);
   }
-  parseAssignment(firstLvalue: ASTNode.ASTNode): ASTNode.ASTNode {
+  private parseAssignment(firstLvalue: ASTNode.ASTNode): ASTNode.ASTNode {
     const lvalues = [firstLvalue];
     while (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
       this.advance(1); // Skip `,`
