@@ -575,7 +575,8 @@ describe("Parser", () => {
             e = 4,
             [1 + 2] = 5,
             1 + 2,
-            ...
+            ...,
+            variable
           }
         `;
         parseExpression(tokenize(code));
