@@ -39,6 +39,11 @@ export default tseslint.config(
       import: importPlugin,
     },
     rules: {
+      quotes: [
+        "error",
+        "double",
+        { avoidEscape: true, allowTemplateLiterals: false },
+      ],
       "import/named": "error",
       "import/namespace": "error",
       "import/default": "error",
