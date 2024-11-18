@@ -398,7 +398,7 @@ export class Parser {
 
     const parameters = [];
     while (this.curToken) {
-      if (this.checkCurrentToken(TokenEnum.CHARACTER, "...")) {
+      if (this.checkCurrentToken(TokenEnum.VARARG, "...")) {
         parameters.push("...");
         this.advance(1); // Skip `...`
         break;
