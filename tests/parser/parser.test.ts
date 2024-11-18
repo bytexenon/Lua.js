@@ -357,4 +357,387 @@ describe("Parser", () => {
       expect(ast).toEqual(expectedNode);
     });
   });
+
+  describe("Complex Parsing", () => {
+    // !TODO: This is not complete as the ASTNode API expected to change
+    //        I will just make basic tests which make sure standard Lua 5.1
+    //        Syntax statements don't throw errors
+
+    describe("Control Structures", () => {
+      it("should parse a simple if statement", () => {
+        const code = `
+          if a then
+            print("Hello")
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple if-else statement", () => {
+        const code = `
+          if a then
+            print("Hello")
+          else
+            print("World")
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple if-elseif-else statement", () => {
+        const code = `
+          if a then
+            print("Hello")
+          elseif b then
+            print("World")
+          else
+            print("!")
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple while loop", () => {
+        const code = `
+          while a do
+            print("Hello")
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple repeat-until loop", () => {
+        const code = 'repeat print("Hello") until a';
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple numeric for loop", () => {
+        const code = `
+          for i = 1, 10, 1 do
+            print(i)
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple generic for loop", () => {
+        const code = `
+          for i, v in ipairs(t) do
+            print(i, v)
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple generic for loop with custom state expression", () => {
+        const code = `
+          for i, j, k in ipairs(t), 1 do
+            print(i, j, k)
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple generic for loop with custom state + control expressions", () => {
+        const code = `
+          for i, j, k in ipairs(t), 1, 2 do
+            print(i, j, k)
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple break statement", () => {
+        const code = "break";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple do-end block", () => {
+        const code = "do local a = 10 end";
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Return Statements", () => {
+      it("should parse a simple return statement", () => {
+        const code = "return 1, 2, 3";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple return statement with no values", () => {
+        const code = "return";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple return statement with varargs", () => {
+        const code = "return ...";
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Function Definitions", () => {
+      it("should parse a simple function definition", () => {
+        const code = `
+          function foo(a, b)
+            return a + b
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple function definition with no arguments", () => {
+        const code = `
+          function foo()
+            return
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple function definition with varargs", () => {
+        const code = `
+          function foo(a, b, ...)
+            return ...
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple local function definition", () => {
+        const code = `
+          local function foo(a, b)
+            return a + b
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a function definition with fields", () => {
+        const code = `
+          local function a.b.c(foo, bar)
+            return foo + bar
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a method definition", () => {
+        const code = `
+          function obj:method(a, b)
+            return a + b
+          end
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse a method definition with fields", () => {
+        const code = `
+          function obj.a.b:method(a, b)
+            return a + b
+          end
+        `;
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Variable Declarations", () => {
+      it("should parse a simple local variable declaration", () => {
+        const code = "local a = 10";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple local variable declaration with no value", () => {
+        const code = "local a";
+        parse(tokenize(code));
+      });
+
+      it("should parse a local variable declaration with multiple variables", () => {
+        const code = "local a, b, c = 1, 2, 3";
+        parse(tokenize(code));
+      });
+
+      it("should parse a local variable declaration with multiple variables and no values", () => {
+        const code = "local a, b, c";
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Table Constructors", () => {
+      it("should parse a simple table constructor", () => {
+        const code = "{ a = 1, b = 2, c = 3 }";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple table constructor with array part", () => {
+        const code = "{ 1, 2, 3, a = 4, b = 5 }";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse complex table constructors", () => {
+        const code = `
+          {
+            ["a"] = 1,
+            b = {
+              c = 2,
+              d = 3,
+            },
+            e = 4,
+            [1 + 2] = 5,
+            1 + 2,
+            ...
+          }
+        `;
+        parseExpression(tokenize(code));
+      });
+    });
+
+    describe("Function and Method Calls", () => {
+      it("should parse a simple function call", () => {
+        const code = "foo(1, 2, 3)";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple method call", () => {
+        const code = "obj:method(1, 2, 3)";
+        parse(tokenize(code));
+      });
+
+      it("should parse a method call with fields", () => {
+        const code = "obj.a.b:method(1, 2, 3)";
+        parse(tokenize(code));
+      });
+
+      it("should parse a method call with no arguments", () => {
+        const code = "obj:method()";
+        parse(tokenize(code));
+      });
+
+      it("should parse a function call with implicit string arguments", () => {
+        const code = 'foo"hello"';
+        parse(tokenize(code));
+      });
+
+      it("should parse a function call with implicit table arguments", () => {
+        const code = "foo{ a = 1, b = 2 }";
+        parse(tokenize(code));
+      });
+
+      it("should parse a method call with implicit string arguments", () => {
+        const code = 'obj:method"hello"';
+        parse(tokenize(code));
+      });
+
+      it("should parse a method call with implicit table arguments", () => {
+        const code = "obj:method{ a = 1, b = 2 }";
+        parse(tokenize(code));
+      });
+
+      it("should parse a method call with implicit table arguments and fields", () => {
+        const code = "obj.a.b:method{ a = 1, b = 2 }";
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Assignments", () => {
+      it("should parse a simple assignment", () => {
+        const code = "a = 10";
+        parse(tokenize(code));
+      });
+
+      it("should parse a simple multiple assignment", () => {
+        const code = "a, b, c = 1, 2, 3";
+        parse(tokenize(code));
+      });
+
+      it("should parse complex multiple assignments", () => {
+        const code = `
+          a.b, a.b.c = 1, 2
+          a.c.d = 3
+          a, b.c = 1
+        `;
+        parse(tokenize(code));
+      });
+
+      it("should parse assignments with different data types", () => {
+        const code = `
+          a = "hello"
+          b = true
+          c = nil
+        `;
+        parse(tokenize(code));
+      });
+    });
+
+    describe("Expressions", () => {
+      it("should parse expressions with constants and operators", () => {
+        const code = "true and false or nil";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple expression", () => {
+        const code = "1 + 2 * 3 - 4 / 5";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple unary expression", () => {
+        const code = "-b";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple logical expression", () => {
+        const code = "b and c or d";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple relational expression", () => {
+        const code = "b < c and d > e";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple concatenation expression", () => {
+        const code = '"Hello" .. " " .. "World"';
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple index expression", () => {
+        const code = "a.b.c";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple bracket expression", () => {
+        const code = "a[b]";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a complex bracket expression", () => {
+        const code = "a[b[c] + 1]";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple function call expression", () => {
+        const code = "a()";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple method call expression", () => {
+        const code = "a:b()";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse anonymous function expression", () => {
+        const code = "function(a, b) return a + b end";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse anonymous function expression with no arguments", () => {
+        const code = "function() return end";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse anonymous function expression with varargs", () => {
+        const code = "function(...) return ... end";
+        parseExpression(tokenize(code));
+      });
+    });
+  });
 });
