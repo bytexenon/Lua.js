@@ -250,6 +250,9 @@ export class Parser {
           this.advance(1); // Skip last token of expression
           this.expectCurrentToken(TokenEnum.CHARACTER, ")");
           return expression;
+        } else if (tokenValue === "{") {
+          // \{ <fieldlist>? \}
+          return this.parseTableConstructor();
         }
         break;
       }
@@ -464,6 +467,14 @@ export class Parser {
   private parseFunctionCall(
     primaryExpression: ASTNode.ASTNode,
   ): ASTNode.FunctionCall {
+    // Check if it's an implicit function call
+    if (
+      this.checkCurrentTokenType(TokenEnum.STRING) ||
+      this.checkCurrentToken(TokenEnum.CHARACTER, "{")
+    ) {
+      return this.parseImplicitFunctionCall(primaryExpression);
+    }
+
     this.expectCurrentToken(TokenEnum.CHARACTER, "(");
     this.advance(1); // Skip '('
     const args = this.parseExpressionList();
@@ -501,6 +512,51 @@ export class Parser {
       argumentListNode.addChild(tableNode);
     }
     return new ASTNode.FunctionCall(primaryExpression, argumentListNode);
+  }
+
+  private parseTableConstructor(): ASTNode.TableConstructor {
+    this.expectCurrentToken(TokenEnum.CHARACTER, "{");
+    this.advance(1); // Skip '{'
+    const fields = new ASTNode.ExpressionList(); // TODO: Make TableElementList node
+    let internalImplicitIndex = 1; // Implicit index for table elements that don't have a (explicit) key
+    while (!this.checkCurrentToken(TokenEnum.CHARACTER, "}")) {
+      // [<key: expression>] = <value: expression>
+      if (this.checkCurrentToken(TokenEnum.CHARACTER, "[")) {
+        this.advance(1); // Skip `[`
+        const key = this.parseExpressionWithError();
+        this.advance(1); // Skip last token of key expression
+        this.expectCurrentToken(TokenEnum.CHARACTER, "]");
+        this.advance(1); // Skip `]`
+        this.expectCurrentToken(TokenEnum.CHARACTER, "=");
+        this.advance(1); // Skip `=`
+        const value = this.parseExpressionWithError();
+        fields.addChild(new ASTNode.TableElement(key, value));
+      }
+      // <key: identifier> = <value: expression>
+      else if (this.checkCurrentTokenType(TokenEnum.IDENTIFIER)) {
+        const key = new ASTNode.StringLiteral(this.curToken!.value);
+        this.advance(1); // Skip the key
+        this.expectCurrentToken(TokenEnum.CHARACTER, "=");
+        this.advance(1); // Skip `=`
+        const value = this.parseExpressionWithError();
+        fields.addChild(new ASTNode.TableElement(key, value));
+      }
+      // <value: expression>
+      else {
+        const value = this.parseExpressionWithError();
+        const key = new ASTNode.NumberLiteral(internalImplicitIndex.toString());
+        internalImplicitIndex += 1;
+        fields.addChild(new ASTNode.TableElement(key, value, true));
+      }
+      this.advance(1); // Skip last token of the value
+      if (!this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
+        break;
+      }
+
+      this.advance(1); // Skip `,`
+    }
+    this.expectCurrentToken(TokenEnum.CHARACTER, "}");
+    return new ASTNode.TableConstructor(fields);
   }
 
   private consumeTableIndex(
