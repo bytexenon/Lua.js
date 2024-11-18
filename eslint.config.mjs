@@ -44,6 +44,15 @@ export default tseslint.config(
         "double",
         { avoidEscape: true, allowTemplateLiterals: false },
       ],
+      "@typescript-eslint/explicit-member-accessibility": [
+        "error",
+        {
+          accessibility: "explicit",
+          overrides: {
+            constructors: "no-public",
+          },
+        },
+      ],
       "import/named": "error",
       "import/namespace": "error",
       "import/default": "error",
