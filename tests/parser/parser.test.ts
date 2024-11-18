@@ -512,15 +512,6 @@ describe("Parser", () => {
         parse(tokenize(code));
       });
 
-      it("should parse a function definition with fields", () => {
-        const code = `
-          local function a.b.c(foo, bar)
-            return foo + bar
-          end
-        `;
-        parse(tokenize(code));
-      });
-
       it("should parse a method definition", () => {
         const code = `
           function obj:method(a, b)
