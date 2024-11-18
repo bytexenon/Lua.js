@@ -20,7 +20,7 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   // Primitive nodes //
   [NodeType.NUMBER_LITERAL]: [],
   [NodeType.STRING_LITERAL]: [],
-  [NodeType.BOOLEAN_LITERAL]: [],
+  [NodeType.VALUE_LITERAL]: [],
   [NodeType.VARARG_LITERAL]: [],
 
   // Expression nodes //

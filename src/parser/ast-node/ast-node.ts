@@ -33,7 +33,7 @@ export const enum NodeType {
   // Primitive nodes //
   NUMBER_LITERAL = "NUMBER_LITERAL",
   STRING_LITERAL = "STRING_LITERAL",
-  BOOLEAN_LITERAL = "BOOLEAN_LITERAL",
+  VALUE_LITERAL = "VALUE_LITERAL",
   VARARG_LITERAL = "VARARG_LITERAL",
 
   // Expression nodes //
@@ -121,9 +121,9 @@ export class StringLiteral extends ASTNode {
     super(NodeType.STRING_LITERAL, { value });
   }
 }
-export class BooleanLiteral extends ASTNode {
+export class ValueLiteral extends ASTNode {
   constructor(value: string) {
-    super(NodeType.BOOLEAN_LITERAL, { value });
+    super(NodeType.VALUE_LITERAL, { value });
   }
 }
 export class VarargLiteral extends ASTNode {

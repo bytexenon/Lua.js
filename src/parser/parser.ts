@@ -238,7 +238,7 @@ export class Parser {
       case TokenEnum.VARARG:
         return new ASTNode.VarargLiteral();
       case TokenEnum.CONSTANT:
-        return new ASTNode.BooleanLiteral(curToken.value);
+        return new ASTNode.ValueLiteral(curToken.value);
       case TokenEnum.IDENTIFIER:
         return this.parseVariable();
       case TokenEnum.CHARACTER: {
