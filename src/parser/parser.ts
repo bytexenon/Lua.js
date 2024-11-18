@@ -269,28 +269,39 @@ export class Parser {
     primaryExpression: ASTNode.ASTNode,
   ): ASTNode.ASTNode | null {
     const nextToken = this.peek(1);
-    if (nextToken && nextToken.type === TokenEnum.CHARACTER) {
-      switch (nextToken.value) {
-        case "(": {
-          this.advance(1);
-          // expression \( <explist> \)
-          return this.parseFunctionCall(primaryExpression);
+    if (nextToken) {
+      if (nextToken.type === TokenEnum.CHARACTER) {
+        switch (nextToken.value) {
+          case "(": {
+            this.advance(1);
+            // expression \( <explist> \)
+            return this.parseFunctionCall(primaryExpression);
+          }
+          case ":": {
+            this.advance(1);
+            // expression : <name> \( <explist> \)
+            return this.consumeMethodCall(primaryExpression);
+          }
+          case ".": {
+            this.advance(1);
+            // expression \. <name>
+            return this.consumeTableIndex(primaryExpression);
+          }
+          case "[": {
+            this.advance(1);
+            // expression \[ <expr> \]
+            return this.consumeBracketIndex(primaryExpression);
+          }
+          case "{": {
+            this.advance(1);
+            // expression \{ <fieldlist>? \}
+            return this.parseImplicitFunctionCall(primaryExpression);
+          }
         }
-        case ":": {
-          this.advance(1);
-          // expression : <name> \( <explist> \)
-          return this.consumeMethodCall(primaryExpression);
-        }
-        case ".": {
-          this.advance(1);
-          // expression \. <name>
-          return this.consumeTableIndex(primaryExpression);
-        }
-        case "[": {
-          this.advance(1);
-          // expression \[ <expr> \]
-          return this.consumeBracketIndex(primaryExpression);
-        }
+      } else if (nextToken.type === TokenEnum.STRING) {
+        this.advance(1);
+        // <implicitFuncCall> ::= <expression> <string>
+        return this.parseImplicitFunctionCall(primaryExpression);
       }
     }
     return null;
@@ -475,6 +486,21 @@ export class Parser {
     const methodCall = this.parseFunctionCall(methodExpression);
     methodCall["isMethodCall"] = true;
     return methodCall;
+  }
+
+  private parseImplicitFunctionCall(
+    primaryExpression: ASTNode.ASTNode,
+  ): ASTNode.FunctionCall {
+    const argumentListNode = new ASTNode.ExpressionList();
+    if (this.checkCurrentTokenType(TokenEnum.STRING)) {
+      const stringNode = new ASTNode.StringLiteral(this.curToken!.value);
+      argumentListNode.addChild(stringNode);
+    } else {
+      this.expectCurrentToken(TokenEnum.CHARACTER, "{");
+      const tableNode = this.parseTableConstructor();
+      argumentListNode.addChild(tableNode);
+    }
+    return new ASTNode.FunctionCall(primaryExpression, argumentListNode);
   }
 
   private consumeTableIndex(
