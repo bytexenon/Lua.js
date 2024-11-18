@@ -35,11 +35,11 @@ class Scope {
     this.variables = {};
   }
 
-  registerVariable(name: string): void {
+  public registerVariable(name: string): void {
     this.variables[name] = true;
   }
 
-  hasVariable(name: string): boolean {
+  public hasVariable(name: string): boolean {
     return this.variables[name] === true;
   }
 }
