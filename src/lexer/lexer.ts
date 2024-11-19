@@ -31,6 +31,19 @@ const VALID_CHARACTERS = new Set([
   "="
 ]) // All the characters expected to be valid
 
+const TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS: Record<string, string> = {
+  b: "\b",
+  f: "\f",
+  n: "\n",
+  r: "\r",
+  t: "\t",
+  v: "\v",
+
+  "\\": "\\",
+  '"': '"',
+  "'": "'",
+};
+
 const OPERATOR_TRIE = makeTrie(OPERATORS);
 const OPERATOR_KEYWORDS = new Set(["and", "or", "not"]);
 const CONSTANT_KEYWORDS = new Set(["nil", "true", "false"]);
@@ -278,8 +291,28 @@ export class Lexer {
     this.advance(1); // Skip the quote
     let string = "";
     while (this.curChar && this.curChar !== quote) {
-      string += this.curChar;
-      this.advance(1);
+      if (this.curChar === "\\") {
+        this.advance(1); // Skip the "\"
+        const escapedChar =
+          TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS[this.curChar];
+        if (escapedChar) {
+          string += escapedChar;
+          this.advance(1); // Skip the escaped character
+        } else if (Lexer.isNumber(this.curChar)) {
+          // \d\d\d type of escape
+          let numericEscape = "";
+          for (let i = 0; i < 3 && Lexer.isNumber(this.curChar); i++) {
+            numericEscape += this.curChar;
+            this.advance(1);
+          }
+          string += String.fromCharCode(parseInt(numericEscape, 10));
+        } else {
+          this.throwError(`Invalid escape sequence: \\${this.curChar}`);
+        }
+      } else {
+        string += this.curChar;
+        this.advance(1);
+      }
     }
     this.advance(1); // Skip the ending quote
     return string;
