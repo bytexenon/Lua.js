@@ -91,9 +91,12 @@ export class LuaPrototype {
 
 /* Compiler */
 export class Compiler {
+  // @ts-ignore
   private currentProto: LuaPrototype;
+  // @ts-ignore
   private currentChunk: ASTNode;
   private nextRegister: number; // next free register
+  // @ts-ignore
   private numVars: number; // number of active variables
 
   /* Constructor */
@@ -105,14 +108,17 @@ export class Compiler {
   }
 
   /* Stack Management */
+  // @ts-ignore
   private allocateRegister(): number {
     // eslint-disable-next-line no-plusplus
     return this.nextRegister++;
   }
+  // @ts-ignore
   private freeRegister(): void {
     // eslint-disable-next-line no-plusplus
     this.nextRegister--;
   }
+  // @ts-ignore
   private freeRegisters(n: number): void {
     this.nextRegister -= n;
   }
