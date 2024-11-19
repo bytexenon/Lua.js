@@ -551,7 +551,12 @@ export class Parser {
         fields.addChild(new ASTNode.TableElement(key, value, true));
       }
       this.advance(1); // Skip last token of the value
-      if (!this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
+      if (
+        !(
+          this.checkCurrentToken(TokenEnum.CHARACTER, ",") ||
+          this.checkCurrentToken(TokenEnum.CHARACTER, ";")
+        )
+      ) {
         break;
       }
 
