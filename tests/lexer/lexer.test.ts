@@ -159,6 +159,46 @@ describe("Lexer", () => {
         "Unexpected character '!', expected '['",
       );
     });
+
+    describe("should handle escape sequences", () => {
+      it("should handle newline escape sequence", () => {
+        testLexer('"hello\\nworld"', [
+          new Token(TokenEnum.STRING, "hello\nworld"),
+        ]);
+      });
+
+      it("should handle tab escape sequence", () => {
+        testLexer('"hello\\tworld"', [
+          new Token(TokenEnum.STRING, "hello\tworld"),
+        ]);
+      });
+
+      it("should handle carriage return escape sequence", () => {
+        testLexer('"hello\\rworld"', [
+          new Token(TokenEnum.STRING, "hello\rworld"),
+        ]);
+      });
+    });
+
+    describe("should handle numeric escape sequences", () => {
+      it("should handle 1-char escape digit", () => {
+        testLexer('"hello\\9world"', [
+          new Token(TokenEnum.STRING, "hello\tworld"),
+        ]);
+      });
+
+      it("should handle 2-char escape digit", () => {
+        testLexer('"hello\\97world"', [
+          new Token(TokenEnum.STRING, "helloaworld"),
+        ]);
+      });
+
+      it("should handle 3-char escape digit", () => {
+        testLexer('"hello\\122world"', [
+          new Token(TokenEnum.STRING, "hellozworld"),
+        ]);
+      });
+    });
   });
 
   describe("Comment Tokenization", () => {
