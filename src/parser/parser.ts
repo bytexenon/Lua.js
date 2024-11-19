@@ -386,14 +386,14 @@ export class Parser {
     // Ensure the first token is always an identifier
     this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
     const identifiers = [this.curToken!.value];
-    this.advance(1); // Skip the first identifier
+    // this.advance(1); // Skip the first identifier
 
     // Continue consuming identifiers separated by commas
-    while (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
-      this.advance(1); // Skip the comma
+    while (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
+      this.advance(2); // Skip the last identifier and `,`
       this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
       identifiers.push(this.curToken!.value);
-      this.advance(1); // Skip the identifier
+      // this.advance(1); // Skip the identifier
     }
 
     return identifiers;
@@ -650,8 +650,8 @@ export class Parser {
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
     // local <varlist> = <explist>
-    if (this.checkCurrentToken(TokenEnum.CHARACTER, "=")) {
-      this.advance(1); // Skip '='
+    if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")) {
+      this.advance(2); // Skip last token of the variable list and `=`
       expressions = this.parseExpressionList(true);
     }
     this.registerVariables(locals);
