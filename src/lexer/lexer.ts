@@ -374,7 +374,7 @@ export class Lexer {
         this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
       } else {
         if (!VALID_CHARACTERS.has(curChar)) {
-          throw new Error(`Invalid character: ${curChar}`);
+          this.throwError(`Invalid character: ${curChar}`);
         }
         // Process it as character
         this.tokens.push(new Token(TokenEnum.CHARACTER, curChar));
