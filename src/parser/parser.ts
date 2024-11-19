@@ -3,6 +3,8 @@ import { TokenInterface, TokenEnum } from "../lexer/token.js";
 import * as ASTNode from "./ast-node/ast-node.js";
 
 /* Constants */
+// Length of surrounding tokens to show in error messages (in both directions)
+const ERROR_SURROUNDING_LENGTH = 10;
 
 // prettier-ignore
 const OPERATOR_PRECEDENCE: Readonly<Record<string, readonly [number, number]>> = {
@@ -122,6 +124,14 @@ export class Parser {
 
   /* Error handing */
   private fatalError(message: string): never {
+    const minPos = Math.max(0, this.position - ERROR_SURROUNDING_LENGTH);
+    const maxPos = Math.min(
+      this.tokens.length,
+      this.position + ERROR_SURROUNDING_LENGTH,
+    );
+    const surroundingTokens = this.tokens.slice(minPos, maxPos);
+    // eslint-disable-next-line no-console
+    console.log(surroundingTokens);
     throw new Error(message);
   }
 
