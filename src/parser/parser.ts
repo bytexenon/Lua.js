@@ -505,7 +505,7 @@ export class Parser {
       new ASTNode.StringLiteral(methodName),
     );
     const methodCall = this.parseFunctionCall(methodExpression);
-    methodCall["isMethodCall"] = true;
+    methodCall.isMethodCall = true;
     return methodCall;
   }
 
@@ -641,7 +641,9 @@ export class Parser {
   }
 
   /* Keyword parsers */
-  private parseLocal(): ASTNode.LocalAssignment {
+  private parseLocal():
+    | ASTNode.LocalAssignment
+    | ASTNode.LocalFunctionDeclaration {
     this.advance(1); // Skip 'local'
     if (this.checkCurrentToken(TokenEnum.KEYWORD, "function")) {
       // local function <name> \( <parlist> \)

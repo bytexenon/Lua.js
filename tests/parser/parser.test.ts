@@ -58,14 +58,6 @@ describe("Parser", () => {
         expect(node.type).toBe(ASTNode.NodeType.EXPRESSION_LIST);
         expect(node.children).toEqual([]);
       });
-
-      it("should error when initializing ASTNode with reserved properties", () => {
-        expect(() => {
-          new ASTNode.ASTNode(ASTNode.NodeType.PROGRAM, {
-            type: ASTNode.NodeType.CHUNK,
-          });
-        }).toThrow("Property 'type' is reserved and cannot be set on ASTNode.");
-      });
     });
 
     describe("ASTNodeList Children Management", () => {
@@ -81,11 +73,9 @@ describe("Parser", () => {
 
       it("should correctly set children in ASTNodeList (implicit)", () => {
         const childNode = new ASTNode.ASTNode(ASTNode.NodeType.CHUNK);
-        const node = new ASTNode.ASTNodeList(
-          ASTNode.NodeType.PROGRAM,
-          undefined,
-          [childNode],
-        );
+        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM, [
+          childNode,
+        ]);
 
         expect(node.children).toHaveLength(1);
         expect(node.children[0]).toBeInstanceOf(ASTNode.ASTNode);
