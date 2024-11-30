@@ -1,3 +1,5 @@
+/* eslint-disable max-nested-callbacks */
+
 /* Imports */
 import { Lexer } from "../../src/lexer/lexer.js";
 import { Token, TokenEnum } from "../../src/lexer/token";
@@ -177,6 +179,11 @@ describe("Lexer", () => {
         testLexer('"hello\\rworld"', [
           new Token(TokenEnum.STRING, "hello\rworld"),
         ]);
+      });
+
+      it("should error on invalid escape sequence", () => {
+        const lexer = new Lexer('"hello\\xworld"');
+        expect(() => lexer.lex()).toThrow("Invalid escape sequence: \\x");
       });
     });
 
