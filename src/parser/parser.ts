@@ -53,6 +53,10 @@ export class Parser {
   private position: number;
   private curToken: TokenInterface | undefined;
   private currentScope: Scope | undefined;
+  private readonly keywordParsingMap: Record<
+    string,
+    () => ASTNode.ASTNode | null
+  >;
 
   /* Constructor */
   constructor(tokens: TokenInterface[]) {
@@ -61,6 +65,17 @@ export class Parser {
     this.position = 0;
     this.curToken = this.tokens[this.position];
     this.currentScope = undefined;
+    this.keywordParsingMap = {
+      local: () => this.parseLocal(),
+      while: () => this.parseWhile(),
+      if: () => this.parseIf(),
+      do: () => this.parseDo(),
+      return: () => this.parseReturn(),
+      for: () => this.parseFor(),
+      break: () => this.parseBreak(),
+      repeat: () => this.parseRepeat(),
+      function: () => this.parseFunction(),
+    };
   }
 
   /* Utils */
@@ -403,7 +418,6 @@ export class Parser {
       this.advance(2); // Skip the last identifier and `,`
       this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
       identifiers.push(this.curToken!.value);
-      // this.advance(1); // Skip the identifier
     }
 
     return identifiers;
@@ -865,39 +879,12 @@ export class Parser {
       if (STOP_KEYWORDS.includes(tokenValue)) {
         return null;
       }
-
-      switch (tokenValue) {
-        case "local":
-          node = this.parseLocal();
-          break;
-        case "while":
-          node = this.parseWhile();
-          break;
-        case "if":
-          node = this.parseIf();
-          break;
-        case "do":
-          node = this.parseDo();
-          break;
-        case "return":
-          node = this.parseReturn();
-          break;
-        case "for":
-          node = this.parseFor();
-          break;
-        case "break":
-          node = this.parseBreak();
-          break;
-        case "repeat":
-          node = this.parseRepeat();
-          break;
-        case "function":
-          node = this.parseFunction();
-          break;
-        default:
-          // Raise an unrecovarable error as it's a problem with the lexer/parser
-          this.fatalError(`Unexpected keyword '${tokenValue}'`);
+      const keywordParser = this.keywordParsingMap[tokenValue];
+      if (!keywordParser) {
+        this.fatalError(`Unknown keyword '${tokenValue}'`);
       }
+
+      node = keywordParser();
     } else {
       // <exprstat>
       node = this.parseExprstat();
