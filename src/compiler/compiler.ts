@@ -150,6 +150,12 @@ export class Compiler {
   /* Stack Management */
   private allocateRegister(): number {
     this.nextRegister += 1;
+
+    // Update max stack size if needed
+    if (this.currentProto.maxStackSize < this.nextRegister) {
+      this.currentProto.maxStackSize = this.nextRegister;
+    }
+
     return this.nextRegister;
   }
   private freeRegister(): void {
