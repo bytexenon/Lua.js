@@ -216,6 +216,19 @@ export class Compiler {
     this.currentProto.code.push(instruction);
   }
   private emitConstant(constant: LuaConstant): number {
+    // Check if the constant already exists
+    for (const [
+      index,
+      existingConstant,
+    ] of this.currentProto.constants.entries()) {
+      if (
+        existingConstant.type === constant.type &&
+        existingConstant.value === constant.value
+      ) {
+        return index;
+      }
+    }
+
     const index = this.currentProto.constants.length;
     this.currentProto.constants.push(constant);
     return index;
