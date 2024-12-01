@@ -310,7 +310,6 @@ export class Compiler {
   }
 
   /* Node Compilation Handlers */
-  // @ts-ignore
   private compileExpressionNode(
     node: ASTNode.ASTNode,
     targetRegister: number,
