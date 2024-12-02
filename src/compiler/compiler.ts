@@ -135,7 +135,7 @@ export class Compiler {
   private nextRegister: number; // next free register
   private numVars: number; // number of active variables
   private scopeStack: Scope[];
-  private currentScope: Scope | null;
+  private currentScope: Scope | undefined;
 
   /* Constructor */
   constructor(ast: ASTNode.Program) {
@@ -144,7 +144,7 @@ export class Compiler {
     this.nextRegister = -1;
     this.numVars = 0;
     this.scopeStack = [];
-    this.currentScope = null;
+    this.currentScope = undefined;
   }
 
   /* Stack Management */
@@ -206,7 +206,8 @@ export class Compiler {
     }
 
     this.scopeStack.pop();
-    this.currentScope = this.scopeStack[this.scopeStack.length - 1] ?? null;
+    this.currentScope =
+      this.scopeStack[this.scopeStack.length - 1] ?? undefined;
   }
 
   // Runs at the end of compilation to ensure that
@@ -286,6 +287,39 @@ export class Compiler {
   ): void {
     this.compileConstantNode(node, targetRegister);
   }
+  private compileVariableNode(
+    node: ASTNode.VariableNode,
+    targetRegister: number,
+  ): void {
+    const variableName = node.name;
+
+    let currentScope = this.currentScope;
+    while (currentScope) {
+      if (currentScope.locals[variableName] !== undefined) {
+        const variableRegister = currentScope.locals[variableName];
+        this.emit(
+          new IRInstruction(Opcodes.MOVE, [
+            new IROperand("Register", targetRegister),
+            new IROperand("Register", variableRegister),
+          ]),
+        );
+        return;
+      }
+
+      currentScope = this.scopeStack[this.scopeStack.indexOf(currentScope) - 1];
+    }
+
+    // Variable not found in any scope, assume global
+    const constantIndex = this.emitConstant(
+      new LuaConstant(LuaConstantType.LUA_TSTRING, variableName),
+    );
+    this.emit(
+      new IRInstruction(Opcodes.GETGLOBAL, [
+        new IROperand("Register", targetRegister),
+        new IROperand("Constant", constantIndex),
+      ]),
+    );
+  }
 
   /* Statement Compilation */
   private compileDoStatement(node: ASTNode.DoStatement): void {
@@ -332,6 +366,9 @@ export class Compiler {
           node as ASTNode.StringLiteral,
           targetRegister,
         );
+        break;
+      case ASTNode.NodeType.VARIABLE:
+        this.compileVariableNode(node as ASTNode.VariableNode, targetRegister);
         break;
       default:
         throw new Error(`Unsupported expression node type: ${node.type}`);
