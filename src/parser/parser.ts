@@ -1,5 +1,5 @@
 /* Dependencies */
-import { TokenInterface, TokenEnum } from "../lexer/token.js";
+import { Token, TokenEnum } from "../lexer/token.js";
 import * as ASTNode from "./ast-node/ast-node.js";
 
 /* Constants */
@@ -48,10 +48,10 @@ class Scope {
 
 /* Parser */
 export class Parser {
-  private readonly tokens: TokenInterface[];
+  private readonly tokens: Token[];
   private readonly scopeStack: Scope[];
   private position: number;
-  private curToken: TokenInterface | undefined;
+  private curToken: Token | undefined;
   private currentScope: Scope | undefined;
   private readonly keywordParsingMap: Record<
     string,
@@ -59,7 +59,7 @@ export class Parser {
   >;
 
   /* Constructor */
-  constructor(tokens: TokenInterface[]) {
+  constructor(tokens: Token[]) {
     this.tokens = tokens;
     this.scopeStack = [];
     this.position = 0;
@@ -79,7 +79,7 @@ export class Parser {
   }
 
   /* Utils */
-  private peek(n: number): TokenInterface | undefined {
+  private peek(n: number): Token | undefined {
     return this.tokens[this.position + n];
   }
 
@@ -171,22 +171,16 @@ export class Parser {
     }
   }
 
-  private checkTokenType(
-    token: TokenInterface | undefined,
-    type: TokenEnum,
-  ): boolean {
+  private checkTokenType(token: Token | undefined, type: TokenEnum): boolean {
     return token?.type === type;
   }
 
-  private checkTokenValue(
-    token: TokenInterface | undefined,
-    value: string,
-  ): boolean {
+  private checkTokenValue(token: Token | undefined, value: string): boolean {
     return token?.value === value;
   }
 
   private checkToken(
-    token: TokenInterface | undefined,
+    token: Token | undefined,
     type: TokenEnum,
     value: string,
   ): boolean {
@@ -209,7 +203,7 @@ export class Parser {
 
   /* Expression parsing */
   private static isUnaryOperator(
-    token: TokenInterface | undefined,
+    token: Token | undefined,
   ): boolean | undefined {
     return (
       token &&
@@ -219,7 +213,7 @@ export class Parser {
   }
 
   private static isBinaryOperator(
-    token: TokenInterface | undefined,
+    token: Token | undefined,
   ): boolean | undefined {
     return (
       token &&
@@ -379,7 +373,7 @@ export class Parser {
     }
 
     while (true) {
-      const nextToken: TokenInterface | undefined = this.peek(1);
+      const nextToken: Token | undefined = this.peek(1);
       if (!Parser.isBinaryOperator(nextToken)) {
         break;
       }

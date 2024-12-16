@@ -1,21 +1,6 @@
-/* Token */
-export class Token {
-  public type: TokenEnum;
-  public value: string;
-
-  constructor(type: TokenEnum, value: string) {
-    this.type = type;
-    this.value = value;
-  }
-}
-
-/* TokenInterface */
-export interface TokenInterface {
-  readonly type: TokenEnum;
-  readonly value: string;
-}
-
-/* TokenEnum */
+/**
+ * Enum for token types.
+ */
 export const enum TokenEnum {
   OPERATOR = "OPERATOR",
   CONSTANT = "CONSTANT",
@@ -25,4 +10,14 @@ export const enum TokenEnum {
   STRING = "STRING",
   VARARG = "VARARG",
   CHARACTER = "CHARACTER",
+}
+
+/**
+ * Class representing a token.
+ */
+export class Token {
+  constructor(
+    public readonly type: TokenEnum,
+    public readonly value: string,
+  ) {}
 }
