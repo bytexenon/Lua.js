@@ -82,7 +82,6 @@ export class ASTNodeList extends ASTNode {
   /**
    * Creates an instance of ASTNodeList.
    * @param type - The type of the node list.
-   * @param properties - Additional properties to set on the node list.
    * @param children - Child nodes to add to the node list.
    */
   constructor(type: NodeType, children?: ASTNode[]) {
