@@ -35,7 +35,7 @@ export const NODE_SCHEMA: Record<NodeType, string[]> = {
   // Statement nodes //
   [NodeType.LOCAL_ASSIGNMENT]: ["expressions"],
   [NodeType.VARIABLE_ASSIGNMENT]: ["expressions"],
-  [NodeType.FUNCTION_DECLARATION]: ["chunk"],
+  [NodeType.FUNCTION_DECLARATION]: ["variable", "chunk"],
   [NodeType.LOCAL_FUNCTION_DECLARATION]: ["chunk"],
   [NodeType.RETURN_STATEMENT]: ["expressions"],
   [NodeType.BREAK_STATEMENT]: [],
