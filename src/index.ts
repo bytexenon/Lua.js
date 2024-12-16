@@ -1,29 +1,7 @@
-/* eslint-disable no-console */
-
 /* Dependencies */
 import { Lexer } from "./lexer/lexer.js";
 import { Parser } from "./parser/parser.js";
+import { Compiler } from "./compiler/compiler.js";
 
-/* Code */
-const code = `
-local a = 10 + 20 * 10 ^ 5;
-while a do
-  local b = a
-end
-`.repeat(1);
-
-console.log(`Processing ${(code.length / 1024 / 1024).toString()} MB of data`);
-
-const lexer = new Lexer(code);
-const tokens = lexer.lex();
-console.log(tokens);
-const parser = new Parser(tokens);
-const ast = parser.parse();
-
-ast.print();
-ast.traverse(
-  () => true,
-  (obj) => {
-    console.log(obj);
-  },
-);
+/* Export */
+export { Lexer, Parser, Compiler };
