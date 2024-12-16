@@ -207,6 +207,7 @@ export class Lexer {
     } else if (!this.checkCharacter("[")) {
       return false;
     }
+
     this.expectCharacter("[");
     this.advance(1); // Skip the second "["
     const start = this.curPos;
@@ -223,9 +224,12 @@ export class Lexer {
         }
       } else if (this.curChar === "\0") {
         // Error if ended abruptly
-        const endingDelimeter = `]${"=".repeat(delimeterDepth)}]`;
+        const equalSigns = "=".repeat(delimeterDepth);
+        const endingDelimeter = `]${equalSigns}]`;
         this.throwUnexpectedCharacterError(endingDelimeter);
       }
+
+      // Skip the character
       this.advance(1);
     }
     this.expectCharacter("]");
