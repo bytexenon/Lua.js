@@ -15,6 +15,7 @@ export default tseslint.config(
       "dist/**",
       "**/*.mjs",
       "eslint.config.mjs",
+      "rollup.config.js",
       "coverage/**",
     ],
   },
