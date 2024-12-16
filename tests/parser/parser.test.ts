@@ -127,6 +127,67 @@ describe("Parser", () => {
         node.addChild(childNode);
         expect(() => node.removeChild(dummyNode)).toThrow("Node not found");
       });
+
+      describe("Node Traversal", () => {
+        it("should traverse ASTNodeList", () => {
+          const chunkNode = new ASTNode.Chunk();
+          const expressionListNode = new ASTNode.ExpressionList();
+          const programNode = new ASTNode.Program();
+          const numberNode = new ASTNode.NumberLiteral("1");
+
+          const nodeList = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM, [
+            chunkNode,
+            expressionListNode,
+            programNode,
+            numberNode,
+          ]);
+
+          const visitedNodes: ASTNode.ASTNode[] = [];
+          nodeList.traverse(
+            () => true,
+            (node) => visitedNodes.push(node),
+          );
+
+          expect(visitedNodes).toEqual(
+            // Unordered array comparison
+            expect.arrayContaining([
+              chunkNode,
+              expressionListNode,
+              programNode,
+              numberNode,
+            ]),
+          );
+        });
+
+        it("should traverse an ASTNode", () => {
+          const variableNode = new ASTNode.LocalVariable("hello");
+          const numberNode = new ASTNode.NumberLiteral("1");
+          const chunkNode = new ASTNode.Chunk([numberNode]);
+
+          const functionDeclaration = new ASTNode.FunctionDeclaration(
+            variableNode,
+            [], // No fields
+            [], // No parameters
+            chunkNode,
+          );
+
+          const visitedNodes: ASTNode.ASTNode[] = [];
+          functionDeclaration.traverse(
+            () => true,
+            (node) => visitedNodes.push(node),
+          );
+
+          expect(visitedNodes).toEqual(
+            // Unordered array comparison
+            expect.arrayContaining([
+              functionDeclaration,
+              variableNode,
+              numberNode,
+              chunkNode,
+            ]),
+          );
+        });
+      });
     });
   });
 
