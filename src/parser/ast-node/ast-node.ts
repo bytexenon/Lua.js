@@ -90,14 +90,11 @@ export class IfBranchList extends ASTNodeList {
 
 /* Variable nodes */
 export class VariableNode extends ASTNode {
-  public name: string;
-  public variableType: VariableType;
-
-  constructor(name: string, variableType: VariableType) {
+  constructor(
+    public name: string,
+    public variableType: VariableType,
+  ) {
     super(NodeType.VARIABLE);
-
-    this.name = name;
-    this.variableType = variableType;
   }
 }
 export class LocalVariable extends VariableNode {
@@ -118,30 +115,18 @@ export class UpvalueVariable extends VariableNode {
 
 /* Primitive nodes */
 export class NumberLiteral extends ASTNode {
-  public value: string;
-
-  constructor(value: string) {
+  constructor(public value: string) {
     super(NodeType.NUMBER_LITERAL);
-
-    this.value = value;
   }
 }
 export class StringLiteral extends ASTNode {
-  public value: string;
-
-  constructor(value: string) {
+  constructor(public value: string) {
     super(NodeType.STRING_LITERAL);
-
-    this.value = value;
   }
 }
 export class ValueLiteral extends ASTNode {
-  public value: string;
-
-  constructor(value: string) {
+  constructor(public value: string) {
     super(NodeType.VALUE_LITERAL);
-
-    this.value = value;
   }
 }
 export class VarargLiteral extends ASTNode {
@@ -152,157 +137,102 @@ export class VarargLiteral extends ASTNode {
 
 /* Expression nodes */
 export class BinaryOperator extends ASTNode {
-  public operator: string;
-  public left: ASTNode;
-  public right: ASTNode;
-
-  constructor(operator: string, left: ASTNode, right: ASTNode) {
+  constructor(
+    public operator: string,
+    public left: ASTNode,
+    public right: ASTNode,
+  ) {
     super(NodeType.BINARY_OPERATOR);
-
-    this.operator = operator;
-    this.left = left;
-    this.right = right;
   }
 }
 export class UnaryOperator extends ASTNode {
-  public operator: string;
-  public operand: ASTNode;
-
-  constructor(operator: string, operand: ASTNode) {
+  constructor(
+    public operator: string,
+    public operand: ASTNode,
+  ) {
     super(NodeType.UNARY_OPERATOR);
-
-    this.operator = operator;
-    this.operand = operand;
   }
 }
 export class FunctionCall extends ASTNode {
-  public expression: ASTNode;
-  public arguments: ASTNodeList;
-  public isMethodCall: boolean;
-
   constructor(
-    expression: ASTNode,
-    argumentsList: ASTNodeList,
-    isMethodCall = false,
+    public expression: ASTNode,
+    public argumentsList: ASTNodeList,
+    public isMethodCall = false,
   ) {
     super(NodeType.FUNCTION_CALL);
-
-    this.expression = expression;
-    this.arguments = argumentsList;
-    this.isMethodCall = isMethodCall;
   }
 }
 export class TableIndex extends ASTNode {
-  public expression: ASTNode;
-  public index: ASTNode;
-
-  constructor(expression: ASTNode, index: ASTNode) {
+  constructor(
+    public expression: ASTNode,
+    public index: ASTNode,
+  ) {
     super(NodeType.TABLE_INDEX);
-
-    this.expression = expression;
-    this.index = index;
   }
 }
 export class AnonymousFunction extends ASTNode {
-  public parameters: string[];
-  public chunk: Chunk;
-
-  constructor(parameters: string[], chunk: Chunk) {
+  constructor(
+    public parameters: string[],
+    public chunk: Chunk,
+  ) {
     super(NodeType.ANONYMOUS_FUNCTION);
-
-    this.parameters = parameters;
-    this.chunk = chunk;
   }
 }
 export class TableElement extends ASTNode {
-  public key: ASTNode;
-  public value: ASTNode;
-  public isImplicitKey: boolean;
-
-  constructor(key: ASTNode, value: ASTNode, isImplicitKey = false) {
+  constructor(
+    public key: ASTNode,
+    public value: ASTNode,
+    public isImplicitKey = false,
+  ) {
     super(NodeType.TABLE_ELEMENT);
-
-    this.key = key;
-    this.value = value;
-    this.isImplicitKey = isImplicitKey;
   }
 }
 export class TableConstructor extends ASTNode {
-  public elements: ASTNodeList;
-
-  constructor(elements: ASTNodeList) {
+  constructor(public elements: ASTNodeList) {
     super(NodeType.TABLE_CONSTRUCTOR);
-
-    this.elements = elements;
   }
 }
 
 /* Statement nodes */
 export class LocalAssignment extends ASTNode {
-  public locals: string[];
-  public expressions: ExpressionList | undefined;
-
-  constructor(locals: string[], expressions: ExpressionList | undefined) {
+  constructor(
+    public locals: string[],
+    public expressions: ExpressionList | undefined,
+  ) {
     super(NodeType.LOCAL_ASSIGNMENT);
-
-    this.locals = locals;
-    this.expressions = expressions;
   }
 }
 export class VariableAssignment extends ASTNode {
-  public lvalues: ASTNode[];
-  public expressions: ASTNodeList;
-
-  constructor(lvalues: ASTNode[], expressions: ASTNodeList) {
+  constructor(
+    public lvalues: ASTNode[],
+    public expressions: ASTNodeList,
+  ) {
     super(NodeType.VARIABLE_ASSIGNMENT);
-
-    this.lvalues = lvalues;
-    this.expressions = expressions;
   }
 }
 export class FunctionDeclaration extends ASTNode {
-  public variable: VariableNode;
-  public fields: string[];
-  public parameters: string[];
-  public chunk: Chunk;
-  public isMethod = false;
-
   constructor(
-    variable: VariableNode,
-    fields: string[],
-    parameters: string[],
-    chunk: Chunk,
-    isMethod = false,
+    public variable: VariableNode,
+    public fields: string[],
+    public parameters: string[],
+    public chunk: Chunk,
+    public isMethod = false,
   ) {
     super(NodeType.FUNCTION_DECLARATION);
-
-    this.variable = variable;
-    this.fields = fields;
-    this.parameters = parameters;
-    this.chunk = chunk;
-    this.isMethod = isMethod;
   }
 }
 export class LocalFunctionDeclaration extends ASTNode {
-  public name: string;
-  public parameters: string[];
-  public chunk: Chunk;
-
-  constructor(name: string, parameters: string[], chunk: Chunk) {
+  constructor(
+    public name: string,
+    public parameters: string[],
+    public chunk: Chunk,
+  ) {
     super(NodeType.LOCAL_FUNCTION_DECLARATION);
-
-    this.name = name;
-    this.parameters = parameters;
-    this.chunk = chunk;
   }
 }
 export class ReturnStatement extends ASTNode {
-  public expressions: ExpressionList;
-
-  constructor(expressions: ExpressionList) {
+  constructor(public expressions: ExpressionList) {
     super(NodeType.RETURN_STATEMENT);
-
-    this.expressions = expressions;
   }
 }
 export class BreakStatement extends ASTNode {
@@ -311,99 +241,58 @@ export class BreakStatement extends ASTNode {
   }
 }
 export class DoStatement extends ASTNode {
-  public chunk: Chunk;
-
-  constructor(chunk: Chunk) {
+  constructor(public chunk: Chunk) {
     super(NodeType.DO_STATEMENT);
-
-    this.chunk = chunk;
   }
 }
 export class WhileStatement extends ASTNode {
-  public condition: ASTNode;
-  public chunk: Chunk;
-
-  constructor(condition: ASTNode, chunk: Chunk) {
+  constructor(
+    public condition: ASTNode,
+    public chunk: Chunk,
+  ) {
     super(NodeType.WHILE_STATEMENT);
-
-    this.condition = condition;
-    this.chunk = chunk;
   }
 }
 export class RepeatUntilStatement extends ASTNode {
-  public chunk: Chunk;
-  public condition: ASTNode;
-
-  constructor(chunk: Chunk, condition: ASTNode) {
+  constructor(
+    public chunk: Chunk,
+    public condition: ASTNode,
+  ) {
     super(NodeType.REPEAT_UNTIL_STATEMENT);
-
-    this.chunk = chunk;
-    this.condition = condition;
   }
 }
 export class NumericForStatement extends ASTNode {
-  public variable: string;
-  public start: ASTNode;
-  public end: ASTNode;
-  public step: ASTNode | null;
-  public chunk: Chunk;
-
   constructor(
-    variable: string,
-    start: ASTNode,
-    end: ASTNode,
-    step: ASTNode | null,
-    chunk: Chunk,
+    public variable: string,
+    public start: ASTNode,
+    public end: ASTNode,
+    public step: ASTNode | null,
+    public chunk: Chunk,
   ) {
     super(NodeType.NUMERIC_FOR_STATEMENT);
-
-    this.variable = variable;
-    this.start = start;
-    this.end = end;
-    this.step = step;
-    this.chunk = chunk;
   }
 }
 export class GenericForStatement extends ASTNode {
-  public variables: string[];
-  public generator: ASTNode;
-  public state: ASTNode | undefined;
-  public control: ASTNode | undefined;
-  public chunk: Chunk;
-
   constructor(
-    variables: string[],
-    generator: ASTNode,
-    state: ASTNode | undefined,
-    control: ASTNode | undefined,
-    chunk: Chunk,
+    public variables: string[],
+    public generator: ASTNode,
+    public state: ASTNode | undefined,
+    public control: ASTNode | undefined,
+    public chunk: Chunk,
   ) {
     super(NodeType.GENERIC_FOR_STATEMENT);
-
-    this.variables = variables;
-    this.generator = generator;
-    this.state = state;
-    this.control = control;
-    this.chunk = chunk;
   }
 }
 export class IfBranch extends ASTNode {
-  public condition: ASTNode | null;
-  public chunk: Chunk;
-
-  constructor(condition: ASTNode | null, chunk: Chunk) {
+  constructor(
+    public condition: ASTNode | null,
+    public chunk: Chunk,
+  ) {
     super(NodeType.IF_BRANCH);
-
-    this.condition = condition;
-    this.chunk = chunk;
   }
 }
 export class IfStatement extends ASTNode {
-  public branches: IfBranchList;
-
-  constructor(branches: IfBranchList) {
+  constructor(public branches: IfBranchList) {
     super(NodeType.IF_STATEMENT);
-
-    this.branches = branches;
   }
 }
