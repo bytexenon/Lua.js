@@ -60,7 +60,7 @@ describe("Parser", () => {
       });
     });
 
-    describe("ASTNodeList Children Management", () => {
+    describe("Child Management", () => {
       it("should correctly set children in ASTNodeList (explicit)", () => {
         const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
         const childNode = new ASTNode.ASTNode(ASTNode.NodeType.CHUNK);
