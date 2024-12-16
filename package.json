@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build",
-    "test": "tsc && jest --coverage"
+    "test": "tsc && jest --coverage",
+    "bundle": "tsc && rollup -c"
   },
   "author": "bytexenon",
   "license": "MIT",
