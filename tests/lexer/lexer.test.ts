@@ -1,13 +1,13 @@
 /* eslint-disable max-nested-callbacks */
 
 /* Imports */
+import { Token, TokenEnum } from "../../src/lexer/token";
 import {
   Lexer,
   KEYWORDS,
   OPERATORS,
   VALID_CHARACTERS,
 } from "../../src/lexer/lexer.js";
-import { Token, TokenEnum } from "../../src/lexer/token";
 
 /* Constants */
 const WHITESPACE = " \t\n";
@@ -29,7 +29,7 @@ const TEST_NUMBERS = [
 ];
 
 /* Helper Functions */
-function createTokens(values: string[], type: TokenEnum): Token[] {
+function createTokens(values: readonly string[], type: TokenEnum): Token[] {
   return values.map((value) => new Token(type, value));
 }
 function testLexer(code: string, expectedTokens: Token[]): void {
@@ -62,7 +62,8 @@ describe("Lexer", () => {
 
   describe("Keyword Tokenization", () => {
     it("should tokenize keywords", () => {
-      testLexer(KEYWORDS.join(" "), createTokens(KEYWORDS, TokenEnum.KEYWORD));
+      const keywords = Array.from(KEYWORDS);
+      testLexer(keywords.join(" "), createTokens(keywords, TokenEnum.KEYWORD));
     });
   });
 
@@ -86,9 +87,10 @@ describe("Lexer", () => {
 
   describe("Valid Character Tokenization", () => {
     it("should tokenize valid characters", () => {
+      const validCharacters = Array.from(VALID_CHARACTERS);
       testLexer(
-        VALID_CHARACTERS.join(""),
-        createTokens(VALID_CHARACTERS, TokenEnum.CHARACTER),
+        validCharacters.join(""),
+        createTokens(validCharacters, TokenEnum.CHARACTER),
       );
     });
   });
