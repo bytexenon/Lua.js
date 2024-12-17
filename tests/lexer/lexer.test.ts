@@ -7,11 +7,11 @@ import {
   KEYWORDS,
   OPERATORS,
   VALID_CHARACTERS,
+  CONSTANT_KEYWORDS,
 } from "../../src/lexer/lexer.js";
 
 /* Constants */
 const WHITESPACE = " \t\n";
-const CONSTANTS = ["nil", "true", "false"];
 const TEST_IDENTIFIERS = [
   "variableName",
   "ANOTHERVARIABLE",
@@ -69,9 +69,10 @@ describe("Lexer", () => {
 
   describe("Constant Tokenization", () => {
     it("should tokenize constants", () => {
+      const constants = Array.from(CONSTANT_KEYWORDS);
       testLexer(
-        CONSTANTS.join(" "),
-        createTokens(CONSTANTS, TokenEnum.CONSTANT),
+        constants.join(" "),
+        createTokens(constants, TokenEnum.CONSTANT),
       );
     });
   });
