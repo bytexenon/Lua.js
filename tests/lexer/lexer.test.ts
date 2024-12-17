@@ -1,49 +1,42 @@
 /* eslint-disable max-nested-callbacks */
 
 /* Imports */
-import { Lexer } from "../../src/lexer/lexer.js";
+import {
+  Lexer,
+  KEYWORDS,
+  OPERATORS,
+  VALID_CHARACTERS,
+} from "../../src/lexer/lexer.js";
 import { Token, TokenEnum } from "../../src/lexer/token";
 
 /* Constants */
 const WHITESPACE = " \t\n";
 const CONSTANTS = ["nil", "true", "false"];
-// prettier-ignore
-const KEYWORDS = [
-  "while", "do", "end", "for",
-  "local", "repeat", "until", "return",
-  "in", "if", "else", "elseif",
-  "function", "then", "break",
-];
-// prettier-ignore
-const OPERATORS = [
-  "^", "*", "/", "%",
-  "+", "-", "<", ">",
-  "#", "<=", ">=", "==", "~=",
-  "and", "or", "not", ".."
-];
-// prettier-ignore
-const VALID_CHARACTERS = [
-  "(", ")", "[", "]", "{", "}",
-  ".", ",", ";", ":", "="
-];
-// prettier-ignore
 const TEST_IDENTIFIERS = [
-  "variableName", "ANOTHERVARIABLE", "_underscore1234567890", "a"
+  "variableName",
+  "ANOTHERVARIABLE",
+  "_underscore1234567890",
+  "a",
 ];
-// prettier-ignore
 const TEST_NUMBERS = [
-  "123", "123456.789", "0xBEEF", "0Xbeeef", "1e10", "2.5e-3", ".9e9"
+  "123",
+  "123456.789",
+  "0xBEEF",
+  "0Xbeeef",
+  "1e10",
+  "2.5e-3",
+  ".9e9",
 ];
 
 /* Helper Functions */
-const createTokens = (values: string[], type: TokenEnum) =>
-  values.map((value) => new Token(type, value));
-
-const testLexer = (code: string, expectedTokens: Token[]) => {
+function createTokens(values: string[], type: TokenEnum): Token[] {
+  return values.map((value) => new Token(type, value));
+}
+function testLexer(code: string, expectedTokens: Token[]): void {
   const lexer = new Lexer(code);
   const tokens = lexer.lex();
   expect(tokens).toEqual(expectedTokens);
-};
+}
 
 /* Tests */
 describe("Lexer", () => {
