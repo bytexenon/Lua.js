@@ -77,16 +77,16 @@ export class ASTNode {
  * Base class for AST node lists.
  */
 export class ASTNodeList extends ASTNode {
-  public override readonly children: ASTNode[];
-
   /**
    * Creates an instance of ASTNodeList.
    * @param type - The type of the node list.
    * @param children - Child nodes to add to the node list.
    */
-  constructor(type: NodeType, children?: ASTNode[]) {
+  constructor(
+    type: NodeType,
+    public override readonly children: ASTNode[] = [],
+  ) {
     super(type);
-    this.children = children ?? [];
   }
 
   /**
