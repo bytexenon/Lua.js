@@ -1,5 +1,3 @@
-/* eslint-disable max-nested-callbacks */
-
 /* Imports */
 import { Token, TokenEnum } from "../../src/lexer/token";
 import {

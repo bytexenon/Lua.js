@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 /* Imports */
 import { Lexer } from "../../src/lexer/lexer.js";
 import { Parser } from "../../src/parser/parser.js";
