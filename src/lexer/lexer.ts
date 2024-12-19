@@ -86,15 +86,15 @@ export class Lexer {
   }
 
   /* Error Handling */
+  private static throwError(message: string): never {
+    throw new Error(message);
+  }
   private checkCharacter(char: string): boolean {
     return this.curChar === char;
   }
-  private throwError(message: string): never {
-    throw new Error(message);
-  }
   private throwUnexpectedCharacterError(expected: string): never {
     const convertedCurChar = SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
-    this.throwError(
+    Lexer.throwError(
       `Unexpected character '${convertedCurChar}', expected '${expected}'`,
     );
   }
@@ -312,7 +312,7 @@ export class Lexer {
           }
           string += String.fromCharCode(parseInt(numericEscape, 10));
         } else {
-          this.throwError(`Invalid escape sequence: \\${this.curChar}`);
+          Lexer.throwError(`Invalid escape sequence: \\${this.curChar}`);
         }
       } else {
         string += this.curChar;
@@ -379,7 +379,7 @@ export class Lexer {
         this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
       } else {
         if (!VALID_CHARACTERS.has(curChar)) {
-          this.throwError(`Invalid character: ${curChar}`);
+          Lexer.throwError(`Invalid character: ${curChar}`);
         }
         // Process it as character
         this.tokens.push(new Token(TokenEnum.CHARACTER, curChar));

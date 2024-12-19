@@ -176,15 +176,19 @@ export class Parser {
     }
   }
 
-  private checkTokenType(token: Token | undefined, type: TokenEnum): boolean {
+  private static checkTokenType(
+    token: Token | undefined,
+    type: TokenEnum,
+  ): boolean {
     return token?.type === type;
   }
-
-  private checkTokenValue(token: Token | undefined, value: string): boolean {
+  private static checkTokenValue(
+    token: Token | undefined,
+    value: string,
+  ): boolean {
     return token?.value === value;
   }
-
-  private checkToken(
+  private static checkToken(
     token: Token | undefined,
     type: TokenEnum,
     value: string,
@@ -195,15 +199,15 @@ export class Parser {
   }
 
   private checkCurrentTokenType(type: TokenEnum): boolean {
-    return this.checkTokenType(this.curToken, type);
+    return Parser.checkTokenType(this.curToken, type);
   }
 
   private checkCurrentTokenValue(value: string): boolean {
-    return this.checkTokenValue(this.curToken, value);
+    return Parser.checkTokenValue(this.curToken, value);
   }
 
   private checkCurrentToken(type: TokenEnum, value: string): boolean {
-    return this.checkToken(this.curToken, type, value);
+    return Parser.checkToken(this.curToken, type, value);
   }
 
   /* Expression parsing */
@@ -420,7 +424,7 @@ export class Parser {
     // this.advance(1); // Skip the first identifier
 
     // Continue consuming identifiers separated by commas
-    while (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
+    while (Parser.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
       this.advance(2); // Skip the last identifier and `,`
       this.expectCurrentTokenType(TokenEnum.IDENTIFIER);
       identifiers.push(this.curToken!.value);
@@ -469,7 +473,7 @@ export class Parser {
       return expressionList;
     }
     expressionList.addChild(firstExpression);
-    while (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
+    while (Parser.checkToken(this.peek(1), TokenEnum.CHARACTER, ",")) {
       this.advance(2); // Skip last token of the expression and `,`
       const expression = this.parseExpressionWithError();
       expressionList.addChild(expression);
@@ -489,7 +493,7 @@ export class Parser {
   }
 
   private consumeOptionalSemicolon(): void {
-    if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, ";")) {
+    if (Parser.checkToken(this.peek(1), TokenEnum.CHARACTER, ";")) {
       this.advance(1);
     }
   }
@@ -566,7 +570,7 @@ export class Parser {
       else if (
         this.checkCurrentTokenType(TokenEnum.IDENTIFIER) &&
         // To avoid false positives with variables
-        this.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")
+        Parser.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")
       ) {
         const key = new ASTNode.StringLiteral(this.curToken!.value);
         this.advance(2); // Skip the key and `=`
@@ -682,7 +686,7 @@ export class Parser {
     const locals: string[] = this.consumeIdentifierList();
     let expressions: ASTNode.ExpressionList | undefined;
     // local <varlist> = <explist>
-    if (this.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")) {
+    if (Parser.checkToken(this.peek(1), TokenEnum.CHARACTER, "=")) {
       this.advance(2); // Skip last token of the variable list and `=`
       expressions = this.parseExpressionList(true);
     }
@@ -819,6 +823,8 @@ export class Parser {
     );
   }
 
+  // Disable eslint because it's one of the keyword parsers
+  // eslint-disable-next-line class-methods-use-this
   private parseBreak(): ASTNode.BreakStatement {
     return new ASTNode.BreakStatement();
   }
