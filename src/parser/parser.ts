@@ -362,7 +362,10 @@ export class Parser {
     if (!expression) {
       this.fatalError("Expected expression");
     }
-    return new ASTNode.UnaryOperator(operator, expression);
+    return new ASTNode.UnaryOperator(
+      operator as ASTNode.UnaryOperatorType,
+      expression,
+    );
   }
 
   private parseBinary(minPrecedence = 0): ASTNode.ASTNode | null {
@@ -394,7 +397,11 @@ export class Parser {
         this.fatalError("Expected expression");
       }
 
-      expression = new ASTNode.BinaryOperator(operator, expression, right);
+      expression = new ASTNode.BinaryOperator(
+        operator as ASTNode.BinaryOperatorType,
+        expression,
+        right,
+      );
     }
 
     return expression;

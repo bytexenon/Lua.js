@@ -72,6 +72,21 @@ export const enum VariableType {
   UPVALUE = "UPVALUE",
 }
 
+/**
+ * Type for binary operators.
+ */
+// prettier-ignore
+export type BinaryOperatorType =
+  | "+"  | "-"   | "*"   | "/"
+  | "%"  | "^"   | ".."  | "=="
+  | "~=" | "<"   | "<="  | ">"
+  | ">=" | "and" | "or";
+
+/**
+ * Type for unary operators.
+ */
+export type UnaryOperatorType = "not" | "-" | "#";
+
 /* List nodes */
 
 /**
@@ -256,9 +271,16 @@ export class BinaryOperator extends ASTNode {
    * @param operator The operator itself (e.g., `+`, `-`, `*`, etc.).
    * @param left The left operand of the binary operation.
    * @param right The right operand of the binary operation.
+   * @example
+   * ```ts
+   * new BinaryOperator("+",
+   *   new NumberLiteral("1"),
+   *   new NumberLiteral("2")
+   * );
+   * ```
    */
   constructor(
-    public operator: string,
+    public operator: BinaryOperatorType,
     public left: ASTNode,
     public right: ASTNode,
   ) {
@@ -284,7 +306,7 @@ export class UnaryOperator extends ASTNode {
    * ```
    */
   constructor(
-    public operator: string,
+    public operator: UnaryOperatorType,
     public operand: ASTNode,
   ) {
     super(NodeType.UNARY_OPERATOR);
