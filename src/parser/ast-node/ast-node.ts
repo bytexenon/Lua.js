@@ -80,7 +80,7 @@ export const enum VariableType {
 export class Program extends ASTNodeList {
   /**
    * Creates an instance of Program.
-   * @param children - Child nodes to add to the program node.
+   * @param children Child nodes to add to the program node.
    */
   constructor(children?: ASTNode[]) {
     super(NodeType.PROGRAM, children);
@@ -93,7 +93,7 @@ export class Program extends ASTNodeList {
 export class Chunk extends ASTNodeList {
   /**
    * Creates an instance of Chunk.
-   * @param children - Child nodes to add to the chunk node.
+   * @param children Child nodes to add to the chunk node.
    */
   constructor(children?: ASTNode[]) {
     super(NodeType.CHUNK, children);
@@ -106,7 +106,7 @@ export class Chunk extends ASTNodeList {
 export class ExpressionList extends ASTNodeList {
   /**
    * Creates an instance of ExpressionList.
-   * @param children - Child nodes to add to the expression list node.
+   * @param children Child nodes to add to the expression list node.
    */
   constructor(children?: ASTNode[]) {
     super(NodeType.EXPRESSION_LIST, children);
@@ -119,7 +119,7 @@ export class ExpressionList extends ASTNodeList {
 export class IfBranchList extends ASTNodeList {
   /**
    * Creates an instance of IfBranchList.
-   * @param children - Child nodes to add to the if-branch list node.
+   * @param children Child nodes to add to the if-branch list node.
    */
   constructor(children?: ASTNode[]) {
     super(NodeType.IF_BRANCH_LIST, children);
@@ -134,8 +134,8 @@ export class IfBranchList extends ASTNodeList {
 export class VariableNode extends ASTNode {
   /**
    * Creates an instance of VariableNode.
-   * @param name - The name of the variable.
-   * @param variableType - The type of the variable (local, global, upvalue).
+   * @param name The name for the variable node.
+   * @param variableType The type of the variable (local, global, upvalue).
    */
   constructor(
     public name: string,
@@ -151,7 +151,7 @@ export class VariableNode extends ASTNode {
 export class LocalVariable extends VariableNode {
   /**
    * Creates an instance of LocalVariable.
-   * @param name - The name of the local variable.
+   * @param name The name for the local variable node.
    */
   constructor(name: string) {
     super(name, VariableType.LOCAL);
@@ -164,7 +164,7 @@ export class LocalVariable extends VariableNode {
 export class GlobalVariable extends VariableNode {
   /**
    * Creates an instance of GlobalVariable.
-   * @param name - The name of the global variable.
+   * @param name The name for the global variable node.
    */
   constructor(name: string) {
     super(name, VariableType.GLOBAL);
@@ -177,7 +177,7 @@ export class GlobalVariable extends VariableNode {
 export class UpvalueVariable extends VariableNode {
   /**
    * Creates an instance of UpvalueVariable.
-   * @param name - The name of the upvalue variable.
+   * @param name The name for the upvalue variable node.
    */
   constructor(name: string) {
     super(name, VariableType.UPVALUE);
@@ -192,7 +192,7 @@ export class UpvalueVariable extends VariableNode {
 export class NumberLiteral extends ASTNode {
   /**
    * Creates an instance of NumberLiteral.
-   * @param value - The value of the number literal.
+   * @param value The numeric value represented as a string.
    */
   constructor(public value: string) {
     super(NodeType.NUMBER_LITERAL);
@@ -205,7 +205,7 @@ export class NumberLiteral extends ASTNode {
 export class StringLiteral extends ASTNode {
   /**
    * Creates an instance of StringLiteral.
-   * @param value - The value of the string literal.
+   * @param value The string content represented by the string literal.
    */
   constructor(public value: string) {
     super(NodeType.STRING_LITERAL);
@@ -218,7 +218,15 @@ export class StringLiteral extends ASTNode {
 export class ValueLiteral extends ASTNode {
   /**
    * Creates an instance of ValueLiteral.
-   * @param value - The value of the value literal.
+   * @param value The string representation of the value literal (e.g., `nil`, `true`, `false`).
+   * @example
+   * ```ts
+   * new ValueLiteral("nil");
+   * ```
+   * @example
+   * ```ts
+   * new ValueLiteral("true");
+   * ```
    */
   constructor(public value: string) {
     super(NodeType.VALUE_LITERAL);
@@ -245,9 +253,9 @@ export class VarargLiteral extends ASTNode {
 export class BinaryOperator extends ASTNode {
   /**
    * Creates an instance of BinaryOperator.
-   * @param operator - The binary operator.
-   * @param left - The left operand.
-   * @param right - The right operand.
+   * @param operator The operator itself (e.g., `+`, `-`, `*`, etc.).
+   * @param left The left operand of the binary operation.
+   * @param right The right operand of the binary operation.
    */
   constructor(
     public operator: string,
@@ -264,8 +272,16 @@ export class BinaryOperator extends ASTNode {
 export class UnaryOperator extends ASTNode {
   /**
    * Creates an instance of UnaryOperator.
-   * @param operator - The unary operator.
-   * @param operand - The operand.
+   * @param operator The operator itself (e.g., `not`, `#`, `-`, etc.).
+   * @param operand The operand of the unary operation.
+   * @example
+   * ```ts
+   * new UnaryOperator("not", new ValueLiteral("true"));
+   * ```
+   * @example
+   * ```ts
+   * new UnaryOperator("#", new VariableNode("table", VariableType.LOCAL));
+   * ```
    */
   constructor(
     public operator: string,
@@ -281,9 +297,18 @@ export class UnaryOperator extends ASTNode {
 export class FunctionCall extends ASTNode {
   /**
    * Creates an instance of FunctionCall.
-   * @param expression - The function expression.
-   * @param argumentsList - The list of arguments.
-   * @param isMethodCall - Indicates if the function call is a method call.
+   * @param expression The expression representing the function to be called (aka the callee).
+   * @param argumentsList The list of arguments to pass to the function.
+   * @param isMethodCall Indicates whether it is a method call (e.g., `object:method()`).
+   * @example
+   * ```ts
+   * new FunctionCall(
+   *   new VariableNode("print", VariableType.GLOBAL),
+   *   new ExpressionList([
+   *     new StringLiteral("Hello, World!"),
+   *   ])
+   * );
+   * ```
    */
   constructor(
     public expression: ASTNode,
@@ -300,8 +325,15 @@ export class FunctionCall extends ASTNode {
 export class TableIndex extends ASTNode {
   /**
    * Creates an instance of TableIndex.
-   * @param expression - The table expression.
-   * @param index - The index expression.
+   * @param expression The expression representing the table.
+   * @param index The expression representing the index.
+   * @example
+   * ```ts
+   * new TableIndex(
+   *   new VariableNode("table", VariableType.LOCAL),
+   *   new StringLiteral("key")
+   * );
+   * ```
    */
   constructor(
     public expression: ASTNode,
@@ -317,8 +349,8 @@ export class TableIndex extends ASTNode {
 export class AnonymousFunction extends ASTNode {
   /**
    * Creates an instance of AnonymousFunction.
-   * @param parameters - The list of parameters.
-   * @param chunk - The function body.
+   * @param parameters The list of parameters.
+   * @param chunk The function body.
    */
   constructor(
     public parameters: string[],
@@ -334,9 +366,17 @@ export class AnonymousFunction extends ASTNode {
 export class TableElement extends ASTNode {
   /**
    * Creates an instance of TableElement.
-   * @param key - The key of the table element.
-   * @param value - The value of the table element.
-   * @param isImplicitKey - Indicates if the key is implicit.
+   * @param key The expression representing the key of the table element.
+   * @param value The expression representing the value of the table element.
+   * @param isImplicitKey Indicates if the key is implicit (e.g., `[1] = "value"` vs. `"value"`).
+   * @example
+   * ```ts
+   * new TableElement(
+   *   new NumberLiteral("1"),
+   *   new StringLiteral("value")
+   *   false
+   * );
+   * ```
    */
   constructor(
     public key: ASTNode,
@@ -353,7 +393,7 @@ export class TableElement extends ASTNode {
 export class TableConstructor extends ASTNode {
   /**
    * Creates an instance of TableConstructor.
-   * @param elements - The list of table elements.
+   * @param elements The list of table elements.
    */
   constructor(public elements: ASTNodeList) {
     super(NodeType.TABLE_CONSTRUCTOR);
@@ -368,8 +408,8 @@ export class TableConstructor extends ASTNode {
 export class LocalAssignment extends ASTNode {
   /**
    * Creates an instance of LocalAssignment.
-   * @param locals - The list of local variables.
-   * @param expressions - The list of expressions.
+   * @param locals The list of local variables.
+   * @param expressions The list of expressions.
    */
   constructor(
     public locals: string[],
@@ -385,8 +425,8 @@ export class LocalAssignment extends ASTNode {
 export class VariableAssignment extends ASTNode {
   /**
    * Creates an instance of VariableAssignment.
-   * @param lvalues - The list of left-hand side variables.
-   * @param expressions - The list of expressions.
+   * @param lvalues The list of left-hand side variables.
+   * @param expressions The list of expressions.
    */
   constructor(
     public lvalues: ASTNode[],
@@ -402,11 +442,11 @@ export class VariableAssignment extends ASTNode {
 export class FunctionDeclaration extends ASTNode {
   /**
    * Creates an instance of FunctionDeclaration.
-   * @param variable - The variable node representing the function name.
-   * @param fields - The list of fields.
-   * @param parameters - The list of parameters.
-   * @param chunk - The function body.
-   * @param isMethod - Indicates if the function is a method.
+   * @param variable The variable node representing the function name.
+   * @param fields The list of fields.
+   * @param parameters The list of parameters.
+   * @param chunk The function body.
+   * @param isMethod Indicates if the function is a method.
    */
   constructor(
     public variable: VariableNode,
@@ -425,9 +465,9 @@ export class FunctionDeclaration extends ASTNode {
 export class LocalFunctionDeclaration extends ASTNode {
   /**
    * Creates an instance of LocalFunctionDeclaration.
-   * @param name - The name of the local function.
-   * @param parameters - The list of parameters.
-   * @param chunk - The function body.
+   * @param name User-defined name of the function.
+   * @param parameters A of parameters.
+   * @param chunk The function body.
    */
   constructor(
     public name: string,
@@ -444,7 +484,7 @@ export class LocalFunctionDeclaration extends ASTNode {
 export class ReturnStatement extends ASTNode {
   /**
    * Creates an instance of ReturnStatement.
-   * @param expressions - The list of expressions to return.
+   * @param expressions The list of expressions to return.
    */
   constructor(public expressions: ExpressionList) {
     super(NodeType.RETURN_STATEMENT);
@@ -469,7 +509,7 @@ export class BreakStatement extends ASTNode {
 export class DoStatement extends ASTNode {
   /**
    * Creates an instance of DoStatement.
-   * @param chunk - The body of the do statement.
+   * @param chunk The body of the do statement.
    */
   constructor(public chunk: Chunk) {
     super(NodeType.DO_STATEMENT);
@@ -482,8 +522,8 @@ export class DoStatement extends ASTNode {
 export class WhileStatement extends ASTNode {
   /**
    * Creates an instance of WhileStatement.
-   * @param condition - The condition to evaluate.
-   * @param chunk - The body of the while statement.
+   * @param condition The condition to evaluate.
+   * @param chunk The body of the while statement.
    */
   constructor(
     public condition: ASTNode,
@@ -499,8 +539,8 @@ export class WhileStatement extends ASTNode {
 export class RepeatUntilStatement extends ASTNode {
   /**
    * Creates an instance of RepeatUntilStatement.
-   * @param chunk - The body of the repeat-until statement.
-   * @param condition - The condition to evaluate.
+   * @param chunk The body of the repeat-until statement.
+   * @param condition The condition to evaluate.
    */
   constructor(
     public chunk: Chunk,
@@ -516,11 +556,11 @@ export class RepeatUntilStatement extends ASTNode {
 export class NumericForStatement extends ASTNode {
   /**
    * Creates an instance of NumericForStatement.
-   * @param variable - The loop variable.
-   * @param start - The start expression.
-   * @param end - The end expression.
-   * @param step - The step expression.
-   * @param chunk - The body of the for loop.
+   * @param variable The loop variable.
+   * @param start The start expression.
+   * @param end The end expression.
+   * @param step The step expression.
+   * @param chunk The body of the for loop.
    */
   constructor(
     public variable: string,
@@ -539,11 +579,11 @@ export class NumericForStatement extends ASTNode {
 export class GenericForStatement extends ASTNode {
   /**
    * Creates an instance of GenericForStatement.
-   * @param variables - The list of loop variables.
-   * @param generator - The generator expression (iterator).
-   * @param state - The state expression (initial value).
-   * @param control - The control expression (step).
-   * @param chunk - The body of the for loop.
+   * @param variables The list of loop variables.
+   * @param generator The generator expression (iterator).
+   * @param state The state expression (initial value).
+   * @param control The control expression (step).
+   * @param chunk The body of the for loop.
    */
   constructor(
     public variables: string[],
@@ -562,8 +602,8 @@ export class GenericForStatement extends ASTNode {
 export class IfBranch extends ASTNode {
   /**
    * Creates an instance of IfBranch.
-   * @param condition - The condition to evaluate.
-   * @param chunk - The body of the if branch.
+   * @param condition The condition to evaluate.
+   * @param chunk The body of the if branch.
    */
   constructor(
     public condition: ASTNode | null,
@@ -579,7 +619,7 @@ export class IfBranch extends ASTNode {
 export class IfStatement extends ASTNode {
   /**
    * Creates an instance of IfStatement.
-   * @param branches - The list of if branches.
+   * @param branches The list of if branches.
    */
   constructor(public branches: IfBranchList) {
     super(NodeType.IF_STATEMENT);

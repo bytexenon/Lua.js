@@ -30,8 +30,7 @@ export class ASTNode {
 
   /**
    * Creates an instance of ASTNode.
-   * @param type - The type of the node.
-   * @param properties - Additional properties to set on the node.
+   * @param type The type of the node.
    */
   constructor(type: NodeType) {
     this.type = type;
@@ -39,8 +38,8 @@ export class ASTNode {
 
   /**
    * Traverses the AST and applies a callback to nodes that match the condition.
-   * @param condition - A function that returns true for nodes to be processed.
-   * @param callback - A function to apply to matching nodes.
+   * @param condition A function that returns true for nodes to be processed.
+   * @param callback A function to apply to matching nodes.
    */
   public traverse(
     condition: (node: ASTNode) => boolean,
@@ -79,8 +78,8 @@ export class ASTNode {
 export class ASTNodeList extends ASTNode {
   /**
    * Creates an instance of ASTNodeList.
-   * @param type - The type of the node list.
-   * @param children - Child nodes to add to the node list.
+   * @param type The type of the node list.
+   * @param children Child nodes to add to the node list.
    */
   constructor(
     type: NodeType,
@@ -91,7 +90,7 @@ export class ASTNodeList extends ASTNode {
 
   /**
    * Adds a child node to the node list.
-   * @param node - The child node to add.
+   * @param node The child node to add.
    * @returns The current instance for chaining.
    */
   public addChild(node: ASTNode): this {
@@ -101,7 +100,7 @@ export class ASTNodeList extends ASTNode {
 
   /**
    * Adds multiple child nodes to the node list.
-   * @param nodes - The child nodes to add.
+   * @param nodes The child nodes to add.
    * @returns The current instance for chaining.
    */
   public addChildren(nodes: ASTNode[]): this {
@@ -111,7 +110,7 @@ export class ASTNodeList extends ASTNode {
 
   /**
    * Removes a child node from the node list.
-   * @param node - The child node to remove.
+   * @param node The child node to remove.
    * @returns The current instance for chaining.
    */
   public removeChild(node: ASTNode): this {
@@ -125,7 +124,7 @@ export class ASTNodeList extends ASTNode {
 
   /**
    * Removes multiple child nodes from the node list.
-   * @param nodes - The child nodes to remove.
+   * @param nodes The child nodes to remove.
    * @returns The current instance for chaining.
    */
   public removeChildren(nodes: ASTNode[]): this {

@@ -4,9 +4,8 @@ export type { TrieLeaf, TrieNode };
 
 /**
  * Creates a trie (prefix tree) from an array of words.
- *
- * @param {readonly string[]} words - An array of words to be inserted into the trie.
- * @returns {TrieNode} The root node of the constructed trie.
+ * @param words An array of words to be inserted into the trie.
+ * @returns The root node of the constructed trie.
  */
 export function makeTrie(words: readonly string[]): TrieNode {
   const trie: TrieNode = {};
