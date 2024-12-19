@@ -23,24 +23,18 @@ class IRInstruction {
   CLOSURE R0, P0 ; Register and prototype
   JMP OFFSET-10 ; Jump with offset (relative)
   */
-  public opcode: Opcodes;
-  public operands: IROperand[];
-
-  constructor(opcode: Opcodes, operands: IROperand[]) {
-    this.opcode = opcode;
-    this.operands = operands;
-  }
+  constructor(
+    public opcode: Opcodes,
+    public operands: IROperand[],
+  ) {}
 }
 
 /* IROperand */
 class IROperand {
-  public type: string;
-  public value: number;
-
-  constructor(type: string, value: number) {
-    this.type = type;
-    this.value = value;
-  }
+  constructor(
+    public type: string,
+    public value: number,
+  ) {}
 }
 
 /* LuaConstantType */
@@ -53,51 +47,32 @@ const enum LuaConstantType {
 
 /* LuaConstant */
 class LuaConstant {
-  public type: LuaConstantType;
-  public value: number | string | boolean;
-
-  constructor(type: LuaConstantType, value: number | string | boolean) {
-    this.type = type;
-    this.value = value;
-  }
+  constructor(
+    public type: LuaConstantType,
+    public value: number | string | boolean,
+  ) {}
 }
 
 /* LuaPrototype */
 export class LuaPrototype {
-  public code: IRInstruction[];
-  public constants: LuaConstant[];
-  public prototypes: LuaPrototype[];
-  public numParams: number;
-  public isVararg: boolean;
-  public maxStackSize: number;
-
   constructor(
-    code: IRInstruction[] = [],
-    constants: LuaConstant[] = [],
-    prototypes: LuaPrototype[] = [],
-    numParams = 0,
-    isVararg = false,
+    public code: IRInstruction[] = [],
+    public constants: LuaConstant[] = [],
+    public prototypes: LuaPrototype[] = [],
+    public numParams = 0,
+    public isVararg = false,
     // registers 0/1 are always valid
-    maxStackSize = 2,
-  ) {
-    this.code = code;
-    this.constants = constants;
-    this.prototypes = prototypes;
-    this.numParams = numParams;
-    this.isVararg = isVararg;
-    this.maxStackSize = maxStackSize;
-  }
+    public maxStackSize = 2,
+  ) {}
 }
 
 /* Scope */
 export class Scope {
-  public readonly isFunctionScope: boolean;
-  public locals: Record<string, number>; // variable name to register mapping
-
-  constructor(isFunctionScope = false) {
-    this.isFunctionScope = isFunctionScope;
-    this.locals = {};
-  }
+  constructor(
+    public readonly isFunctionScope = false,
+    // variable name to register mapping
+    public locals: Record<string, number> = {},
+  ) {}
 }
 
 /*
