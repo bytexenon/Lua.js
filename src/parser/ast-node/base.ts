@@ -53,13 +53,13 @@ export class ASTNode {
       for (const child of this.children) {
         child.traverse(condition, callback);
       }
-    } else {
-      const schemaFields = NODE_SCHEMA[this.type];
-      for (const field of schemaFields) {
-        const value = this[field] as unknown;
-        if (value instanceof ASTNode) {
-          value.traverse(condition, callback);
-        }
+      return;
+    }
+    const schemaFields = NODE_SCHEMA[this.type];
+    for (const field of schemaFields) {
+      const value = this[field] as unknown;
+      if (value instanceof ASTNode) {
+        value.traverse(condition, callback);
       }
     }
   }
