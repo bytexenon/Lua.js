@@ -192,6 +192,8 @@ export default tseslint.config(
       "one-var": ["error", "never"],
       "func-names": "error",
       "new-cap": "error",
+      "class-methods-use-this": "error",
+      "no-shadow": ["error", { builtinGlobals: true }],
     },
   },
 );
