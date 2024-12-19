@@ -9,10 +9,15 @@ const ERROR_SURROUNDING_LENGTH = 10;
 // prettier-ignore
 const OPERATOR_PRECEDENCE: Readonly<Record<string, readonly [number, number]>> = {
   "+":   [6, 6],  "-":  [6, 6],
-  "*":   [7, 7],  "/":  [7, 7], "%": [7, 7],
+  "*":   [7, 7],  "/":  [7, 7],
+  "%":   [7, 7],
+
   "^":   [10, 9], "..": [5, 4],
-  "==":  [3, 3],  "~=": [3, 3], "<": [3, 3], ">": [3, 3],
+
+  "==":  [3, 3],  "~=": [3, 3],
+  "<":   [3, 3],  ">":  [3, 3],
   "<=":  [3, 3],  ">=": [3, 3],
+
   "and": [2, 2],  "or": [1, 1],
 };
 // prettier-ignore
