@@ -3,11 +3,16 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
+import jsdoc from "eslint-plugin-jsdoc";
 
 export default tseslint.config(
   eslint.configs.recommended,
-  ...tseslint.configs.strictTypeCheckedOnly,
-  ...tseslint.configs.stylisticTypeCheckedOnly,
+  tseslint.configs.strictTypeCheckedOnly,
+  tseslint.configs.stylisticTypeCheckedOnly,
+  jsdoc.configs["flat/recommended-typescript-error"],
+  jsdoc.configs["flat/stylistic-typescript-error"],
+  jsdoc.configs["flat/logical-typescript-error"],
+  jsdoc.configs["flat/contents-typescript-error"],
   {
     // Ignore patterns
     ignores: [
@@ -38,8 +43,10 @@ export default tseslint.config(
     },
     plugins: {
       import: importPlugin,
+      jsdoc,
     },
     rules: {
+      "jsdoc/require-description-complete-sentence": 2,
       quotes: [
         "error",
         "double",
