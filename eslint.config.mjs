@@ -49,8 +49,13 @@ export default tseslint.config(
       jsdoc,
     },
     rules: {
-      "unicorn/prefer-code-point": 0, // Stupid rule
-      "unicorn/prefer-export-from": 0, // Conflicts with import plugin
+      // Stupid rule, doesn't recognize that we're not working with the DOM
+      "unicorn/prefer-dom-node-remove": 0,
+      // Stupid rule
+      "unicorn/prefer-code-point": 0,
+      // Conflicts with import plugin
+      "unicorn/prefer-export-from": 0,
+
       "jsdoc/require-description-complete-sentence": 2,
       quotes: [
         "error",
