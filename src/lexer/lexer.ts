@@ -93,9 +93,10 @@ export class Lexer {
     return this.curChar === char;
   }
   private throwUnexpectedCharacterError(expected: string): never {
-    const convertedCurChar = SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
+    const convertedCurrentChar =
+      SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
     Lexer.throwError(
-      `Unexpected character '${convertedCurChar}', expected '${expected}'`,
+      `Unexpected character '${convertedCurrentChar}', expected '${expected}'`,
     );
   }
   private expectCharacter(char: string): never | void {
@@ -137,8 +138,8 @@ export class Lexer {
       (code >= 65 && code <= 70) // A-F
     );
   }
-  private static isScientificNotationStart(curChar: string): boolean {
-    return curChar === "e" || curChar === "E";
+  private static isScientificNotationStart(currentChar: string): boolean {
+    return currentChar === "e" || currentChar === "E";
   }
   private static isWhitespace(char: string): boolean {
     return char === " " || char === "\t" || char === "\n";
@@ -146,9 +147,9 @@ export class Lexer {
 
   /* Multi-character checkers */
   private isDelimiter(): boolean {
-    const curChar = this.curChar;
+    const currentChar = this.curChar;
     const nextChar = this.peek(1);
-    return curChar === "[" && (nextChar === "[" || nextChar === "=");
+    return currentChar === "[" && (nextChar === "[" || nextChar === "=");
   }
   private isLongString(): boolean {
     return this.isDelimiter();
@@ -157,9 +158,9 @@ export class Lexer {
     return this.curChar === "-" && this.peek(1) === "-";
   }
   private isHexadecimalStart(): boolean {
-    const curChar = this.curChar;
+    const currentChar = this.curChar;
     const nextChar = this.peek(1);
-    return curChar === "0" && (nextChar === "x" || nextChar === "X");
+    return currentChar === "0" && (nextChar === "x" || nextChar === "X");
   }
   private isVararg(): boolean {
     return this.curChar === "." && this.peek(1) === "." && this.peek(2) === ".";
@@ -179,10 +180,10 @@ export class Lexer {
     let node: TrieNode = OPERATOR_TRIE;
     let operator: string | undefined;
 
-    const curCharPos = this.curPos;
+    const currentCharPos = this.curPos;
     let index = 0;
     while (true) {
-      const char = this.getCharacterFromPosition(curCharPos + index);
+      const char = this.getCharacterFromPosition(currentCharPos + index);
       node = node[char] as TrieNode;
       if (!node) {
         break;
@@ -259,7 +260,7 @@ export class Lexer {
         this.advance(1);
       }
       this.advance(1);
-      return parseInt(this.code.slice(start, this.curPos), 16);
+      return Number.parseInt(this.code.slice(start, this.curPos), 16);
     }
 
     // The normal part
@@ -280,7 +281,7 @@ export class Lexer {
       this.consumeDigit();
     }
 
-    return parseFloat(this.code.slice(start, this.curPos));
+    return Number.parseFloat(this.code.slice(start, this.curPos));
   }
   private consumeIdentifier(): string {
     const start = this.curPos;
@@ -306,11 +307,15 @@ export class Lexer {
         } else if (Lexer.isNumber(this.curChar)) {
           // \d\d\d type of escape
           let numericEscape = "";
-          for (let i = 0; i < 3 && Lexer.isNumber(this.curChar); i++) {
+          for (
+            let index = 0;
+            index < 3 && Lexer.isNumber(this.curChar);
+            index++
+          ) {
             numericEscape += this.curChar;
             this.advance(1);
           }
-          string += String.fromCharCode(parseInt(numericEscape, 10));
+          string += String.fromCharCode(Number.parseInt(numericEscape, 10));
         } else {
           Lexer.throwError(`Invalid escape sequence: \\${this.curChar}`);
         }
@@ -340,10 +345,10 @@ export class Lexer {
 
   /* Main Consumer */
   private getNextToken(): void {
-    const curChar = this.curChar;
-    if (Lexer.isWhitespace(curChar)) {
+    const currentChar = this.curChar;
+    if (Lexer.isWhitespace(currentChar)) {
       this.consumeWhitespace();
-    } else if (Lexer.isIdentifierStart(curChar)) {
+    } else if (Lexer.isIdentifierStart(currentChar)) {
       const identifier = this.consumeIdentifier();
       if (OPERATOR_KEYWORDS.has(identifier)) {
         this.tokens.push(new Token(TokenEnum.OPERATOR, identifier));
@@ -357,7 +362,7 @@ export class Lexer {
     } else if (this.isNumberStart()) {
       const number = this.consumeNumber();
       this.tokens.push(new Token(TokenEnum.NUMBER, number.toString()));
-    } else if (Lexer.isQuoteString(curChar)) {
+    } else if (Lexer.isQuoteString(currentChar)) {
       const string = this.consumeSimpleString();
       this.tokens.push(new Token(TokenEnum.STRING, string));
     } else if (this.isLongString()) {
@@ -378,11 +383,11 @@ export class Lexer {
       if (operator) {
         this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
       } else {
-        if (!VALID_CHARACTERS.has(curChar)) {
-          Lexer.throwError(`Invalid character: ${curChar}`);
+        if (!VALID_CHARACTERS.has(currentChar)) {
+          Lexer.throwError(`Invalid character: ${currentChar}`);
         }
         // Process it as character
-        this.tokens.push(new Token(TokenEnum.CHARACTER, curChar));
+        this.tokens.push(new Token(TokenEnum.CHARACTER, currentChar));
         this.advance(1); // Skip the character
       }
     }

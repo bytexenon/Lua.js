@@ -4,7 +4,7 @@ import { NODE_SCHEMA } from "./node-schema.js";
 
 /* Constants */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type NodeMethod = (...args: any[]) => any;
+export type NodeMethod = (...arguments_: any[]) => any;
 export type NodeProperty =
   | ASTNode
   | ASTNodeList
@@ -12,7 +12,6 @@ export type NodeProperty =
   | string[]
   | number
   | boolean
-  | null
   | undefined
   | ASTNode[]
   | NodeMethod;
@@ -68,7 +67,7 @@ export class ASTNode {
    */
   public print(): void {
     // eslint-disable-next-line no-console
-    console.dir(this, { depth: null });
+    console.dir(this, { depth: undefined });
   }
 }
 
@@ -128,8 +127,8 @@ export class ASTNodeList extends ASTNode {
    * @returns The current instance for chaining.
    */
   public removeChildren(nodes: ASTNode[]): this {
-    for (const node of nodes) {
-      this.removeChild(node);
+    for (const childNode of nodes) {
+      this.removeChild(childNode);
     }
     return this;
   }

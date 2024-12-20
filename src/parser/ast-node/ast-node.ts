@@ -588,7 +588,7 @@ export class NumericForStatement extends ASTNode {
     public variable: string,
     public start: ASTNode,
     public end: ASTNode,
-    public step: ASTNode | null,
+    public step: ASTNode | undefined,
     public chunk: Chunk,
   ) {
     super(NodeType.NUMERIC_FOR_STATEMENT);
@@ -628,7 +628,7 @@ export class IfBranch extends ASTNode {
    * @param chunk The body of the if branch.
    */
   constructor(
-    public condition: ASTNode | null,
+    public condition: ASTNode | undefined,
     public chunk: Chunk,
   ) {
     super(NodeType.IF_BRANCH);

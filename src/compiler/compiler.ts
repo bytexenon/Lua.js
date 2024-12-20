@@ -59,7 +59,7 @@ export class LuaPrototype {
     public code: IRInstruction[] = [],
     public constants: LuaConstant[] = [],
     public prototypes: LuaPrototype[] = [],
-    public numParams = 0,
+    public numberParameters = 0,
     public isVararg = false,
     // registers 0/1 are always valid
     public maxStackSize = 2,
@@ -181,14 +181,13 @@ export class Compiler {
     }
 
     this.scopeStack.pop();
-    this.currentScope =
-      this.scopeStack[this.scopeStack.length - 1] ?? undefined;
+    this.currentScope = this.scopeStack.at(-1) ?? undefined;
   }
 
   // Runs at the end of compilation to ensure that
   // all pushed scopes have been popped
   private checkScopeStack(): void {
-    if (this.scopeStack.length !== 0) {
+    if (this.scopeStack.length > 0) {
       throw new Error("Scope stack not empty");
     }
   }
@@ -226,16 +225,19 @@ export class Compiler {
     let constantValue: number | string | boolean;
 
     switch (nodeType) {
-      case ASTNode.NodeType.NUMBER_LITERAL:
+      case ASTNode.NodeType.NUMBER_LITERAL: {
         constantType = LuaConstantType.LUA_TNUMBER;
         constantValue = node.value;
         break;
-      case ASTNode.NodeType.STRING_LITERAL:
+      }
+      case ASTNode.NodeType.STRING_LITERAL: {
         constantType = LuaConstantType.LUA_TSTRING;
         constantValue = node.value;
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported constant node type: ${nodeType}`);
+      }
     }
 
     const constantIndex = this.emitConstant(
@@ -304,11 +306,7 @@ export class Compiler {
     const locals = node.locals;
     const expressions = node.expressions;
 
-    if (!expressions) {
-      for (const localName of locals) {
-        this.registerVariable(localName);
-      }
-    } else {
+    if (expressions) {
       for (const [index, expressionNode] of expressions.children.entries()) {
         const expressionLocal = locals[index];
         const targetRegister = expressionLocal
@@ -321,6 +319,10 @@ export class Compiler {
           this.freeRegister(); // Free temporary register
         }
       }
+    } else {
+      for (const localName of locals) {
+        this.registerVariable(localName);
+      }
     }
   }
 
@@ -330,37 +332,44 @@ export class Compiler {
     targetRegister: number,
   ): number {
     switch (node.type) {
-      case ASTNode.NodeType.NUMBER_LITERAL:
+      case ASTNode.NodeType.NUMBER_LITERAL: {
         this.compileNumberLiteral(
           node as ASTNode.NumberLiteral,
           targetRegister,
         );
         break;
-      case ASTNode.NodeType.STRING_LITERAL:
+      }
+      case ASTNode.NodeType.STRING_LITERAL: {
         this.compileStringLiteral(
           node as ASTNode.StringLiteral,
           targetRegister,
         );
         break;
-      case ASTNode.NodeType.VARIABLE:
+      }
+      case ASTNode.NodeType.VARIABLE: {
         this.compileVariableNode(node as ASTNode.VariableNode, targetRegister);
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported expression node type: ${node.type}`);
+      }
     }
 
     return targetRegister;
   }
   private compileStatementNode(node: ASTNode.ASTNode): void {
     switch (node.type) {
-      case ASTNode.NodeType.DO_STATEMENT:
+      case ASTNode.NodeType.DO_STATEMENT: {
         this.compileDoStatement(node as ASTNode.DoStatement);
         break;
-      case ASTNode.NodeType.LOCAL_ASSIGNMENT:
+      }
+      case ASTNode.NodeType.LOCAL_ASSIGNMENT: {
         this.compileLocalAssignment(node as ASTNode.LocalAssignment);
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported statement node type: ${node.type}`);
+      }
     }
   }
 

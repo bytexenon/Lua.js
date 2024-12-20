@@ -21,16 +21,16 @@ const OPERATOR_PRECEDENCE: Readonly<Record<string, readonly [number, number]>> =
   "and": [2, 2],  "or": [1, 1],
 };
 // prettier-ignore
-const BINARY_OPERATORS: readonly string[] = [
+const BINARY_OPERATORS = new Set([
   "+",  "-",   "*",  "/",
   "%",  "^",   "..", "==",
   "~=", "<",   ">",  "<=",
   ">=", "and", "or"
-];
+]);
 
-const UNARY_OPERATORS: readonly string[] = ["-", "not", "#"];
+const UNARY_OPERATORS = new Set(["-", "not", "#"]);
 const UNARY_PRECEDENCE = 8;
-const STOP_KEYWORDS: readonly string[] = ["end", "else", "elseif", "until"];
+const STOP_KEYWORDS = new Set(["end", "else", "elseif", "until"]);
 
 /* Scope */
 class Scope {
@@ -60,7 +60,7 @@ export class Parser {
   private currentScope: Scope | undefined;
   private readonly keywordParsingMap: Record<
     string,
-    () => ASTNode.ASTNode | null
+    () => ASTNode.ASTNode | undefined
   >;
 
   /* Constructor */
@@ -107,7 +107,7 @@ export class Parser {
       this.fatalError("No scope to pop");
     }
     this.scopeStack.pop();
-    this.currentScope = this.scopeStack[this.scopeStack.length - 1];
+    this.currentScope = this.scopeStack.at(-1);
   }
 
   /* Variable management */
@@ -126,8 +126,8 @@ export class Parser {
 
   private getVariableType(variableName: string): string {
     let isUpvalue = false;
-    for (let i = this.scopeStack.length - 1; i >= 0; i--) {
-      const scope: Scope | undefined = this.scopeStack[i];
+    for (let index = this.scopeStack.length - 1; index >= 0; index--) {
+      const scope: Scope | undefined = this.scopeStack[index];
       if (!scope) {
         this.fatalError("No scope to check variable type");
       }
@@ -217,7 +217,7 @@ export class Parser {
     return (
       token &&
       token.type === TokenEnum.OPERATOR &&
-      UNARY_OPERATORS.includes(token.value)
+      UNARY_OPERATORS.has(token.value)
     );
   }
 
@@ -227,16 +227,16 @@ export class Parser {
     return (
       token &&
       token.type === TokenEnum.OPERATOR &&
-      BINARY_OPERATORS.includes(token.value)
+      BINARY_OPERATORS.has(token.value)
     );
   }
 
   // It's public because it's used in the tests
-  public parseExpression(): ASTNode.ASTNode | null {
+  public parseExpression(): ASTNode.ASTNode | undefined {
     const expression = this.parseBinary();
     if (!expression) {
       this.advance(-1);
-      return null; // Error?
+      return undefined; // Error?
     }
     return expression;
   }
@@ -251,26 +251,31 @@ export class Parser {
     return expression;
   }
 
-  private parseBase(): ASTNode.ASTNode | null {
-    const curToken = this.curToken;
-    if (!curToken) {
-      return null;
+  private parseBase(): ASTNode.ASTNode | undefined {
+    const currentToken = this.curToken;
+    if (!currentToken) {
+      return undefined;
     }
 
-    const tokenType = curToken.type;
+    const tokenType = currentToken.type;
     switch (tokenType) {
-      case TokenEnum.NUMBER:
-        return new ASTNode.NumberLiteral(curToken.value);
-      case TokenEnum.STRING:
-        return new ASTNode.StringLiteral(curToken.value);
-      case TokenEnum.VARARG:
+      case TokenEnum.NUMBER: {
+        return new ASTNode.NumberLiteral(currentToken.value);
+      }
+      case TokenEnum.STRING: {
+        return new ASTNode.StringLiteral(currentToken.value);
+      }
+      case TokenEnum.VARARG: {
         return new ASTNode.VarargLiteral();
-      case TokenEnum.CONSTANT:
-        return new ASTNode.ValueLiteral(curToken.value);
-      case TokenEnum.IDENTIFIER:
+      }
+      case TokenEnum.CONSTANT: {
+        return new ASTNode.ValueLiteral(currentToken.value);
+      }
+      case TokenEnum.IDENTIFIER: {
         return this.parseVariable();
+      }
       case TokenEnum.CHARACTER: {
-        const tokenValue = curToken.value;
+        const tokenValue = currentToken.value;
         if (tokenValue === "(") {
           // \( <expr> \)
           this.advance(1); // Skip `(`
@@ -285,7 +290,7 @@ export class Parser {
         break;
       }
       case TokenEnum.KEYWORD: {
-        const tokenValue = curToken.value;
+        const tokenValue = currentToken.value;
         if (tokenValue === "function") {
           return this.parseAnonymousFunction();
         }
@@ -293,12 +298,12 @@ export class Parser {
     }
 
     // It's fine, base doesn't always have to be here
-    return null;
+    return undefined;
   }
 
   private parseSuffix(
     primaryExpression: ASTNode.ASTNode,
-  ): ASTNode.ASTNode | null {
+  ): ASTNode.ASTNode | undefined {
     const nextToken = this.peek(1);
     if (nextToken) {
       if (nextToken.type === TokenEnum.CHARACTER) {
@@ -335,13 +340,13 @@ export class Parser {
         return this.parseImplicitFunctionCall(primaryExpression);
       }
     }
-    return null;
+    return undefined;
   }
 
-  private parsePrefix(): ASTNode.ASTNode | null {
+  private parsePrefix(): ASTNode.ASTNode | undefined {
     let primaryExpression = this.parseBase();
     if (!primaryExpression) {
-      return null;
+      return undefined;
     }
     while (true) {
       const suffix = this.parseSuffix(primaryExpression);
@@ -354,19 +359,19 @@ export class Parser {
     return primaryExpression;
   }
 
-  private parseUnary(): ASTNode.ASTNode | null {
-    const curToken = this.curToken;
-    if (!curToken) {
+  private parseUnary(): ASTNode.ASTNode | undefined {
+    const currentToken = this.curToken;
+    if (!currentToken) {
       // TODO: Should error?
-      return null;
+      return undefined;
     }
-    if (!Parser.isUnaryOperator(curToken)) {
+    if (!Parser.isUnaryOperator(currentToken)) {
       return this.parsePrefix();
     }
-    const operator = curToken.value;
+    const operator = currentToken.value;
 
     this.advance(1);
-    const expression: ASTNode.ASTNode | null =
+    const expression: ASTNode.ASTNode | undefined =
       this.parseBinary(UNARY_PRECEDENCE);
     if (!expression) {
       this.fatalError("Expected expression");
@@ -377,11 +382,11 @@ export class Parser {
     );
   }
 
-  private parseBinary(minPrecedence = 0): ASTNode.ASTNode | null {
+  private parseBinary(minPrecedence = 0): ASTNode.ASTNode | undefined {
     let expression = this.parseUnary();
     if (!expression) {
       // TODO: Should error?
-      return null;
+      return undefined;
     }
 
     while (true) {
@@ -389,7 +394,7 @@ export class Parser {
       if (!Parser.isBinaryOperator(nextToken)) {
         break;
       }
-      // @ts-expect-error - Parser.isBinaryOperator checks whether nextToken is null
+      // @ts-expect-error - Parser.isBinaryOperator checks whether nextToken is undefined
       const operator: string = nextToken.value;
       const precedence = OPERATOR_PRECEDENCE[operator];
       if (!precedence) {
@@ -511,10 +516,10 @@ export class Parser {
 
     this.expectCurrentToken(TokenEnum.CHARACTER, "(");
     this.advance(1); // Skip '('
-    const args = this.parseExpressionList();
+    const arguments_ = this.parseExpressionList();
     this.advance(1); // Skip last token of arguments
     this.expectCurrentToken(TokenEnum.CHARACTER, ")");
-    return new ASTNode.FunctionCall(primaryExpression, args);
+    return new ASTNode.FunctionCall(primaryExpression, arguments_);
   }
 
   private consumeMethodCall(
@@ -635,7 +640,7 @@ export class Parser {
 
   // <exprstat> ::= <functioncall> | <assignment>
   private parseExprstat(): ASTNode.ASTNode {
-    const expression: ASTNode.ASTNode | null = this.parsePrefix();
+    const expression: ASTNode.ASTNode | undefined = this.parsePrefix();
     if (!expression) {
       this.fatalError("Expected expression");
     }
@@ -694,7 +699,7 @@ export class Parser {
     return new ASTNode.LocalAssignment(locals, expressions);
   }
 
-  private parseWhile(): ASTNode.WhileStatement | null {
+  private parseWhile(): ASTNode.WhileStatement | undefined {
     this.advance(1); // Skip `while`
     const condition = this.parseExpressionWithError();
     this.advance(1); // Skip last token of condition
@@ -727,7 +732,7 @@ export class Parser {
       } else if (this.checkCurrentTokenValue("else")) {
         this.advance(1); // Skip `else`
         const elseChunk = this.parseCodeBlock();
-        ifBranches.addChild(new ASTNode.IfBranch(null, elseChunk));
+        ifBranches.addChild(new ASTNode.IfBranch(undefined, elseChunk));
         break;
       } else {
         break; // ???
@@ -769,7 +774,7 @@ export class Parser {
       this.advance(1); // Skip `,`
       const endExpression = this.parseExpressionWithError();
       this.advance(1); // Skip last token of the end expression
-      let stepExpression: ASTNode.ASTNode | null = null;
+      let stepExpression: ASTNode.ASTNode | undefined;
       if (this.checkCurrentToken(TokenEnum.CHARACTER, ",")) {
         this.advance(1); // Skip `,`
         stepExpression = this.parseExpressionWithError();
@@ -881,15 +886,15 @@ export class Parser {
   }
 
   /* Parser Handler */
-  private parseStatement(): ASTNode.ASTNode | null {
-    const curToken = this.curToken!;
-    const tokenType = curToken.type;
-    const tokenValue = curToken.value;
+  private parseStatement(): ASTNode.ASTNode | undefined {
+    const currentToken = this.curToken!;
+    const tokenType = currentToken.type;
+    const tokenValue = currentToken.value;
 
-    let node: ASTNode.ASTNode | null = null;
+    let node: ASTNode.ASTNode | undefined;
     if (tokenType === TokenEnum.KEYWORD) {
-      if (STOP_KEYWORDS.includes(tokenValue)) {
-        return null;
+      if (STOP_KEYWORDS.has(tokenValue)) {
+        return undefined;
       }
       const keywordParser = this.keywordParsingMap[tokenValue];
       if (!keywordParser) {
@@ -910,7 +915,7 @@ export class Parser {
   private parseCodeBlock(
     isRoot = false,
     isFunctionScope = false,
-    scopeVariables: string[] | null = null,
+    scopeVariables: string[] | undefined = undefined,
   ): ASTNode.Program | ASTNode.Chunk {
     const chunk = isRoot ? new ASTNode.Program() : new ASTNode.Chunk();
     this.pushScope(isFunctionScope);

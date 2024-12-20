@@ -1,5 +1,5 @@
-/* Imports */
-import { TrieLeaf, TrieNode } from "./types.js";
+/* Imports and Exports */
+import type { TrieLeaf, TrieNode } from "./types.js";
 export type { TrieLeaf, TrieNode };
 
 /**

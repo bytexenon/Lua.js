@@ -1,7 +1,4 @@
-/* Dependencies */
-import { Lexer } from "./lexer/lexer.js";
-import { Parser } from "./parser/parser.js";
-import { Compiler } from "./compiler/compiler.js";
-
-/* Export */
-export { Lexer, Parser, Compiler };
+/* Exports */
+export { Lexer } from "./lexer/lexer.js";
+export { Parser } from "./parser/parser.js";
+export { Compiler } from "./compiler/compiler.js";
