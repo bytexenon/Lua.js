@@ -4,6 +4,7 @@ import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
+import eslintPluginUnicorn from "eslint-plugin-unicorn";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -13,6 +14,7 @@ export default tseslint.config(
   jsdoc.configs["flat/stylistic-typescript-error"],
   jsdoc.configs["flat/logical-typescript-error"],
   jsdoc.configs["flat/contents-typescript-error"],
+  eslintPluginUnicorn.configs["flat/recommended"],
   {
     // Ignore patterns
     ignores: [
@@ -47,6 +49,7 @@ export default tseslint.config(
       jsdoc,
     },
     rules: {
+      "unicorn/prefer-export-from": 0,
       "jsdoc/require-description-complete-sentence": 2,
       quotes: [
         "error",
