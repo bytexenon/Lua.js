@@ -76,7 +76,7 @@ export abstract class ASTNode {
 /**
  * Base class for AST node lists.
  */
-export class ASTNodeList extends ASTNode {
+export abstract class ASTNodeList extends ASTNode {
   public override readonly traversableFields = [];
 
   /**

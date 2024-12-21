@@ -30,7 +30,7 @@ describe("Parser", () => {
       });
 
       it("should create a new ASTNodeList", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         expect(node).toBeInstanceOf(ASTNode.ASTNodeList);
         expect(node.type).toBe(ASTNode.NodeType.PROGRAM);
         expect(node.children).toEqual([]);
@@ -60,7 +60,7 @@ describe("Parser", () => {
 
     describe("Child Management", () => {
       it("should correctly set children in ASTNodeList (explicit)", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         const childNode = new ASTNode.Chunk();
         node.addChild(childNode);
 
@@ -71,9 +71,7 @@ describe("Parser", () => {
 
       it("should correctly set children in ASTNodeList (implicit)", () => {
         const childNode = new ASTNode.Chunk();
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM, [
-          childNode,
-        ]);
+        const node = new ASTNode.Program([childNode]);
 
         expect(node.children).toHaveLength(1);
         expect(node.children[0]).toBeInstanceOf(ASTNode.ASTNode);
@@ -81,7 +79,7 @@ describe("Parser", () => {
       });
 
       it("should add multiple children to ASTNodeList", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         const childNode1 = new ASTNode.Chunk();
         const childNode2 = new ASTNode.ExpressionList();
         node.addChildren([childNode1, childNode2]);
@@ -94,7 +92,7 @@ describe("Parser", () => {
       });
 
       it("should remove a child from ASTNodeList", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         const childNode = new ASTNode.Chunk();
         node.addChild(childNode);
         node.removeChild(childNode);
@@ -103,7 +101,7 @@ describe("Parser", () => {
       });
 
       it("should remove multiple children from ASTNodeList", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         const childNode1 = new ASTNode.Chunk();
         const childNode2 = new ASTNode.ExpressionList();
         node.addChildren([childNode1, childNode2]);
@@ -113,7 +111,7 @@ describe("Parser", () => {
       });
 
       it("should not remove a child that does not exist in ASTNodeList", () => {
-        const node = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM);
+        const node = new ASTNode.Program();
         const dummyNode = new ASTNode.ExpressionList();
         expect(() => node.removeChild(dummyNode)).toThrow("Node not found");
 
@@ -129,7 +127,7 @@ describe("Parser", () => {
           const programNode = new ASTNode.Program();
           const numberNode = new ASTNode.NumberLiteral("1");
 
-          const nodeList = new ASTNode.ASTNodeList(ASTNode.NodeType.PROGRAM, [
+          const nodeList = new ASTNode.Program([
             chunkNode,
             expressionListNode,
             programNode,
