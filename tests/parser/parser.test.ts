@@ -609,6 +609,21 @@ describe("Parser", () => {
         parseExpression(tokenize(code));
       });
 
+      it("should parse a simple table constructor with implicit keys", () => {
+        const code = "{ 1, 2, 3 }";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple table constructor with semicolons as separators", () => {
+        const code = "{ a = 1; b = 2; c = 3 }";
+        parseExpression(tokenize(code));
+      });
+
+      it("should parse a simple table constructor with implicit keys and semicolons as separators", () => {
+        const code = "{ 1; 2; 3 }";
+        parseExpression(tokenize(code));
+      });
+
       it("should parse a simple table constructor with array part", () => {
         const code = "{ 1, 2, 3, a = 4, b = 5 }";
         parseExpression(tokenize(code));
