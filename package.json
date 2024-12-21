@@ -4,14 +4,14 @@
   "description": "A modular and fast Lua interpreter written in JavaScript",
   "main": "./dist/src/index.js",
   "scripts": {
-    "start": "tsc && node dist/src/index.js",
+    "start": "npm run build && node dist/src/index.js",
     "build": "tsc",
-    "lint": "eslint",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "test": "tsc && jest --coverage",
-    "bundle": "tsc && rollup -c"
+    "test": "npm run build && jest --coverage",
+    "bundle": "npm run build && rollup -c",
+    "prepublishOnly": "npm run build"
   },
   "author": "bytexenon",
   "license": "MIT",
