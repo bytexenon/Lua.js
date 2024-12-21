@@ -339,6 +339,88 @@ describe("Parser", () => {
         expect(expressionAST).toEqual(expectedNode);
       });
     });
+
+    it("should parse complex expressions", () => {
+      const code =
+        "1 + 2 * 3 ^ -4 / -5 % 6 - 7 == 8 ~= 9 < 10 > 11 <= 12 >= 13 and 14 or 15 and -(1 + 2)";
+      const tokens = tokenize(code);
+      const expressionAST = parseExpression(tokens);
+      const expectedNode = new ASTNode.BinaryOperator(
+        "or",
+        new ASTNode.BinaryOperator(
+          "and",
+          new ASTNode.BinaryOperator(
+            "==",
+            new ASTNode.BinaryOperator(
+              "+",
+              new ASTNode.NumberLiteral("1"),
+              new ASTNode.BinaryOperator(
+                "-",
+                new ASTNode.BinaryOperator(
+                  "*",
+                  new ASTNode.NumberLiteral("2"),
+                  new ASTNode.BinaryOperator(
+                    "/",
+                    new ASTNode.BinaryOperator(
+                      "^",
+                      new ASTNode.NumberLiteral("3"),
+                      new ASTNode.UnaryOperator(
+                        "-",
+                        new ASTNode.NumberLiteral("4"),
+                      ),
+                    ),
+                    new ASTNode.BinaryOperator(
+                      "%",
+                      new ASTNode.UnaryOperator(
+                        "-",
+                        new ASTNode.NumberLiteral("5"),
+                      ),
+                      new ASTNode.NumberLiteral("6"),
+                    ),
+                  ),
+                ),
+                new ASTNode.NumberLiteral("7"),
+              ),
+            ),
+            new ASTNode.BinaryOperator(
+              "~=",
+              new ASTNode.NumberLiteral("8"),
+              new ASTNode.BinaryOperator(
+                "<",
+                new ASTNode.NumberLiteral("9"),
+                new ASTNode.BinaryOperator(
+                  ">",
+                  new ASTNode.NumberLiteral("10"),
+                  new ASTNode.BinaryOperator(
+                    "<=",
+                    new ASTNode.NumberLiteral("11"),
+                    new ASTNode.BinaryOperator(
+                      ">=",
+                      new ASTNode.NumberLiteral("12"),
+                      new ASTNode.NumberLiteral("13"),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          new ASTNode.NumberLiteral("14"),
+        ),
+        new ASTNode.BinaryOperator(
+          "and",
+          new ASTNode.NumberLiteral("15"),
+          new ASTNode.UnaryOperator(
+            "-",
+            new ASTNode.BinaryOperator(
+              "+",
+              new ASTNode.NumberLiteral("1"),
+              new ASTNode.NumberLiteral("2"),
+            ),
+          ),
+        ),
+      );
+      expect(expressionAST).toEqual(expectedNode);
+    });
   });
 
   describe("Basic Parsing", () => {
