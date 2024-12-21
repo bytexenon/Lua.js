@@ -2,6 +2,10 @@ node_modules/
 performance/
 dist/
 coverage/
+.vscode/
+
 *.log
 *.out
+*.log.*
+*.out.*
 *.lua
