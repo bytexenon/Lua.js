@@ -426,7 +426,7 @@ describe("Parser", () => {
       expect(ast).toEqual(expectedNode);
     });
 
-    it("shoud parse simple local declaration with semicolon", () => {
+    it("should parse simple local declaration with semicolon", () => {
       const code = "local a = 1+2;";
       const ast = parse(code);
 
