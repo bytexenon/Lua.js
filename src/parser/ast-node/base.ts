@@ -22,7 +22,7 @@ export interface NodeProperties {
 /**
  * Base class for AST nodes.
  */
-export class ASTNode {
+export abstract class ASTNode {
   public readonly type: NodeType;
   public readonly children?: ASTNode[];
   [key: string]: NodeProperty;
