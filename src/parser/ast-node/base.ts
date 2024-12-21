@@ -6,14 +6,14 @@ import { NODE_SCHEMA } from "./node-schema.js";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NodeMethod = (...arguments_: any[]) => any;
 export type NodeProperty =
-  | ASTNode
-  | ASTNodeList
   | string
   | string[]
   | number
   | boolean
   | undefined
+  | ASTNode
   | ASTNode[]
+  | ASTNodeList
   | NodeMethod;
 export interface NodeProperties {
   [key: string]: NodeProperty;
