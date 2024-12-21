@@ -1,7 +1,6 @@
 /* Imports */
 import { Lexer } from "../../src/lexer/lexer.js";
 import { Parser } from "../../src/parser/parser.js";
-import { Token } from "../../src/lexer/token.js";
 import * as ASTNode from "../../src/parser/ast-node/ast-node.js";
 
 /* Helper Functions */
@@ -9,11 +8,13 @@ function tokenize(code: string) {
   const lexer = new Lexer(code);
   return lexer.lex();
 }
-function parse(tokens: Token[]) {
+function parse(code: string) {
+  const tokens = tokenize(code);
   const parser = new Parser(tokens);
   return parser.parse();
 }
-function parseExpression(tokens: Token[]) {
+function parseExpression(code: string) {
+  const tokens = tokenize(code);
   const parser = new Parser(tokens);
   return parser.parseExpression();
 }
@@ -194,8 +195,7 @@ describe("Parser", () => {
     describe("Basic Expressions", () => {
       it("should parse a simple number literal", () => {
         const code = "123";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.NumberLiteral("123");
 
         expect(expressionAST).toEqual(expectedNode);
@@ -203,8 +203,7 @@ describe("Parser", () => {
 
       it("should parse a simple string literal", () => {
         const code = '"hello"';
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.StringLiteral("hello");
 
         expect(expressionAST).toEqual(expectedNode);
@@ -212,8 +211,7 @@ describe("Parser", () => {
 
       it("should recognize unary operators", () => {
         const code = "-123";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.UnaryOperator(
           "-",
           new ASTNode.NumberLiteral("123"),
@@ -224,8 +222,7 @@ describe("Parser", () => {
 
       it("should be able to nest unary operators", () => {
         const code = "- -123";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.UnaryOperator(
           "-",
           new ASTNode.UnaryOperator("-", new ASTNode.NumberLiteral("123")),
@@ -238,8 +235,7 @@ describe("Parser", () => {
     describe("Binary Operator Expressions", () => {
       it("should parse a simple addition expression", () => {
         const code = "1 + 2";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "+",
           new ASTNode.NumberLiteral("1"),
@@ -251,8 +247,7 @@ describe("Parser", () => {
 
       it("should parse a simple subtraction expression", () => {
         const code = "1 - 2";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "-",
           new ASTNode.NumberLiteral("1"),
@@ -264,8 +259,7 @@ describe("Parser", () => {
 
       it("should prioritize multiplication over addition", () => {
         const code = "1 + 2 * 3";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "+",
           new ASTNode.NumberLiteral("1"),
@@ -281,8 +275,7 @@ describe("Parser", () => {
 
       it("should prioritize unary operators over binary operators (1)", () => {
         const code = "-1 * 2";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "*",
           new ASTNode.UnaryOperator("-", new ASTNode.NumberLiteral("1")),
@@ -294,8 +287,7 @@ describe("Parser", () => {
 
       it("should prioritize unary operators over binary operators (2)", () => {
         const code = "2 ^ -3";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "^",
           new ASTNode.NumberLiteral("2"),
@@ -307,8 +299,7 @@ describe("Parser", () => {
 
       it("should prioritize binary operators with parentheses (1)", () => {
         const code = "(1 + 2) * 3";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "*",
           new ASTNode.BinaryOperator(
@@ -324,8 +315,7 @@ describe("Parser", () => {
 
       it("should prioritize binary operators with parentheses (2)", () => {
         const code = "1 * (2 + 3)";
-        const tokens = tokenize(code);
-        const expressionAST = parseExpression(tokens);
+        const expressionAST = parseExpression(code);
         const expectedNode = new ASTNode.BinaryOperator(
           "*",
           new ASTNode.NumberLiteral("1"),
@@ -343,8 +333,7 @@ describe("Parser", () => {
     it("should parse complex expressions", () => {
       const code =
         "1 + 2 * 3 ^ -4 / -5 % 6 - 7 == 8 ~= 9 < 10 > 11 <= 12 >= 13 and 14 or 15 and -(1 + 2)";
-      const tokens = tokenize(code);
-      const expressionAST = parseExpression(tokens);
+      const expressionAST = parseExpression(code);
       const expectedNode = new ASTNode.BinaryOperator(
         "or",
         new ASTNode.BinaryOperator(
@@ -426,8 +415,7 @@ describe("Parser", () => {
   describe("Basic Parsing", () => {
     it("should parse simple local declaration", () => {
       const code = "local a = 1+2";
-      const tokens = tokenize(code);
-      const ast = parse(tokens);
+      const ast = parse(code);
 
       const expectedNode = new ASTNode.Program([
         new ASTNode.LocalAssignment(
@@ -446,8 +434,7 @@ describe("Parser", () => {
 
     it("shoud parse simple local declaration with semicolon", () => {
       const code = "local a = 1+2;";
-      const tokens = tokenize(code);
-      const ast = parse(tokens);
+      const ast = parse(code);
 
       const expectedNode = new ASTNode.Program([
         new ASTNode.LocalAssignment(
@@ -466,8 +453,7 @@ describe("Parser", () => {
 
     it("should parse simple local declaration with multiple variables", () => {
       const code = "local a, b = 1+2, 2+3";
-      const tokens = tokenize(code);
-      const ast = parse(tokens);
+      const ast = parse(code);
 
       const expectedNode = new ASTNode.Program([
         new ASTNode.LocalAssignment(
@@ -502,7 +488,7 @@ describe("Parser", () => {
             print("Hello")
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple if-else statement", () => {
@@ -513,7 +499,7 @@ describe("Parser", () => {
             print("World")
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple if-elseif-else statement", () => {
@@ -526,7 +512,7 @@ describe("Parser", () => {
             print("!")
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple while loop", () => {
@@ -535,12 +521,12 @@ describe("Parser", () => {
             print("Hello")
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple repeat-until loop", () => {
         const code = 'repeat print("Hello") until a';
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple numeric for loop", () => {
@@ -549,7 +535,7 @@ describe("Parser", () => {
             print(i)
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple generic for loop", () => {
@@ -558,7 +544,7 @@ describe("Parser", () => {
             print(i, v)
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple generic for loop with custom state expression", () => {
@@ -567,7 +553,7 @@ describe("Parser", () => {
             print(i, j, k)
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple generic for loop with custom state + control expressions", () => {
@@ -576,34 +562,34 @@ describe("Parser", () => {
             print(i, j, k)
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple break statement", () => {
         const code = "break";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple do-end block", () => {
         const code = "do local a = 10 end";
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
     describe("Return Statements", () => {
       it("should parse a simple return statement", () => {
         const code = "return 1, 2, 3";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple return statement with no values", () => {
         const code = "return";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple return statement with varargs", () => {
         const code = "return ...";
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
@@ -614,7 +600,7 @@ describe("Parser", () => {
             return a + b
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple function definition with no arguments", () => {
@@ -623,7 +609,7 @@ describe("Parser", () => {
             return
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple function definition with varargs", () => {
@@ -632,7 +618,7 @@ describe("Parser", () => {
             return ...
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple local function definition", () => {
@@ -641,7 +627,7 @@ describe("Parser", () => {
             return a + b
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method definition", () => {
@@ -650,7 +636,7 @@ describe("Parser", () => {
             return a + b
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method definition with fields", () => {
@@ -659,56 +645,56 @@ describe("Parser", () => {
             return a + b
           end
         `;
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
     describe("Variable Declarations", () => {
       it("should parse a simple local variable declaration", () => {
         const code = "local a = 10";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple local variable declaration with no value", () => {
         const code = "local a";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a local variable declaration with multiple variables", () => {
         const code = "local a, b, c = 1, 2, 3";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a local variable declaration with multiple variables and no values", () => {
         const code = "local a, b, c";
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
     describe("Table Constructors", () => {
       it("should parse a simple table constructor", () => {
         const code = "{ a = 1, b = 2, c = 3 }";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple table constructor with implicit keys", () => {
         const code = "{ 1, 2, 3 }";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple table constructor with semicolons as separators", () => {
         const code = "{ a = 1; b = 2; c = 3 }";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple table constructor with implicit keys and semicolons as separators", () => {
         const code = "{ 1; 2; 3 }";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple table constructor with array part", () => {
         const code = "{ 1, 2, 3, a = 4, b = 5 }";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse complex table constructors", () => {
@@ -726,66 +712,66 @@ describe("Parser", () => {
             variable
           }
         `;
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
     });
 
     describe("Function and Method Calls", () => {
       it("should parse a simple function call", () => {
         const code = "foo(1, 2, 3)";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple method call", () => {
         const code = "obj:method(1, 2, 3)";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method call with fields", () => {
         const code = "obj.a.b:method(1, 2, 3)";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method call with no arguments", () => {
         const code = "obj:method()";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a function call with implicit string arguments", () => {
         const code = 'foo"hello"';
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a function call with implicit table arguments", () => {
         const code = "foo{ a = 1, b = 2 }";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method call with implicit string arguments", () => {
         const code = 'obj:method"hello"';
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method call with implicit table arguments", () => {
         const code = "obj:method{ a = 1, b = 2 }";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a method call with implicit table arguments and fields", () => {
         const code = "obj.a.b:method{ a = 1, b = 2 }";
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
     describe("Assignments", () => {
       it("should parse a simple assignment", () => {
         const code = "a = 10";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse a simple multiple assignment", () => {
         const code = "a, b, c = 1, 2, 3";
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse complex multiple assignments", () => {
@@ -794,7 +780,7 @@ describe("Parser", () => {
           a.c.d = 3
           a, b.c = 1
         `;
-        parse(tokenize(code));
+        parse(code);
       });
 
       it("should parse assignments with different data types", () => {
@@ -803,79 +789,79 @@ describe("Parser", () => {
           b = true
           c = nil
         `;
-        parse(tokenize(code));
+        parse(code);
       });
     });
 
     describe("Expressions", () => {
       it("should parse expressions with constants and operators", () => {
         const code = "true and false or nil";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple expression", () => {
         const code = "1 + 2 * 3 - 4 / 5";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple unary expression", () => {
         const code = "-b";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple logical expression", () => {
         const code = "b and c or d";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple relational expression", () => {
         const code = "b < c and d > e";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple concatenation expression", () => {
         const code = '"Hello" .. " " .. "World"';
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple index expression", () => {
         const code = "a.b.c";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple bracket expression", () => {
         const code = "a[b]";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a complex bracket expression", () => {
         const code = "a[b[c] + 1]";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple function call expression", () => {
         const code = "a()";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse a simple method call expression", () => {
         const code = "a:b()";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse anonymous function expression", () => {
         const code = "function(a, b) return a + b end";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse anonymous function expression with no arguments", () => {
         const code = "function() return end";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
 
       it("should parse anonymous function expression with varargs", () => {
         const code = "function(...) return ... end";
-        parseExpression(tokenize(code));
+        parseExpression(code);
       });
     });
   });
