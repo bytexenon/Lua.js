@@ -4,10 +4,7 @@
  * 1. Update Node Class:
  *    - Add, rename, or remove the node class in this file.
  *
- * 2. Update Node Schema:
- *    - Reflect the changes in the node schema by updating `node-schema.ts`.
- *
- * 3. Update Node Enum:
+ * 2. Update Node Enum:
  *    - Ensure the node type entries in node enum are consistent with the changes in this file.
  */
 
@@ -147,6 +144,8 @@ export class IfBranchList extends ASTNodeList {
  * Class representing a variable node.
  */
 export class VariableNode extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of VariableNode.
    * @param name The name for the variable node.
@@ -205,6 +204,8 @@ export class UpvalueVariable extends VariableNode {
  * Class representing a number literal node.
  */
 export class NumberLiteral extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of NumberLiteral.
    * @param value The numeric value represented as a string.
@@ -218,6 +219,8 @@ export class NumberLiteral extends ASTNode {
  * Class representing a string literal node.
  */
 export class StringLiteral extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of StringLiteral.
    * @param value The string content represented by the string literal.
@@ -231,6 +234,8 @@ export class StringLiteral extends ASTNode {
  * Class representing a value literal node.
  */
 export class ValueLiteral extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of ValueLiteral.
    * @param value The string representation of the value literal (e.g., `nil`, `true`, `false`).
@@ -252,6 +257,8 @@ export class ValueLiteral extends ASTNode {
  * Class representing a vararg literal node.
  */
 export class VarargLiteral extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of VarargLiteral.
    */
@@ -266,6 +273,8 @@ export class VarargLiteral extends ASTNode {
  * Class representing a binary operator node.
  */
 export class BinaryOperator extends ASTNode {
+  public override readonly traversableFields = ["left", "right"];
+
   /**
    * Creates an instance of BinaryOperator.
    * @param operator The operator itself (e.g., `+`, `-`, `*`, etc.).
@@ -292,6 +301,8 @@ export class BinaryOperator extends ASTNode {
  * Class representing a unary operator node.
  */
 export class UnaryOperator extends ASTNode {
+  public override readonly traversableFields = ["operand"];
+
   /**
    * Creates an instance of UnaryOperator.
    * @param operator The operator itself (e.g., `not`, `#`, `-`, etc.).
@@ -317,6 +328,8 @@ export class UnaryOperator extends ASTNode {
  * Class representing a function call node.
  */
 export class FunctionCall extends ASTNode {
+  public override readonly traversableFields = ["expression", "argumentsList"];
+
   /**
    * Creates an instance of FunctionCall.
    * @param expression The expression representing the function to be called (aka the callee).
@@ -345,6 +358,8 @@ export class FunctionCall extends ASTNode {
  * Class representing a table index node.
  */
 export class TableIndex extends ASTNode {
+  public override readonly traversableFields = ["expression", "index"];
+
   /**
    * Creates an instance of TableIndex.
    * @param expression The expression representing the table.
@@ -369,6 +384,8 @@ export class TableIndex extends ASTNode {
  * Class representing an anonymous function node.
  */
 export class AnonymousFunction extends ASTNode {
+  public override readonly traversableFields = ["chunk"];
+
   /**
    * Creates an instance of AnonymousFunction.
    * @param parameters The list of parameters.
@@ -386,6 +403,8 @@ export class AnonymousFunction extends ASTNode {
  * Class representing a table element node.
  */
 export class TableElement extends ASTNode {
+  public override readonly traversableFields = ["key", "value"];
+
   /**
    * Creates an instance of TableElement.
    * @param key The expression representing the key of the table element.
@@ -413,6 +432,8 @@ export class TableElement extends ASTNode {
  * Class representing a table constructor node.
  */
 export class TableConstructor extends ASTNode {
+  public override readonly traversableFields = ["elements"];
+
   /**
    * Creates an instance of TableConstructor.
    * @param elements The list of table elements.
@@ -428,6 +449,8 @@ export class TableConstructor extends ASTNode {
  * Class representing a local assignment node.
  */
 export class LocalAssignment extends ASTNode {
+  public override readonly traversableFields = ["expressions"];
+
   /**
    * Creates an instance of LocalAssignment.
    * @param locals The list of local variables.
@@ -445,6 +468,8 @@ export class LocalAssignment extends ASTNode {
  * Class representing a variable assignment node.
  */
 export class VariableAssignment extends ASTNode {
+  public override readonly traversableFields = ["lvalues", "expressions"];
+
   /**
    * Creates an instance of VariableAssignment.
    * @param lvalues The list of left-hand side variables.
@@ -462,6 +487,8 @@ export class VariableAssignment extends ASTNode {
  * Class representing a function declaration node.
  */
 export class FunctionDeclaration extends ASTNode {
+  public override readonly traversableFields = ["variable", "chunk"];
+
   /**
    * Creates an instance of FunctionDeclaration.
    * @param variable The variable node representing the function name.
@@ -485,6 +512,8 @@ export class FunctionDeclaration extends ASTNode {
  * Class representing a local function declaration node.
  */
 export class LocalFunctionDeclaration extends ASTNode {
+  public override readonly traversableFields = ["chunk"];
+
   /**
    * Creates an instance of LocalFunctionDeclaration.
    * @param name User-defined name of the function.
@@ -504,6 +533,8 @@ export class LocalFunctionDeclaration extends ASTNode {
  * Class representing a return statement node.
  */
 export class ReturnStatement extends ASTNode {
+  public override readonly traversableFields = ["expressions"];
+
   /**
    * Creates an instance of ReturnStatement.
    * @param expressions The list of expressions to return.
@@ -517,6 +548,8 @@ export class ReturnStatement extends ASTNode {
  * Class representing a break statement node.
  */
 export class BreakStatement extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of BreakStatement.
    */
@@ -529,6 +562,8 @@ export class BreakStatement extends ASTNode {
  * Class representing a do statement node.
  */
 export class DoStatement extends ASTNode {
+  public override readonly traversableFields = ["chunk"];
+
   /**
    * Creates an instance of DoStatement.
    * @param chunk The body of the do statement.
@@ -542,6 +577,8 @@ export class DoStatement extends ASTNode {
  * Class representing a while statement node.
  */
 export class WhileStatement extends ASTNode {
+  public override readonly traversableFields = ["condition", "chunk"];
+
   /**
    * Creates an instance of WhileStatement.
    * @param condition The condition to evaluate.
@@ -559,6 +596,8 @@ export class WhileStatement extends ASTNode {
  * Class representing a repeat-until statement node.
  */
 export class RepeatUntilStatement extends ASTNode {
+  public override readonly traversableFields = ["chunk", "condition"];
+
   /**
    * Creates an instance of RepeatUntilStatement.
    * @param chunk The body of the repeat-until statement.
@@ -576,6 +615,13 @@ export class RepeatUntilStatement extends ASTNode {
  * Class representing a numeric for statement node.
  */
 export class NumericForStatement extends ASTNode {
+  public override readonly traversableFields = [
+    "start",
+    "end",
+    "step",
+    "chunk",
+  ];
+
   /**
    * Creates an instance of NumericForStatement.
    * @param variable The loop variable.
@@ -599,6 +645,13 @@ export class NumericForStatement extends ASTNode {
  * Class representing a generic for statement node.
  */
 export class GenericForStatement extends ASTNode {
+  public override readonly traversableFields = [
+    "generator",
+    "state",
+    "control",
+    "chunk",
+  ];
+
   /**
    * Creates an instance of GenericForStatement.
    * @param variables The list of loop variables.
@@ -622,6 +675,8 @@ export class GenericForStatement extends ASTNode {
  * Class representing an if branch node.
  */
 export class IfBranch extends ASTNode {
+  public override readonly traversableFields = ["condition", "chunk"];
+
   /**
    * Creates an instance of IfBranch.
    * @param condition The condition to evaluate.
@@ -639,6 +694,8 @@ export class IfBranch extends ASTNode {
  * Class representing an if statement node.
  */
 export class IfStatement extends ASTNode {
+  public override readonly traversableFields = ["branches"];
+
   /**
    * Creates an instance of IfStatement.
    * @param branches The list of if branches.

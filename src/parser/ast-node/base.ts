@@ -1,10 +1,10 @@
 /* Imports */
 import { NodeType } from "./ast-node.js";
-import { NODE_SCHEMA } from "./node-schema.js";
 
 /* Constants */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NodeMethod = (...arguments_: any[]) => any;
+export type traversableFields = readonly string[];
 export type NodeProperty =
   | string
   | string[]
@@ -14,7 +14,8 @@ export type NodeProperty =
   | ASTNode
   | ASTNode[]
   | ASTNodeList
-  | NodeMethod;
+  | NodeMethod
+  | traversableFields;
 export interface NodeProperties {
   [key: string]: NodeProperty;
 }
@@ -25,6 +26,7 @@ export interface NodeProperties {
 export abstract class ASTNode {
   public readonly type: NodeType;
   public readonly children?: ASTNode[];
+  public abstract readonly traversableFields: traversableFields;
   [key: string]: NodeProperty;
 
   /**
@@ -53,8 +55,8 @@ export abstract class ASTNode {
       }
       return;
     }
-    const schemaFields = NODE_SCHEMA[this.type];
-    for (const field of schemaFields) {
+    const nodeTraversableFields = this.traversableFields;
+    for (const field of nodeTraversableFields) {
       const value = this[field] as unknown;
       if (value instanceof ASTNode) {
         value.traverse(condition, callback);
@@ -75,6 +77,8 @@ export abstract class ASTNode {
  * Base class for AST node lists.
  */
 export class ASTNodeList extends ASTNode {
+  public override readonly traversableFields = [];
+
   /**
    * Creates an instance of ASTNodeList.
    * @param type The type of the node list.
