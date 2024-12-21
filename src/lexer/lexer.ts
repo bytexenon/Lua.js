@@ -199,9 +199,9 @@ export class Lexer {
   }
   private consumeDelimiter(noExpect = false): string | false {
     this.advance(1); // Skip the first "["
-    let delimeterDepth = 0;
+    let delimiterDepth = 0;
     while (this.curChar === "=") {
-      delimeterDepth += 1;
+      delimiterDepth += 1;
       this.advance(1);
     }
     if (!noExpect) {
@@ -216,19 +216,19 @@ export class Lexer {
     while (true) {
       if (this.curChar === "]") {
         this.advance(1);
-        let newDelimeterDepth = 0;
+        let newDelimiterDepth = 0;
         while (this.curChar === ("=" as string)) {
-          newDelimeterDepth += 1;
+          newDelimiterDepth += 1;
           this.advance(1);
         }
-        if (this.curChar === "]" && newDelimeterDepth === delimeterDepth) {
+        if (this.curChar === "]" && newDelimiterDepth === delimiterDepth) {
           break; // Successfully consumed the delimiter
         }
       } else if (this.curChar === "\0") {
         // Error if ended abruptly
-        const equalSigns = "=".repeat(delimeterDepth);
-        const endingDelimeter = `]${equalSigns}]`;
-        this.throwUnexpectedCharacterError(endingDelimeter);
+        const equalSigns = "=".repeat(delimiterDepth);
+        const endingDelimiter = `]${equalSigns}]`;
+        this.throwUnexpectedCharacterError(endingDelimiter);
       }
 
       // Skip the character
@@ -236,7 +236,7 @@ export class Lexer {
     }
     this.expectCharacter("]");
     this.advance(1); // Skip the ending "]"
-    return this.code.slice(start, this.curPos - 2 - delimeterDepth);
+    return this.code.slice(start, this.curPos - 2 - delimiterDepth);
   }
   private consumeWhitespace(): void {
     while (Lexer.isWhitespace(this.peek(1))) {
