@@ -150,6 +150,11 @@ export class Compiler {
     this.currentScope.locals[name] = variableRegister;
     return variableRegister;
   }
+  private registerVariables(names: string[]): void {
+    for (const name of names) {
+      this.registerVariable(name);
+    }
+  }
   private unregisterVariable(name: string): void {
     if (!this.currentScope) {
       throw new Error("No scope to unregister variable in");
@@ -162,6 +167,11 @@ export class Compiler {
     this.numVars -= 1;
     this.currentScope.locals[name] = -1;
     this.freeRegister();
+  }
+  private unregisterVariables(names: string[]): void {
+    for (const name of names) {
+      this.unregisterVariable(name);
+    }
   }
 
   /* Scope Management */
@@ -176,9 +186,7 @@ export class Compiler {
     }
 
     // Unregister all local variables in the current scope
-    for (const variable in this.currentScope.locals) {
-      this.unregisterVariable(variable);
-    }
+    this.unregisterVariables(Object.keys(this.currentScope.locals));
 
     this.scopeStack.pop();
     this.currentScope = this.scopeStack.at(-1) ?? undefined;
@@ -320,9 +328,7 @@ export class Compiler {
         }
       }
     } else {
-      for (const localName of locals) {
-        this.registerVariable(localName);
-      }
+      this.registerVariables(locals);
     }
   }
 
@@ -380,9 +386,7 @@ export class Compiler {
     variables: string[] = [],
   ): void {
     this.pushScope(isFunctionScope);
-    for (const variable of variables) {
-      this.registerVariable(variable);
-    }
+    this.registerVariables(variables);
     for (const statement of node.children) {
       this.compileStatementNode(statement);
     }
