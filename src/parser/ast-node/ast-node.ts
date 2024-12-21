@@ -143,18 +143,15 @@ export class IfBranchList extends ASTNodeList {
 /**
  * Class representing a variable node.
  */
-export class VariableNode extends ASTNode {
+export abstract class VariableNode extends ASTNode {
   public override readonly traversableFields = [];
+  public abstract variableType: VariableType;
 
   /**
    * Creates an instance of VariableNode.
    * @param name The name for the variable node.
-   * @param variableType The type of the variable (local, global, upvalue).
    */
-  constructor(
-    public name: string,
-    public variableType: VariableType,
-  ) {
+  constructor(public name: string) {
     super(NodeType.VARIABLE);
   }
 }
@@ -163,12 +160,14 @@ export class VariableNode extends ASTNode {
  * Class representing a local variable node.
  */
 export class LocalVariable extends VariableNode {
+  public override variableType = VariableType.LOCAL;
+
   /**
    * Creates an instance of LocalVariable.
    * @param name The name for the local variable node.
    */
   constructor(name: string) {
-    super(name, VariableType.LOCAL);
+    super(name);
   }
 }
 
@@ -176,12 +175,14 @@ export class LocalVariable extends VariableNode {
  * Class representing a global variable node.
  */
 export class GlobalVariable extends VariableNode {
+  public override variableType = VariableType.GLOBAL;
+
   /**
    * Creates an instance of GlobalVariable.
    * @param name The name for the global variable node.
    */
   constructor(name: string) {
-    super(name, VariableType.GLOBAL);
+    super(name);
   }
 }
 
@@ -189,12 +190,14 @@ export class GlobalVariable extends VariableNode {
  * Class representing an upvalue variable node.
  */
 export class UpvalueVariable extends VariableNode {
+  public override variableType = VariableType.UPVALUE;
+
   /**
    * Creates an instance of UpvalueVariable.
    * @param name The name for the upvalue variable node.
    */
   constructor(name: string) {
-    super(name, VariableType.UPVALUE);
+    super(name);
   }
 }
 
