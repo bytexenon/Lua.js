@@ -4,7 +4,7 @@ import { NodeType } from "./ast-node.js";
 /* Constants */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type NodeMethod = (...arguments_: any[]) => any;
-export type traversableFields = readonly string[];
+export type TraversableFields = readonly string[];
 export type NodeProperty =
   | string
   | string[]
@@ -15,7 +15,7 @@ export type NodeProperty =
   | ASTNode[]
   | ASTNodeList
   | NodeMethod
-  | traversableFields;
+  | TraversableFields;
 export interface NodeProperties {
   [key: string]: NodeProperty;
 }
@@ -26,7 +26,7 @@ export interface NodeProperties {
 export abstract class ASTNode {
   public readonly type: NodeType;
   public readonly children?: ASTNode[];
-  public abstract readonly traversableFields: traversableFields;
+  public abstract readonly traversableFields: TraversableFields;
   [key: string]: NodeProperty;
 
   /**
