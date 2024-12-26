@@ -3,7 +3,7 @@ import * as ASTNode from "../parser/ast-node/ast-node.js";
 
 /* Opcodes */
 // prettier-ignore
-const enum Opcodes {
+export enum Opcodes {
   MOVE,      LOADK,    LOADBOOL,  LOADNIL,  GETUPVAL,
   GETGLOBAL, GETTABLE, SETGLOBAL, SETUPVAL, SETTABLE,
   NEWTABLE,  SELF,     ADD,       SUB,      MUL,
@@ -15,7 +15,7 @@ const enum Opcodes {
 }
 
 /* IRInstruction */
-class IRInstruction {
+export class IRInstruction {
   /* Example:
   MOVE R0, R1 ; Two registers
   LOADK R0, K0 ; Register and constant
@@ -30,7 +30,7 @@ class IRInstruction {
 }
 
 /* IROperand */
-class IROperand {
+export class IROperand {
   constructor(
     public type: string,
     public value: number,
@@ -38,7 +38,7 @@ class IROperand {
 }
 
 /* LuaConstantType */
-const enum LuaConstantType {
+export const enum LuaConstantType {
   LUA_TNIL = 0,
   LUA_TBOOLEAN = 1,
   LUA_TNUMBER = 3,
@@ -46,7 +46,7 @@ const enum LuaConstantType {
 }
 
 /* LuaConstant */
-class LuaConstant {
+export class LuaConstant {
   constructor(
     public type: LuaConstantType,
     public value: number | string | boolean,
