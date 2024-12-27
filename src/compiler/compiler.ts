@@ -105,7 +105,7 @@ return values, etc -- anything that doesn't have a variable assigned to it.
 
 /* Compiler */
 export class Compiler {
-  private currentProto: LuaPrototype;
+  public currentProto: LuaPrototype;
   private currentChunk: ASTNode.Chunk | ASTNode.Program;
   private nextRegister: number; // next free register
   private numVars: number; // number of active variables
