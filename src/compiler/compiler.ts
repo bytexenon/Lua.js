@@ -29,11 +29,20 @@ export class IRInstruction {
   ) {}
 }
 
+/* IROperandType */
+export const enum IROperandType {
+  REGISTER = "Register",
+  CONSTANT = "Constant",
+}
+
+/* IROperandValue */
+export type IROperandValue = number;
+
 /* IROperand */
 export class IROperand {
   constructor(
-    public type: string,
-    public value: number,
+    public type: IROperandType,
+    public value: IROperandValue,
   ) {}
 }
 
@@ -258,8 +267,8 @@ export class Compiler {
 
     const constantIndex = this.emitConstant(constantType, constantValue);
     this.emit(Opcodes.LOADK, [
-      new IROperand("Register", targetRegister),
-      new IROperand("Constant", constantIndex),
+      new IROperand(IROperandType.REGISTER, targetRegister),
+      new IROperand(IROperandType.CONSTANT, constantIndex),
     ]);
   }
 
@@ -287,8 +296,8 @@ export class Compiler {
       if (currentScope.locals[variableName] !== undefined) {
         const variableRegister = currentScope.locals[variableName];
         this.emit(Opcodes.MOVE, [
-          new IROperand("Register", targetRegister),
-          new IROperand("Register", variableRegister),
+          new IROperand(IROperandType.REGISTER, targetRegister),
+          new IROperand(IROperandType.REGISTER, variableRegister),
         ]);
         return;
       }
@@ -303,8 +312,8 @@ export class Compiler {
     );
 
     this.emit(Opcodes.GETGLOBAL, [
-      new IROperand("Register", targetRegister),
-      new IROperand("Constant", constantIndex),
+      new IROperand(IROperandType.REGISTER, targetRegister),
+      new IROperand(IROperandType.CONSTANT, constantIndex),
     ]);
   }
 
