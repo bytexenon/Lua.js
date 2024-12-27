@@ -1,91 +1,18 @@
 /* Dependencies */
 import * as ASTNode from "../parser/ast-node/ast-node.js";
-
-/* Opcodes */
-// prettier-ignore
-export enum Opcodes {
-  MOVE,      LOADK,    LOADBOOL,  LOADNIL,  GETUPVAL,
-  GETGLOBAL, GETTABLE, SETGLOBAL, SETUPVAL, SETTABLE,
-  NEWTABLE,  SELF,     ADD,       SUB,      MUL,
-  DIV,       MOD,      POW,       UNM,      NOT,
-  LEN,       CONCAT,   JMP,       EQ,       LT,
-  LE,        TEST,     TESTSET,   CALL,     TAILCALL,
-  RETURN,    FORLOOP,  FORPREP,   TFORLOOP, SETLIST,
-  CLOSE,     CLOSURE,  VARARG
-}
-
-/* IRInstruction */
-export class IRInstruction {
-  /* Example:
-  MOVE R0, R1 ; Two registers
-  LOADK R0, K0 ; Register and constant
-  ADD R0, K0, K1 ; Register (dest) and two constants
-  CLOSURE R0, P0 ; Register and prototype
-  JMP OFFSET-10 ; Jump with offset (relative)
-  */
-  constructor(
-    public opcode: Opcodes,
-    public operands: IROperand[],
-  ) {}
-}
-
-/* IROperandType */
-export const enum IROperandType {
-  REGISTER = "Register",
-  CONSTANT = "Constant",
-}
-
-/* IROperandValue */
-export type IROperandValue = number;
-
-/* IROperand */
-export class IROperand {
-  constructor(
-    public type: IROperandType,
-    public value: IROperandValue,
-  ) {}
-}
-
-/* LuaConstantType */
-export const enum LuaConstantType {
-  LUA_TNIL = 0,
-  LUA_TBOOLEAN = 1,
-  LUA_TNUMBER = 3,
-  LUA_TSTRING = 4,
-}
-
-/* LuaConstantValue */
-export type LuaConstantValue = number | string | boolean;
-
-/* LuaConstant */
-export class LuaConstant {
-  constructor(
-    public type: LuaConstantType,
-    public value: LuaConstantValue,
-  ) {}
-}
-
-/* LuaPrototype */
-export class LuaPrototype {
-  constructor(
-    public code: IRInstruction[] = [],
-    public constants: LuaConstant[] = [],
-    public prototypes: LuaPrototype[] = [],
-    public numberParameters = 0,
-    public isVararg = false,
-    // registers 0/1 are always valid
-    public maxStackSize = 2,
-  ) {}
-}
-
-/* Scope */
-export class Scope {
-  constructor(
-    public readonly isFunctionScope = false,
-    // variable name to register mapping
-    public locals: Record<string, number> = {},
-  ) {}
-}
+import {
+  IRInstruction,
+  Opcodes,
+  IROperand,
+  IROperandType,
+} from "./instructions/index.js";
+import {
+  LuaConstant,
+  LuaConstantType,
+  LuaConstantValue,
+  LuaPrototype,
+  Scope,
+} from "./lua/index.js";
 
 /*
 Lua register stack:
