@@ -45,11 +45,14 @@ export const enum LuaConstantType {
   LUA_TSTRING = 4,
 }
 
+/* LuaConstantValue */
+export type LuaConstantValue = number | string | boolean;
+
 /* LuaConstant */
 export class LuaConstant {
   constructor(
     public type: LuaConstantType,
-    public value: number | string | boolean,
+    public value: LuaConstantValue,
   ) {}
 }
 
@@ -201,25 +204,30 @@ export class Compiler {
   }
 
   /* Prototype Management */
-  private emit(instruction: IRInstruction): void {
-    this.currentProto.code.push(instruction);
+  private emit(opcode: Opcodes, operands: IROperand[]): void {
+    this.currentProto.code.push(new IRInstruction(opcode, operands));
   }
-  private emitConstant(constant: LuaConstant): number {
+  private emitConstant(
+    constantType: LuaConstantType,
+    constantValue: LuaConstantValue,
+  ): number {
     // Check if the constant already exists
     for (const [
       index,
       existingConstant,
     ] of this.currentProto.constants.entries()) {
       if (
-        existingConstant.type === constant.type &&
-        existingConstant.value === constant.value
+        existingConstant.type === constantType &&
+        existingConstant.value === constantValue
       ) {
         return index;
       }
     }
 
     const index = this.currentProto.constants.length;
-    this.currentProto.constants.push(constant);
+    this.currentProto.constants.push(
+      new LuaConstant(constantType, constantValue),
+    );
     return index;
   }
 
@@ -229,7 +237,7 @@ export class Compiler {
     targetRegister: number,
   ): void {
     const nodeType = node.type;
-    let constantType;
+    let constantType: LuaConstantType;
     let constantValue: number | string | boolean;
 
     switch (nodeType) {
@@ -248,15 +256,11 @@ export class Compiler {
       }
     }
 
-    const constantIndex = this.emitConstant(
-      new LuaConstant(constantType, constantValue),
-    );
-    this.emit(
-      new IRInstruction(Opcodes.LOADK, [
-        new IROperand("Register", targetRegister),
-        new IROperand("Constant", constantIndex),
-      ]),
-    );
+    const constantIndex = this.emitConstant(constantType, constantValue);
+    this.emit(Opcodes.LOADK, [
+      new IROperand("Register", targetRegister),
+      new IROperand("Constant", constantIndex),
+    ]);
   }
 
   /* Expression Compilation */
@@ -282,12 +286,10 @@ export class Compiler {
     while (currentScope) {
       if (currentScope.locals[variableName] !== undefined) {
         const variableRegister = currentScope.locals[variableName];
-        this.emit(
-          new IRInstruction(Opcodes.MOVE, [
-            new IROperand("Register", targetRegister),
-            new IROperand("Register", variableRegister),
-          ]),
-        );
+        this.emit(Opcodes.MOVE, [
+          new IROperand("Register", targetRegister),
+          new IROperand("Register", variableRegister),
+        ]);
         return;
       }
 
@@ -296,14 +298,14 @@ export class Compiler {
 
     // Variable not found in any scope, assume global
     const constantIndex = this.emitConstant(
-      new LuaConstant(LuaConstantType.LUA_TSTRING, variableName),
+      LuaConstantType.LUA_TSTRING,
+      variableName,
     );
-    this.emit(
-      new IRInstruction(Opcodes.GETGLOBAL, [
-        new IROperand("Register", targetRegister),
-        new IROperand("Constant", constantIndex),
-      ]),
-    );
+
+    this.emit(Opcodes.GETGLOBAL, [
+      new IROperand("Register", targetRegister),
+      new IROperand("Constant", constantIndex),
+    ]);
   }
 
   /* Statement Compilation */
