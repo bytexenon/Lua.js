@@ -333,7 +333,7 @@ export class Compiler {
   }
 
   /* Node Compilation Handlers */
-  private compileExpressionNode(
+  public compileExpressionNode(
     node: ASTNode.ASTNode,
     targetRegister: number,
   ): number {
@@ -363,7 +363,7 @@ export class Compiler {
 
     return targetRegister;
   }
-  private compileStatementNode(node: ASTNode.ASTNode): void {
+  public compileStatementNode(node: ASTNode.ASTNode): void {
     switch (node.type) {
       case ASTNode.NodeType.DO_STATEMENT: {
         this.compileDoStatement(node as ASTNode.DoStatement);
