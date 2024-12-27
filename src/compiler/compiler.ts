@@ -53,7 +53,7 @@ export class Compiler {
 
   /* Constructor */
   constructor(ast: ASTNode.Program) {
-    this.currentProto = new LuaPrototype([]);
+    this.currentProto = new LuaPrototype();
     this.currentChunk = ast;
     this.nextRegister = -1;
     this.numVars = 0;
