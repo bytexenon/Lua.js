@@ -335,7 +335,7 @@ export class Compiler {
   /* Node Compilation Handlers */
   public compileExpressionNode(
     node: ASTNode.ASTNode,
-    targetRegister: number,
+    targetRegister: number = this.allocateRegister(),
   ): number {
     switch (node.type) {
       case ASTNode.NodeType.NUMBER_LITERAL: {
