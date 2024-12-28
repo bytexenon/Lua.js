@@ -1,12 +1,12 @@
 /* Imports */
 import { Token, TokenEnum } from "../../src/lexer/token";
+import { Lexer } from "../../src/lexer/lexer.js";
 import {
-  Lexer,
   KEYWORDS,
   OPERATORS,
   VALID_CHARACTERS,
   CONSTANT_KEYWORDS,
-} from "../../src/lexer/lexer.js";
+} from "../../src/lexer/constants.js";
 
 /* Constants */
 const WHITESPACE = " \t\n";
