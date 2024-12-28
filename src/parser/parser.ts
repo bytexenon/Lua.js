@@ -1,36 +1,14 @@
 /* Dependencies */
 import { Token, TokenEnum } from "../lexer/token.js";
+import {
+  BINARY_OPERATORS,
+  ERROR_SURROUNDING_LENGTH,
+  OPERATOR_PRECEDENCE,
+  STOP_KEYWORDS,
+  UNARY_OPERATORS,
+  UNARY_PRECEDENCE,
+} from "./constants.js";
 import * as ASTNode from "./ast-node/ast-node.js";
-
-/* Constants */
-// Length of surrounding tokens to show in error messages (in both directions)
-const ERROR_SURROUNDING_LENGTH = 10;
-
-// prettier-ignore
-const OPERATOR_PRECEDENCE: Readonly<Record<string, readonly [number, number]>> = {
-  "+":   [6, 6],  "-":  [6, 6],
-  "*":   [7, 7],  "/":  [7, 7],
-  "%":   [7, 7],
-
-  "^":   [10, 9], "..": [5, 4],
-
-  "==":  [3, 3],  "~=": [3, 3],
-  "<":   [3, 3],  ">":  [3, 3],
-  "<=":  [3, 3],  ">=": [3, 3],
-
-  "and": [2, 2],  "or": [1, 1],
-};
-// prettier-ignore
-const BINARY_OPERATORS = new Set([
-  "+",  "-",   "*",  "/",
-  "%",  "^",   "..", "==",
-  "~=", "<",   ">",  "<=",
-  ">=", "and", "or"
-]);
-
-const UNARY_OPERATORS = new Set(["-", "not", "#"]);
-const UNARY_PRECEDENCE = 8;
-const STOP_KEYWORDS = new Set(["end", "else", "elseif", "until"]);
 
 /* Scope */
 class Scope {
