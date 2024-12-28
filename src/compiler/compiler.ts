@@ -10,7 +10,7 @@ import {
   LuaConstantType,
   LuaConstantValue,
   LuaPrototype,
-  Scope,
+  LuaScope,
 } from "./lua/index.js";
 import * as ASTNode from "../parser/ast-node/ast-node.js";
 
@@ -48,8 +48,8 @@ export class Compiler {
   private currentChunk: ASTNode.Chunk | ASTNode.Program;
   private currentRegister: number; // current (free) register
   private numVars: number; // number of active variables
-  private scopeStack: Scope[];
-  private currentScope: Scope | undefined;
+  private scopeStack: LuaScope[];
+  private currentScope: LuaScope | undefined;
 
   /* Constructor */
   constructor(ast: ASTNode.Program) {
@@ -115,7 +115,7 @@ export class Compiler {
 
   /* Scope Management */
   private pushScope(isFunctionScope = false): void {
-    const scope = new Scope(isFunctionScope);
+    const scope = new LuaScope(isFunctionScope);
     this.scopeStack.push(scope);
     this.currentScope = scope;
   }

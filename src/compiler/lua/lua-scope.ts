@@ -1,5 +1,5 @@
-/* Scope */
-export class Scope {
+/* LuaScope */
+export class LuaScope {
   constructor(
     public readonly isFunctionScope = false,
     // variable name to register mapping
