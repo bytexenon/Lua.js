@@ -10,6 +10,7 @@
 
 /* Imports */
 import { ASTNode, ASTNodeList } from "./base.js";
+
 export { ASTNode, ASTNodeList };
 
 /**

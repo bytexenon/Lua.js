@@ -1,6 +1,6 @@
 /* Dependencies */
-import { IRInstruction } from "../instructions/ir-instruction.js";
 import { LuaConstant } from "./lua-constant.js";
+import { IRInstruction } from "../instructions/ir-instruction.js";
 
 /* LuaPrototypeOptions */
 export interface LuaPrototypeOptions {

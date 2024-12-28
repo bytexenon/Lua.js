@@ -1,6 +1,6 @@
 /* Dependencies */
-import { makeTrie, TrieNode } from "../utils/utils.js";
 import { Token, TokenEnum } from "./token.js";
+import { makeTrie, TrieNode } from "../utils/utils.js";
 
 /* Constants */
 

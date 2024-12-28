@@ -1,11 +1,9 @@
 /* Dependencies */
-import * as ASTNode from "../parser/ast-node/ast-node.js";
-
 import {
   IRInstruction,
-  Opcodes,
   IROperand,
   IROperandType,
+  Opcodes,
 } from "./instructions/index.js";
 import {
   LuaConstant,
@@ -14,6 +12,7 @@ import {
   LuaPrototype,
   Scope,
 } from "./lua/index.js";
+import * as ASTNode from "../parser/ast-node/ast-node.js";
 
 /*
 Lua register stack:
