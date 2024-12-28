@@ -1,5 +1,6 @@
 /* Dependencies */
 import * as ASTNode from "../parser/ast-node/ast-node.js";
+
 import {
   IRInstruction,
   Opcodes,
@@ -46,7 +47,7 @@ return values, etc -- anything that doesn't have a variable assigned to it.
 export class Compiler {
   public currentProto: LuaPrototype;
   private currentChunk: ASTNode.Chunk | ASTNode.Program;
-  private nextRegister: number; // next free register
+  private currentRegister: number; // current (free) register
   private numVars: number; // number of active variables
   private scopeStack: Scope[];
   private currentScope: Scope | undefined;
@@ -55,7 +56,7 @@ export class Compiler {
   constructor(ast: ASTNode.Program) {
     this.currentProto = new LuaPrototype();
     this.currentChunk = ast;
-    this.nextRegister = -1;
+    this.currentRegister = -1;
     this.numVars = 0;
     this.scopeStack = [];
     this.currentScope = undefined;
@@ -63,17 +64,17 @@ export class Compiler {
 
   /* Stack Management */
   private allocateRegister(): number {
-    this.nextRegister += 1;
+    this.currentRegister += 1;
 
     // Update max stack size if needed
-    if (this.currentProto.maxStackSize < this.nextRegister) {
-      this.currentProto.maxStackSize = this.nextRegister;
+    if (this.currentProto.maxStackSize < this.currentRegister) {
+      this.currentProto.maxStackSize = this.currentRegister;
     }
 
-    return this.nextRegister;
+    return this.currentRegister;
   }
   private freeRegister(): void {
-    this.nextRegister -= 1;
+    this.currentRegister -= 1;
   }
 
   /* Variable Management */
