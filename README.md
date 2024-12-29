@@ -19,7 +19,7 @@ Lua.js is a modular and fast Lua interpreter written in TypeScript and JavaScrip
 To install Lua.js, use npm:
 
 ```bash
-npm install lua-js
+npm install git+https://github.com/bytexenon/Lua.js
 ```
 
 ## Usage
