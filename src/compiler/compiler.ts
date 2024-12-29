@@ -140,6 +140,18 @@ export class Compiler {
   }
 
   /* Prototype Management */
+  private findConstantIndex(
+    constantType: LuaConstantType,
+    constantValue: LuaConstantValue,
+  ): number {
+    for (const [index, constant] of this.currentProto.constants.entries()) {
+      if (constant.type === constantType && constant.value === constantValue) {
+        return index;
+      }
+    }
+
+    return -1;
+  }
   private emit(opcode: Opcodes, operands: IROperand[]): void {
     this.currentProto.code.push(new IRInstruction(opcode, operands));
   }
@@ -148,16 +160,9 @@ export class Compiler {
     constantValue: LuaConstantValue,
   ): number {
     // Check if the constant already exists
-    for (const [
-      index,
-      existingConstant,
-    ] of this.currentProto.constants.entries()) {
-      if (
-        existingConstant.type === constantType &&
-        existingConstant.value === constantValue
-      ) {
-        return index;
-      }
+    const existingIndex = this.findConstantIndex(constantType, constantValue);
+    if (existingIndex !== -1) {
+      return existingIndex;
     }
 
     const index = this.currentProto.constants.length;
