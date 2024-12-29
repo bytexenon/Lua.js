@@ -33,8 +33,10 @@ const luaCode = `
 print("Hello, Lua!")
 `;
 
+
 const lexer = new Lexer(luaCode);
-const parser = new Parser(lexer);
+const tokens = lexer.lex();
+const parser = new Parser(tokens);
 const ast = parser.parse();
 const compiler = new Compiler(ast);
 const bytecode = compiler.compile();
