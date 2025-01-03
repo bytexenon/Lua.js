@@ -150,8 +150,21 @@ export class Compiler {
 
     return -1;
   }
-  private emit(opcode: Opcodes, operands: IROperand[]): void {
-    this.currentProto.code.push(new IRInstruction(opcode, operands));
+  private emit(
+    opcode: Opcodes,
+    operands: IROperand[],
+  ): [IRInstruction, number] {
+    const instruction = new IRInstruction(opcode, operands);
+    this.currentProto.code.push(instruction);
+    return [instruction, this.currentProto.code.length - 1];
+  }
+  private static changeInstruction(
+    instruction: IRInstruction,
+    opcode?: Opcodes,
+    operands?: IROperand[],
+  ): void {
+    instruction.opcode = opcode ?? instruction.opcode;
+    instruction.operands = operands ?? instruction.operands;
   }
   private emitConstant(
     constantType: LuaConstantType,
