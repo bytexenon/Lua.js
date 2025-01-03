@@ -19,27 +19,25 @@ Lua register stack:
 +----------------------+
 |      Variables       |
 |----------------------|
-| Variable 1           |
-| Variable 2           |
+| Local Variable 1     |
+| Local Variable 2     |
 | ...                  |
-| Variable 200         |
+| Local Variable N     |
 +----------------------+
 | Temporary Registers  |
 |----------------------|
 | Temp Register 1      |
 | Temp Register 2      |
 | ...                  |
-| Temp Register 56     |
+| Temp Register M      |
 +----------------------+
 
-(Max stack size = 256, temp. register count = 256 - 200 = 56) 
+(Max stack size = 256, where N + M <= 256 and N <= 200)
 
-Variables always should be on top of the stack,
-a variable can't come after a temporary register.
-
-Temporary registers are used for intermediate values,
+Local variables are stored in the lower part of the stack,
+and temporary registers are used for intermediate values,
 such as operands in arithmetic operations, function call arguments,
-return values, etc -- anything that doesn't have a variable assigned to it.
+return values, etc.
 */
 
 /* Compiler */
