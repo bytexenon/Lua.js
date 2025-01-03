@@ -1,9 +1,9 @@
 /* LuaConstantType */
 export const enum LuaConstantType {
-  LUA_TNIL = 0,
-  LUA_TBOOLEAN = 1,
-  LUA_TNUMBER = 3,
-  LUA_TSTRING = 4,
+  LUA_TNIL = "nil",
+  LUA_TBOOLEAN = "boolean",
+  LUA_TNUMBER = "number",
+  LUA_TSTRING = "string",
 }
 
 /* LuaConstantValue */
