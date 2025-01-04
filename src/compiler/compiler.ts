@@ -14,6 +14,24 @@ import {
 } from "./lua/index.js";
 import * as ASTNode from "../parser/ast-node/ast-node.js";
 
+/* Constants */
+
+// prettier-ignore
+const ARITHMETIC_OPERATOR_MAP: Record<string, Opcodes> = {
+  "+": Opcodes.ADD, "-": Opcodes.SUB,
+  "*": Opcodes.MUL, "/": Opcodes.DIV,
+  "%": Opcodes.MOD, "^": Opcodes.POW,
+};
+
+// prettier-ignore
+const COMPARISON_OPERATOR_MAP: Record<string, [Opcodes, boolean]> = {
+  "~=": [Opcodes.EQ, true],  "==": [Opcodes.EQ, false],
+  "<":  [Opcodes.LT, false], ">":  [Opcodes.LT, true],
+  "<=": [Opcodes.LE, false], ">=": [Opcodes.LE, true],
+};
+
+const CONTROL_FLOW_OPERATORS: Set<string> = new Set(["and", "or"]);
+
 /*
 Lua register stack:
 +----------------------+
@@ -259,6 +277,117 @@ export class Compiler {
       new IROperand(IROperandType.CONSTANT, constantIndex),
     ]);
   }
+  private compileBinaryOperatorNode(
+    node: ASTNode.BinaryOperator,
+    targetRegister: number,
+  ) {
+    const operator = node.operator;
+
+    // Handle control flow operators (and, or)
+    if (CONTROL_FLOW_OPERATORS.has(operator)) {
+      const leftRegister = this.compileExpressionNode(node.left);
+      const shouldShortCircuit = operator === "or" ? 1 : 0;
+
+      // Emit TEST instruction
+      this.emit(Opcodes.TEST, [
+        new IROperand(IROperandType.REGISTER, leftRegister),
+        new IROperand(IROperandType.OTHER, 0),
+        new IROperand(IROperandType.OTHER, shouldShortCircuit),
+      ]);
+
+      // Emit placeholder JMP instruction
+      const [jumpInstruction, jumpIndex] = this.emit(Opcodes.JMP, []);
+
+      // Generate a LOADBOOL instruction pair
+      this.emit(Opcodes.LOADBOOL, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.OTHER, 0),
+        new IROperand(IROperandType.OTHER, 1),
+      ]);
+      this.emit(Opcodes.LOADBOOL, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.OTHER, 1),
+        new IROperand(IROperandType.OTHER, 0),
+      ]);
+
+      // Compile right expression
+      this.compileExpressionNode(node.right, targetRegister);
+
+      // Update JMP instruction with correct offset
+      Compiler.changeInstruction(jumpInstruction, Opcodes.JMP, [
+        new IROperand(
+          IROperandType.OTHER,
+          this.currentProto.code.length - jumpIndex,
+        ),
+      ]);
+      return;
+    }
+
+    const leftRegister = this.compileExpressionNode(node.left);
+    const rightRegister = this.compileExpressionNode(node.right);
+
+    // Handle arithmetic operators (+, -, *, /, %, ^)
+    if (ARITHMETIC_OPERATOR_MAP[operator]) {
+      const opcode = ARITHMETIC_OPERATOR_MAP[operator];
+
+      // Emit arithmetic instruction
+      this.emit(opcode, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.REGISTER, leftRegister),
+        new IROperand(IROperandType.REGISTER, rightRegister),
+      ]);
+    }
+    // Handle comparison operators (==, ~=, <, >, <=, >=)
+    else if (COMPARISON_OPERATOR_MAP[operator]) {
+      const [opcode, invert] = COMPARISON_OPERATOR_MAP[operator];
+
+      // Emit comparison instruction
+      this.emit(opcode, [
+        new IROperand(IROperandType.OTHER, invert ? 1 : 0),
+        new IROperand(
+          IROperandType.REGISTER,
+          invert ? rightRegister : leftRegister,
+        ),
+        new IROperand(
+          IROperandType.REGISTER,
+          invert ? leftRegister : rightRegister,
+        ),
+      ]);
+
+      // Emit LOADBOOL instructions for boolean result
+      this.emit(Opcodes.LOADBOOL, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.OTHER, 0),
+        new IROperand(IROperandType.OTHER, 1),
+      ]);
+      this.emit(Opcodes.LOADBOOL, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.OTHER, 1),
+        new IROperand(IROperandType.OTHER, 0),
+      ]);
+    }
+    // Handle concatenation operator (..)
+    else if (operator === "..") {
+      // Ensure concatenation operands are in consecutive registers
+      if (leftRegister + 1 !== rightRegister) {
+        throw new Error(
+          "Concatenation operands must be consecutive registers." +
+            " You shouldn't see this error.",
+        );
+      }
+
+      // Emit CONCAT instruction
+      this.emit(Opcodes.CONCAT, [
+        new IROperand(IROperandType.REGISTER, targetRegister),
+        new IROperand(IROperandType.REGISTER, leftRegister),
+        new IROperand(IROperandType.REGISTER, rightRegister),
+      ]);
+    }
+
+    // Free registers used for left and right expressions
+    this.freeRegister(); // Free right expression register
+    this.freeRegister(); // Free left expression register
+  }
 
   /* Statement Compilation */
   private compileDoStatement(node: ASTNode.DoStatement): void {
@@ -308,6 +437,13 @@ export class Compiler {
       }
       case ASTNode.NodeType.VARIABLE: {
         this.compileVariableNode(node as ASTNode.VariableNode, targetRegister);
+        break;
+      }
+      case ASTNode.NodeType.BINARY_OPERATOR: {
+        this.compileBinaryOperatorNode(
+          node as ASTNode.BinaryOperator,
+          targetRegister,
+        );
         break;
       }
       default: {
