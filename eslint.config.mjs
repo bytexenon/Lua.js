@@ -32,6 +32,8 @@ const RULES = {
       accessibility: "explicit",
       overrides: {
         constructors: "no-public",
+        abstractMethods: "off",
+        abstractProperties: "off",
       },
     },
   ],
