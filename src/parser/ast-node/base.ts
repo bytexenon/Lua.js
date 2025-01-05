@@ -49,12 +49,6 @@ export abstract class ASTNode {
     if (condition(this)) {
       callback(this);
     }
-    if (this instanceof ASTNodeList) {
-      for (const child of this.children) {
-        child.traverse(condition, callback);
-      }
-      return;
-    }
     const nodeTraversableFields = this.traversableFields;
     for (const field of nodeTraversableFields) {
       const value = this[field] as unknown;
@@ -89,6 +83,25 @@ export abstract class ASTNodeList extends ASTNode {
     public override readonly children: ASTNode[] = [],
   ) {
     super(type);
+  }
+
+  /**
+   * Traverses the AST and applies a callback to nodes that match the condition.
+   * @param condition A function that returns true for nodes to be processed.
+   * @param callback A function to apply to matching nodes.
+   */
+  public override traverse(
+    condition: (node: ASTNode) => boolean,
+    callback: (node: ASTNode) => void,
+  ): void {
+    if (condition(this)) {
+      callback(this);
+    }
+
+    for (const child of this.children) {
+      child.traverse(condition, callback);
+    }
+    return;
   }
 
   /**
