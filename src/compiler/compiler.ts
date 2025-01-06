@@ -207,18 +207,16 @@ export class Compiler {
     targetRegister: number,
   ): void {
     const nodeType = node.type;
+    let constantValue = node.value;
     let constantType: LuaConstantType;
-    let constantValue: number | string | boolean;
 
     switch (nodeType) {
       case ASTNode.NodeType.NUMBER_LITERAL: {
         constantType = LuaConstantType.LUA_TNUMBER;
-        constantValue = node.value;
         break;
       }
       case ASTNode.NodeType.STRING_LITERAL: {
         constantType = LuaConstantType.LUA_TSTRING;
-        constantValue = node.value;
         break;
       }
       default: {
