@@ -8,13 +8,13 @@ import {
   TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS,
   VALID_CHARACTERS,
 } from "./constants.js";
-import { Token, TokenEnum } from "./token.js";
+import * as Token from "./token.js";
 import { TrieNode } from "../utils/utils.js";
 
 /* Lexer */
 export class Lexer {
   private readonly code: string;
-  private readonly tokens: Token[];
+  private readonly tokens: Token.Token[];
   private curPos: number;
   private curChar: string;
 
@@ -306,23 +306,23 @@ export class Lexer {
     } else if (Lexer.isIdentifierStart(currentChar)) {
       const identifier = this.consumeIdentifier();
       if (OPERATOR_KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token(TokenEnum.OPERATOR, identifier));
+        this.tokens.push(new Token.OperatorToken(identifier));
       } else if (CONSTANT_KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token(TokenEnum.CONSTANT, identifier));
+        this.tokens.push(new Token.ConstantToken(identifier));
       } else if (KEYWORDS.has(identifier)) {
-        this.tokens.push(new Token(TokenEnum.KEYWORD, identifier));
+        this.tokens.push(new Token.KeywordToken(identifier));
       } else {
-        this.tokens.push(new Token(TokenEnum.IDENTIFIER, identifier));
+        this.tokens.push(new Token.IdentifierToken(identifier));
       }
     } else if (this.isNumberStart()) {
       const number = this.consumeNumber();
-      this.tokens.push(new Token(TokenEnum.NUMBER, number.toString()));
+      this.tokens.push(new Token.NumberToken(number.toString()));
     } else if (Lexer.isQuoteString(currentChar)) {
       const string = this.consumeSimpleString();
-      this.tokens.push(new Token(TokenEnum.STRING, string));
+      this.tokens.push(new Token.StringToken(string));
     } else if (this.isLongString()) {
       const string = this.consumeLongString() as string;
-      this.tokens.push(new Token(TokenEnum.STRING, string));
+      this.tokens.push(new Token.StringToken(string));
     } else if (this.isComment()) {
       this.advance(2); // Skip the first two "-"
       if (this.isDelimiter()) {
@@ -332,24 +332,24 @@ export class Lexer {
       }
     } else if (this.isVararg()) {
       this.advance(3); // Skip the "..."
-      this.tokens.push(new Token(TokenEnum.VARARG, "..."));
+      this.tokens.push(new Token.VarargToken());
     } else {
       const operator = this.consumeOperatorIfPossible();
       if (operator) {
-        this.tokens.push(new Token(TokenEnum.OPERATOR, operator));
+        this.tokens.push(new Token.OperatorToken(operator));
       } else {
         if (!VALID_CHARACTERS.has(currentChar)) {
           Lexer.throwError(`Invalid character: ${currentChar}`);
         }
         // Process it as character
-        this.tokens.push(new Token(TokenEnum.CHARACTER, currentChar));
+        this.tokens.push(new Token.CharacterToken(currentChar));
         this.advance(1); // Skip the character
       }
     }
   }
 
   /* Main Method */
-  public lex(): Token[] {
+  public lex(): Token.Token[] {
     while (this.curChar !== "\0") {
       this.getNextToken();
     }

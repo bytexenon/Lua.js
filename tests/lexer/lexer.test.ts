@@ -1,5 +1,5 @@
 /* Imports */
-import { Token, TokenEnum } from "../../src/lexer/token";
+import * as Token from "../../src/lexer/token.js";
 import { Lexer } from "../../src/lexer/lexer.js";
 import {
   KEYWORDS,
@@ -27,10 +27,14 @@ const TEST_NUMBERS = [
 ];
 
 /* Helper Functions */
-function createTokens(values: readonly string[], type: TokenEnum): Token[] {
-  return values.map((value) => new Token(type, value));
+function createTokens(
+  values: readonly string[],
+  type: Token.TokenEnum,
+): Token.Token[] {
+  // Ignore abstractness of Token.Token for testing purposes
+  return values.map((value) => new (Token.Token as any)(type, value));
 }
-function testLexer(code: string, expectedTokens: Token[]): void {
+function testLexer(code: string, expectedTokens: Token.Token[]): void {
   const lexer = new Lexer(code);
   const tokens = lexer.lex();
   expect(tokens).toEqual(expectedTokens);
@@ -51,8 +55,8 @@ describe("Lexer", () => {
     it("should ignore whitespace between tokens", () => {
       for (const ws of WHITESPACE) {
         testLexer(`a${ws}b`, [
-          new Token(TokenEnum.IDENTIFIER, "a"),
-          new Token(TokenEnum.IDENTIFIER, "b"),
+          new Token.IdentifierToken("a"),
+          new Token.IdentifierToken("b"),
         ]);
       }
     });
@@ -61,7 +65,10 @@ describe("Lexer", () => {
   describe("Keyword Tokenization", () => {
     it("should tokenize keywords", () => {
       const keywords = Array.from(KEYWORDS);
-      testLexer(keywords.join(" "), createTokens(keywords, TokenEnum.KEYWORD));
+      testLexer(
+        keywords.join(" "),
+        createTokens(keywords, Token.TokenEnum.KEYWORD),
+      );
     });
   });
 
@@ -70,7 +77,7 @@ describe("Lexer", () => {
       const constants = Array.from(CONSTANT_KEYWORDS);
       testLexer(
         constants.join(" "),
-        createTokens(constants, TokenEnum.CONSTANT),
+        createTokens(constants, Token.TokenEnum.CONSTANT),
       );
     });
   });
@@ -79,7 +86,7 @@ describe("Lexer", () => {
     it("should tokenize operators", () => {
       testLexer(
         OPERATORS.join(" "),
-        createTokens(OPERATORS, TokenEnum.OPERATOR),
+        createTokens(OPERATORS, Token.TokenEnum.OPERATOR),
       );
     });
   });
@@ -89,7 +96,7 @@ describe("Lexer", () => {
       const validCharacters = Array.from(VALID_CHARACTERS);
       testLexer(
         validCharacters.join(""),
-        createTokens(validCharacters, TokenEnum.CHARACTER),
+        createTokens(validCharacters, Token.TokenEnum.CHARACTER),
       );
     });
   });
@@ -98,7 +105,7 @@ describe("Lexer", () => {
     it("should tokenize identifiers", () => {
       testLexer(
         TEST_IDENTIFIERS.join(" "),
-        createTokens(TEST_IDENTIFIERS, TokenEnum.IDENTIFIER),
+        createTokens(TEST_IDENTIFIERS, Token.TokenEnum.IDENTIFIER),
       );
     });
   });
@@ -106,7 +113,7 @@ describe("Lexer", () => {
   describe("Number Tokenization", () => {
     it("should tokenize numbers", () => {
       const expectedTokens = TEST_NUMBERS.map(
-        (num) => new Token(TokenEnum.NUMBER, Number(num).toString()),
+        (num) => new Token.NumberToken(Number(num).toString()),
       );
       testLexer(TEST_NUMBERS.join(" "), expectedTokens);
     });
@@ -115,24 +122,18 @@ describe("Lexer", () => {
   describe("String Tokenization", () => {
     it("should tokenize strings", () => {
       testLexer("'simple string' \"another string\"", [
-        new Token(TokenEnum.STRING, "simple string"),
-        new Token(TokenEnum.STRING, "another string"),
+        new Token.StringToken("simple string"),
+        new Token.StringToken("another string"),
       ]);
     });
 
     it("should tokenize long strings", () => {
-      testLexer("[[long string]]", [
-        new Token(TokenEnum.STRING, "long string"),
-      ]);
+      testLexer("[[long string]]", [new Token.StringToken("long string")]);
     });
 
     it("should tokenize long strings with delimiters", () => {
-      testLexer("[=[long string]=]", [
-        new Token(TokenEnum.STRING, "long string"),
-      ]);
-      testLexer("[==[long string]==]", [
-        new Token(TokenEnum.STRING, "long string"),
-      ]);
+      testLexer("[=[long string]=]", [new Token.StringToken("long string")]);
+      testLexer("[==[long string]==]", [new Token.StringToken("long string")]);
     });
 
     it("should throw error on unterminated long string", () => {
@@ -158,21 +159,15 @@ describe("Lexer", () => {
 
     describe("should handle escape sequences", () => {
       it("should handle newline escape sequence", () => {
-        testLexer('"hello\\nworld"', [
-          new Token(TokenEnum.STRING, "hello\nworld"),
-        ]);
+        testLexer('"hello\\nworld"', [new Token.StringToken("hello\nworld")]);
       });
 
       it("should handle tab escape sequence", () => {
-        testLexer('"hello\\tworld"', [
-          new Token(TokenEnum.STRING, "hello\tworld"),
-        ]);
+        testLexer('"hello\\tworld"', [new Token.StringToken("hello\tworld")]);
       });
 
       it("should handle carriage return escape sequence", () => {
-        testLexer('"hello\\rworld"', [
-          new Token(TokenEnum.STRING, "hello\rworld"),
-        ]);
+        testLexer('"hello\\rworld"', [new Token.StringToken("hello\rworld")]);
       });
 
       it("should error on invalid escape sequence", () => {
@@ -183,21 +178,15 @@ describe("Lexer", () => {
 
     describe("should handle numeric escape sequences", () => {
       it("should handle 1-char escape digit", () => {
-        testLexer('"hello\\9world"', [
-          new Token(TokenEnum.STRING, "hello\tworld"),
-        ]);
+        testLexer('"hello\\9world"', [new Token.StringToken("hello\tworld")]);
       });
 
       it("should handle 2-char escape digit", () => {
-        testLexer('"hello\\97world"', [
-          new Token(TokenEnum.STRING, "helloaworld"),
-        ]);
+        testLexer('"hello\\97world"', [new Token.StringToken("helloaworld")]);
       });
 
       it("should handle 3-char escape digit", () => {
-        testLexer('"hello\\122world"', [
-          new Token(TokenEnum.STRING, "hellozworld"),
-        ]);
+        testLexer('"hello\\122world"', [new Token.StringToken("hellozworld")]);
       });
     });
   });
@@ -209,7 +198,7 @@ describe("Lexer", () => {
 
     it("should not skip a character after simple comment", () => {
       testLexer("--simple comment\nhello", [
-        new Token(TokenEnum.IDENTIFIER, "hello"),
+        new Token.IdentifierToken("hello"),
       ]);
     });
 
@@ -219,7 +208,7 @@ describe("Lexer", () => {
 
     it("should not skip a character after long comment", () => {
       testLexer("--[[long comment]]hello", [
-        new Token(TokenEnum.IDENTIFIER, "hello"),
+        new Token.IdentifierToken("hello"),
       ]);
     });
 
@@ -230,7 +219,7 @@ describe("Lexer", () => {
 
     it("should handle malformed long comment delimiters", () => {
       testLexer("--[==simple comment\nhello", [
-        new Token(TokenEnum.IDENTIFIER, "hello"),
+        new Token.IdentifierToken("hello"),
       ]);
     });
 
@@ -244,7 +233,7 @@ describe("Lexer", () => {
 
   describe("Vararg Tokenization", () => {
     it("should tokenize vararg", () => {
-      testLexer("...", [new Token(TokenEnum.VARARG, "...")]);
+      testLexer("...", [new Token.VarargToken()]);
     });
   });
 
