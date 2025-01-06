@@ -1,4 +1,3 @@
-
 # Lua.js
 
 [ALPHA] A non-crappy Lua 5.1 - 5.4 parsing and compiling library.
@@ -27,12 +26,11 @@ npm install git+https://github.com/bytexenon/Lua.js
 Here's a basic example of how to use Lua.js:
 
 ```typescript
-import { Lexer, Parser, Compiler } from 'lua-js';
+import { Lexer, Parser, Compiler } from "lua-js";
 
 const luaCode = `
 print("Hello, Lua!")
 `;
-
 
 const lexer = new Lexer(luaCode);
 const tokens = lexer.lex();
