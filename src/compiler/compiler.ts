@@ -412,6 +412,41 @@ export class Compiler {
       this.registerVariables(locals);
     }
   }
+  private compileWhileStatement(node: ASTNode.WhileStatement): void {
+    // Destructure condition and chunk from the node
+    const { condition, chunk } = node;
+    const startOfLoop = this.currentProto.code.length;
+
+    // Compile the condition expression and get the register
+    const conditionRegister = this.compileExpressionNode(condition);
+
+    // Emit a TEST instruction to evaluate the condition
+    this.emit(Opcodes.TEST, [
+      new IROperand(IROperandType.REGISTER, conditionRegister),
+      new IROperand(IROperandType.OTHER, 0),
+      new IROperand(IROperandType.OTHER, 1),
+    ]);
+
+    // Emit a JMP instruction and store the jump instruction and index
+    const [jumpInstruction, jumpIndex] = this.emit(Opcodes.JMP, []);
+    this.compileChunk(chunk);
+
+    // Change the JMP instruction to jump back to the start of the loop
+    this.emit(Opcodes.JMP, [
+      new IROperand(
+        IROperandType.OTHER,
+        startOfLoop - this.currentProto.code.length - 1,
+      ),
+    ]);
+
+    // Update the TEST instruction with the correct offset
+    Compiler.changeInstruction(jumpInstruction, Opcodes.JMP, [
+      new IROperand(
+        IROperandType.OTHER,
+        this.currentProto.code.length - jumpIndex,
+      ),
+    ]);
+  }
 
   /* Node Compilation Handlers */
   public compileExpressionNode(
@@ -459,6 +494,10 @@ export class Compiler {
       }
       case ASTNode.NodeType.LOCAL_ASSIGNMENT: {
         this.compileLocalAssignment(node as ASTNode.LocalAssignment);
+        break;
+      }
+      case ASTNode.NodeType.WHILE_STATEMENT: {
+        this.compileWhileStatement(node as ASTNode.WhileStatement);
         break;
       }
       default: {
