@@ -27,13 +27,6 @@ const TEST_NUMBERS = [
 ];
 
 /* Helper Functions */
-function createTokens(
-  values: readonly string[],
-  type: Token.TokenEnum,
-): Token.Token[] {
-  // Ignore abstractness of Token.Token for testing purposes
-  return values.map((value) => new (Token.Token as any)(type, value));
-}
 function testLexer(code: string, expectedTokens: Token.Token[]): void {
   const lexer = new Lexer(code);
   const tokens = lexer.lex();
@@ -67,7 +60,7 @@ describe("Lexer", () => {
       const keywords = Array.from(KEYWORDS);
       testLexer(
         keywords.join(" "),
-        createTokens(keywords, Token.TokenEnum.KEYWORD),
+        keywords.map((value) => new Token.KeywordToken(value)),
       );
     });
   });
@@ -77,7 +70,7 @@ describe("Lexer", () => {
       const constants = Array.from(CONSTANT_KEYWORDS);
       testLexer(
         constants.join(" "),
-        createTokens(constants, Token.TokenEnum.CONSTANT),
+        constants.map((value) => new Token.ConstantToken(value)),
       );
     });
   });
@@ -86,7 +79,7 @@ describe("Lexer", () => {
     it("should tokenize operators", () => {
       testLexer(
         OPERATORS.join(" "),
-        createTokens(OPERATORS, Token.TokenEnum.OPERATOR),
+        OPERATORS.map((value) => new Token.OperatorToken(value)),
       );
     });
   });
@@ -96,7 +89,7 @@ describe("Lexer", () => {
       const validCharacters = Array.from(VALID_CHARACTERS);
       testLexer(
         validCharacters.join(""),
-        createTokens(validCharacters, Token.TokenEnum.CHARACTER),
+        validCharacters.map((value) => new Token.CharacterToken(value)),
       );
     });
   });
@@ -105,7 +98,7 @@ describe("Lexer", () => {
     it("should tokenize identifiers", () => {
       testLexer(
         TEST_IDENTIFIERS.join(" "),
-        createTokens(TEST_IDENTIFIERS, Token.TokenEnum.IDENTIFIER),
+        TEST_IDENTIFIERS.map((value) => new Token.IdentifierToken(value)),
       );
     });
   });
