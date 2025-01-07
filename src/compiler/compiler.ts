@@ -207,7 +207,7 @@ export class Compiler {
     targetRegister: number,
   ): void {
     const nodeType = node.type;
-    let constantValue = node.value;
+    const constantValue = node.value;
     let constantType: LuaConstantType;
 
     switch (nodeType) {

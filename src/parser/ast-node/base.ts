@@ -101,7 +101,6 @@ export abstract class ASTNodeList extends ASTNode {
     for (const child of this.children) {
       child.traverse(condition, callback);
     }
-    return;
   }
 
   /**
