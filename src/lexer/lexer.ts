@@ -13,10 +13,21 @@ import { TrieNode } from "../utils/utils.js";
 
 /* Lexer */
 export class Lexer {
+  /* Properties */
   private readonly code: string;
   private readonly tokens: Token.Token[];
   private curPos: number;
   private curChar: string;
+
+  /* Properties for constants */
+  public CONSTANT_KEYWORDS = CONSTANT_KEYWORDS;
+  public KEYWORDS = KEYWORDS;
+  public OPERATOR_KEYWORDS = OPERATOR_KEYWORDS;
+  public OPERATOR_TRIE = OPERATOR_TRIE;
+  public SPECIAL_CHARS_MAP = SPECIAL_CHARS_MAP;
+  public TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS =
+    TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS;
+  public VALID_CHARACTERS = VALID_CHARACTERS;
 
   /* Constructor */
   constructor(code: string) {
@@ -49,7 +60,7 @@ export class Lexer {
   }
   private throwUnexpectedCharacterError(expected: string): never {
     const convertedCurrentChar =
-      SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
+      this.SPECIAL_CHARS_MAP[this.curChar] ?? this.curChar;
     Lexer.throwError(
       `Unexpected character '${convertedCurrentChar}', expected '${expected}'`,
     );
@@ -132,7 +143,7 @@ export class Lexer {
   // Checks if the next character sequence is an operator,
   // if so, consumes it and returns the operator string.
   private consumeOperatorIfPossible(): string | false {
-    let node: TrieNode = OPERATOR_TRIE;
+    let node: TrieNode = this.OPERATOR_TRIE;
     let operator: string | undefined;
 
     const currentCharPos = this.curPos;
@@ -255,7 +266,7 @@ export class Lexer {
       if (this.curChar === "\\") {
         this.advance(1); // Skip the "\"
         const escapedChar =
-          TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS[this.curChar];
+          this.TOKENIZER_ESCAPED_CHARACTER_CONVERSIONS[this.curChar];
         if (escapedChar) {
           string += escapedChar;
           this.advance(1); // Skip the escaped character
@@ -305,11 +316,11 @@ export class Lexer {
       this.consumeWhitespace();
     } else if (Lexer.isIdentifierStart(currentChar)) {
       const identifier = this.consumeIdentifier();
-      if (OPERATOR_KEYWORDS.has(identifier)) {
+      if (this.OPERATOR_KEYWORDS.has(identifier)) {
         this.tokens.push(new Token.OperatorToken(identifier));
-      } else if (CONSTANT_KEYWORDS.has(identifier)) {
+      } else if (this.CONSTANT_KEYWORDS.has(identifier)) {
         this.tokens.push(new Token.ConstantToken(identifier));
-      } else if (KEYWORDS.has(identifier)) {
+      } else if (this.KEYWORDS.has(identifier)) {
         this.tokens.push(new Token.KeywordToken(identifier));
       } else {
         this.tokens.push(new Token.IdentifierToken(identifier));
@@ -338,7 +349,7 @@ export class Lexer {
       if (operator) {
         this.tokens.push(new Token.OperatorToken(operator));
       } else {
-        if (!VALID_CHARACTERS.has(currentChar)) {
+        if (!this.VALID_CHARACTERS.has(currentChar)) {
           Lexer.throwError(`Invalid character: ${currentChar}`);
         }
         // Process it as character
